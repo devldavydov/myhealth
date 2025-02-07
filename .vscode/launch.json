@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "bot",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/myhealthbot/",
+            "args": [
+                "-t", "BOT_TOKEN",
+                "-d", "${workspaceFolder}/myfood.db",
+                "-u", "USER_ID",
+                "-b", "true"
+            ]
+        }
+    ]
+}
