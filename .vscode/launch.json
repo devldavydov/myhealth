@@ -9,7 +9,7 @@
             "program": "${workspaceFolder}/cmd/myhealthbot/",
             "args": [
                 "-t", "BOT_TOKEN",
-                "-d", "${workspaceFolder}/myfood.db",
+                "-d", "${workspaceFolder}/myhealth.db",
                 "-u", "USER_ID",
                 "-b", "true"
             ]

@@ -86,12 +86,10 @@ func (s *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestam
 //
 //
 
-func (r *StorageSQLite) Close() {
+func (r *StorageSQLite) Close() error {
 	if r.db == nil {
-		return
+		return nil
 	}
 
-	if err := r.db.Close(); err != nil {
-		r.logger.Error("db close error", zap.Error(err))
-	}
+	return r.db.Close()
 }

@@ -11,5 +11,5 @@ type Storage interface {
 	SetWeight(ctx context.Context, userID int64, weight *Weight) error
 	DeleteWeight(ctx context.Context, userID int64, timestamp time.Time) error
 
-	Close()
+	Close() error
 }
