@@ -44,10 +44,16 @@ const (
         timestamp
 	`
 
+	_sqlWeightBackup = `
+	SELECT user_id, timestamp, value
+    FROM weight
+	ORDER BY user_id, timestamp
+	`
+
 	_sqlSetWeight = `
-	INSERT INTO weight(user_id, timestamp, value)
+	INSERT INTO weight (user_id, timestamp, value)
 	VALUES ($1, $2, $3)
-	ON CONFLICT (uuser_id, timestamp) DO
+	ON CONFLICT (user_id, timestamp) DO
 	UPDATE SET value = $3
 	`
 

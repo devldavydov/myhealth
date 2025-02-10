@@ -70,7 +70,7 @@ func NewStorageSQLite(dbFilePath string, logger *zap.Logger) (*StorageSQLite, er
 // Weight
 //
 
-func (r *StorageSQLite) GetWeightList(ctx context.Context, userID int64, from time.Time, to time.Time) ([]s.Weight, error) {
+func (r *StorageSQLite) GetWeightList(ctx context.Context, userID int64, from, to s.Timestamp) ([]s.Weight, error) {
 	rows, err := r.db.QueryContext(ctx, _sqlGetWeightList, userID, from, to)
 	if err != nil {
 		return nil, err
@@ -112,9 +112,60 @@ func (r *StorageSQLite) SetWeight(ctx context.Context, userID int64, weight *s.W
 	return nil
 }
 
-func (r *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestamp time.Time) error {
+func (r *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestamp s.Timestamp) error {
 	_, err := r.db.ExecContext(ctx, _sqlDeleteWeight, userID, timestamp)
 	return err
+}
+
+//
+// Backup/restore.
+//
+
+func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
+	backup := &s.Backup{
+		Timestamp: s.Timestamp(time.Now().UnixMilli()),
+	}
+
+	// Weight
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlWeightBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.Weight = []s.WeightBackup{}
+		for rows.Next() {
+			var w s.WeightBackup
+			err = rows.Scan(&w.UserID, &w.Timestamp, &w.Value)
+			if err != nil {
+				return nil, err
+			}
+
+			backup.Weight = append(backup.Weight, w)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
+	// Result
+	return backup, nil
+}
+
+func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
+	for _, w := range backup.Weight {
+		if err := r.SetWeight(
+			ctx,
+			w.UserID,
+			&s.Weight{Timestamp: w.Timestamp, Value: w.Value},
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 //

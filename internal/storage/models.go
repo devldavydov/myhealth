@@ -2,8 +2,10 @@ package storage
 
 import (
 	"strings"
-	"time"
 )
+
+// Unix time in milliseconds
+type Timestamp int64
 
 type Food struct {
 	Key     string
@@ -65,7 +67,7 @@ func (r Meal) MustToString() string {
 }
 
 type Journal struct {
-	Timestamp  time.Time
+	Timestamp  Timestamp
 	Meal       Meal
 	FoodKey    string
 	FoodWeight float64
@@ -78,7 +80,7 @@ func (r *Journal) Validate() bool {
 }
 
 type Weight struct {
-	Timestamp time.Time
+	Timestamp Timestamp
 	Value     float64
 }
 
@@ -130,10 +132,21 @@ func (r *Sport) Validate() bool {
 
 type SportActivity struct {
 	SportKey  string
-	Timestamp time.Time
+	Timestamp Timestamp
 	Sets      []int64
 }
 
 func (r *SportActivity) Validate() bool {
 	return r.SportKey != "" && len(r.Sets) != 0
+}
+
+type Backup struct {
+	Timestamp Timestamp      `json:"timestamp"`
+	Weight    []WeightBackup `json:"weight"`
+}
+
+type WeightBackup struct {
+	UserID    int64     `json:"userID"`
+	Timestamp Timestamp `json:"timestamp"`
+	Value     float64   `json:"value"`
 }
