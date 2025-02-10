@@ -70,16 +70,51 @@ func NewStorageSQLite(dbFilePath string, logger *zap.Logger) (*StorageSQLite, er
 // Weight
 //
 
-func (s *StorageSQLite) GetWeightList(ctx context.Context, userID int64, from time.Time, to time.Time) ([]s.Weight, error) {
-	panic("unimplemented")
+func (r *StorageSQLite) GetWeightList(ctx context.Context, userID int64, from time.Time, to time.Time) ([]s.Weight, error) {
+	rows, err := r.db.QueryContext(ctx, _sqlGetWeightList, userID, from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []s.Weight{}
+	for rows.Next() {
+		var w s.Weight
+		err = rows.Scan(&w.Timestamp, &w.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, w)
+	}
+
+	if len(list) == 0 {
+		return nil, s.ErrEmptyResult
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return list, nil
 }
 
-func (s *StorageSQLite) SetWeight(ctx context.Context, userID int64, weight *s.Weight) error {
-	panic("unimplemented")
+func (r *StorageSQLite) SetWeight(ctx context.Context, userID int64, weight *s.Weight) error {
+	if !weight.Validate() {
+		return s.ErrWeightInvalid
+	}
+
+	_, err := r.db.ExecContext(ctx, _sqlSetWeight, userID, weight.Timestamp, weight.Value)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (s *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestamp time.Time) error {
-	panic("unimplemented")
+func (r *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestamp time.Time) error {
+	_, err := r.db.ExecContext(ctx, _sqlDeleteWeight, userID, timestamp)
+	return err
 }
 
 //

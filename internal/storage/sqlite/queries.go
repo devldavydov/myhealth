@@ -32,4 +32,28 @@ const (
         PRIMARY KEY (user_id, timestamp)
     ) STRICT;
 	`
+
+	_sqlGetWeightList = `
+	SELECT timestamp, value
+    FROM weight
+    WHERE
+        user_id = $1 AND
+        timestamp >= $2 AND
+        timestamp <= $3
+    ORDER BY
+        timestamp
+	`
+
+	_sqlSetWeight = `
+	INSERT INTO weight(user_id, timestamp, value)
+	VALUES ($1, $2, $3)
+	ON CONFLICT (uuser_id, timestamp) DO
+	UPDATE SET value = $3
+	`
+
+	_sqlDeleteWeight = `
+	DELETE
+	FROM weight
+	WHERE user_id = $1 AND timestamp = $2
+	`
 )
