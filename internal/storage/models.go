@@ -2,10 +2,19 @@ package storage
 
 import (
 	"strings"
+	"time"
 )
 
 // Unix time in milliseconds
 type Timestamp int64
+
+func NewTimestamp(t time.Time) Timestamp {
+	return Timestamp(t.UnixMilli())
+}
+
+func (r Timestamp) ToTime(tz *time.Location) time.Time {
+	return time.UnixMilli(int64(r)).In(tz)
+}
 
 type Food struct {
 	Key     string

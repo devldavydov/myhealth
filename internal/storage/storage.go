@@ -2,7 +2,10 @@ package storage
 
 import (
 	"context"
+	"time"
 )
+
+const StorageOperationTimeout = 15 * time.Second
 
 type Storage interface {
 	// Weight
