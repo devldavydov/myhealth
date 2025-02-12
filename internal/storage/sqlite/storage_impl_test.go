@@ -35,6 +35,10 @@ func (r *StorageSQLiteTestSuite) TestWeightCRUD() {
 		r.ErrorIs(err, s.ErrEmptyResult)
 	})
 
+	r.Run("set invalid weight", func() {
+		r.ErrorIs(r.stg.SetWeight(context.Background(), 1, &s.Weight{Value: -1}), s.ErrWeightInvalid)
+	})
+
 	r.Run("set initial data", func() {
 		r.NoError(r.stg.SetWeight(context.Background(), 1, &s.Weight{Timestamp: 1000, Value: 94.3}))
 		r.NoError(r.stg.SetWeight(context.Background(), 1, &s.Weight{Timestamp: 2000, Value: 94}))
