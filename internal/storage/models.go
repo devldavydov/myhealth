@@ -152,10 +152,18 @@ func (r *SportActivity) Validate() bool {
 type Backup struct {
 	Timestamp Timestamp      `json:"timestamp"`
 	Weight    []WeightBackup `json:"weight"`
+	Sport     []SportBackup  `json:"sport"`
 }
 
 type WeightBackup struct {
 	UserID    int64     `json:"userID"`
 	Timestamp Timestamp `json:"timestamp"`
 	Value     float64   `json:"value"`
+}
+
+type SportBackup struct {
+	UserID  int64  `json:"userID"`
+	Key     string `json:"key"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
 }

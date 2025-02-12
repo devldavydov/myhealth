@@ -13,6 +13,12 @@ type Storage interface {
 	SetWeight(ctx context.Context, userID int64, weight *Weight) error
 	DeleteWeight(ctx context.Context, userID int64, timestamp Timestamp) error
 
+	// Sport
+	GetSport(ctx context.Context, userID int64, key string) (*Sport, error)
+	GetSportList(ctx context.Context, userID int64) ([]Sport, error)
+	SetSport(ctx context.Context, userID int64, sp *Sport) error
+	DeleteSport(ctx context.Context, userID int64, key string) error
+
 	// Backup/restore
 	Backup(ctx context.Context) (*Backup, error)
 	Restore(ctx context.Context, backup *Backup) error

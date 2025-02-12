@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -67,7 +68,7 @@ func NewStorageSQLite(dbFilePath string, logger *zap.Logger) (*StorageSQLite, er
 }
 
 //
-// Weight
+// Weight.
 //
 
 func (r *StorageSQLite) GetWeightList(ctx context.Context, userID int64, from, to s.Timestamp) ([]s.Weight, error) {
@@ -105,15 +106,76 @@ func (r *StorageSQLite) SetWeight(ctx context.Context, userID int64, weight *s.W
 	}
 
 	_, err := r.db.ExecContext(ctx, _sqlSetWeight, userID, weight.Timestamp, weight.Value)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (r *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestamp s.Timestamp) error {
 	_, err := r.db.ExecContext(ctx, _sqlDeleteWeight, userID, timestamp)
+	return err
+}
+
+//
+// Sport.
+//
+
+func (r *StorageSQLite) GetSport(ctx context.Context, userID int64, key string) (*s.Sport, error) {
+	res := r.db.QueryRowContext(ctx, _sqlGetSport, userID, key)
+	if err := res.Err(); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, s.ErrEmptyResult
+		}
+		return nil, err
+	}
+
+	var sp s.Sport
+	if err := res.Scan(&sp.Key, &sp.Name, &sp.Comment); err != nil {
+		return nil, err
+	}
+
+	return &sp, nil
+}
+
+func (r *StorageSQLite) GetSportList(ctx context.Context, userID int64) ([]s.Sport, error) {
+	rows, err := r.db.QueryContext(ctx, _sqlGetSportList, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []s.Sport{}
+	for rows.Next() {
+		var sp s.Sport
+		err = rows.Scan(&sp.Key, &sp.Name, &sp.Comment)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, sp)
+	}
+
+	if len(list) == 0 {
+		return nil, s.ErrEmptyResult
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
+func (r *StorageSQLite) SetSport(ctx context.Context, userID int64, sp *s.Sport) error {
+	if !sp.Validate() {
+		return s.ErrSportInvalid
+	}
+
+	_, err := r.db.ExecContext(ctx, _sqlSetSport, userID, sp.Key, sp.Name, sp.Comment)
+	return err
+}
+
+func (r *StorageSQLite) DeleteSport(ctx context.Context, userID int64, key string) error {
+	_, err := r.db.ExecContext(ctx, _sqlDeleteSport, userID, key)
+	// TODO add check constraint with sport activity
 	return err
 }
 
@@ -150,6 +212,30 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 	}
 
+	// Sport
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlSportBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.Sport = []s.SportBackup{}
+		for rows.Next() {
+			var sp s.SportBackup
+			err = rows.Scan(&sp.UserID, &sp.Key, &sp.Name, &sp.Comment)
+			if err != nil {
+				return nil, err
+			}
+
+			backup.Sport = append(backup.Sport, sp)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
 	// Result
 	return backup, nil
 }
@@ -160,6 +246,16 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 			ctx,
 			w.UserID,
 			&s.Weight{Timestamp: w.Timestamp, Value: w.Value},
+		); err != nil {
+			return err
+		}
+	}
+
+	for _, sp := range backup.Sport {
+		if err := r.SetSport(
+			ctx,
+			sp.UserID,
+			&s.Sport{Key: sp.Key, Name: sp.Name, Comment: sp.Comment},
 		); err != nil {
 			return err
 		}

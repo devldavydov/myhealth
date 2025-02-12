@@ -24,13 +24,14 @@ const (
 	//
 	// Weight.
 	//
+
 	_sqlCreateTableWeight = `
 	CREATE TABLE weight (
         user_id   INTEGER NOT NULL,
         timestamp INTEGER NOT NULL,
         value     REAL    NOT NULL,
         PRIMARY KEY (user_id, timestamp)
-    ) STRICT;
+    ) STRICT
 	`
 
 	_sqlGetWeightList = `
@@ -61,5 +62,51 @@ const (
 	DELETE
 	FROM weight
 	WHERE user_id = $1 AND timestamp = $2
+	`
+
+	//
+	// Sport.
+	//
+
+	_sqlCreateTableSport = `
+	CREATE TABLE sport (
+	 	user_id  INTEGER NOT NULL,
+        key      TEXT NOT NULL,
+        name     TEXT NOT NULL,
+        comment  TEXT NULL,
+		PRIMARY KEY (user_id, key)
+    ) STRICT
+	`
+
+	_sqlGetSport = `
+	SELECT key, name, comment
+    FROM sport
+    WHERE user_id = $1 AND key = $2
+	`
+
+	_sqlGetSportList = `
+	SELECT key, name, comment
+    FROM sport
+    WHERE user_id = $1
+	ORDER BY name
+	`
+
+	_sqlSetSport = `
+	INSERT INTO sport (user_id, key, name, comment)
+	VALUES ($1, $2, $3, $4)
+	ON CONFLICT (user_id, key) DO
+	UPDATE SET name = $3, comment = $4
+	`
+
+	_sqlDeleteSport = `
+	DELETE
+	FROM sport
+    WHERE user_id = $1 AND key = $2
+	`
+
+	_sqlSportBackup = `
+	SELECT user_id, key, name, comment
+    FROM sport
+	ORDER BY user_id, key
 	`
 )

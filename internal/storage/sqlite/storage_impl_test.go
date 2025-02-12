@@ -21,7 +21,7 @@ func (r *StorageSQLiteTestSuite) TestMigrations() {
 	r.Run("check last migration", func() {
 		migrationID, err := r.stg.getLastMigrationID(context.Background())
 		r.NoError(err)
-		r.Equal(int64(2), migrationID)
+		r.Equal(int64(3), migrationID)
 	})
 }
 
@@ -87,6 +87,66 @@ func (r *StorageSQLiteTestSuite) TestWeightCRUD() {
 }
 
 //
+// Sport.
+//
+
+func (r *StorageSQLiteTestSuite) TestSportCRUD() {
+	r.Run("check empty sport list for user 1", func() {
+		_, err := r.stg.GetSportList(context.Background(), 1)
+		r.ErrorIs(err, s.ErrEmptyResult)
+	})
+
+	r.Run("set invalid sport", func() {
+		r.ErrorIs(r.stg.SetSport(context.Background(), 1, &s.Sport{}), s.ErrSportInvalid)
+		r.ErrorIs(r.stg.SetSport(context.Background(), 1, &s.Sport{Key: "key"}), s.ErrSportInvalid)
+	})
+
+	r.Run("set sport", func() {
+		r.NoError(r.stg.SetSport(context.Background(), 1, &s.Sport{
+			Key:     "sport1 key",
+			Name:    "sport1 name",
+			Comment: "sport1 comment",
+		}))
+		r.NoError(r.stg.SetSport(context.Background(), 1, &s.Sport{
+			Key:     "sport2 key",
+			Name:    "sport2 name",
+			Comment: "sport2 comment",
+		}))
+		r.NoError(r.stg.SetSport(context.Background(), 2, &s.Sport{
+			Key:     "sport1 key",
+			Name:    "sport1 name",
+			Comment: "sport1 comment",
+		}))
+	})
+
+	r.Run("get sport list for user 1", func() {
+		res, err := r.stg.GetSportList(context.Background(), 1)
+		r.NoError(err)
+		r.Equal([]s.Sport{
+			{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+			{Key: "sport2 key", Name: "sport2 name", Comment: "sport2 comment"},
+		}, res)
+	})
+
+	r.Run("get sport list for user 2", func() {
+		res, err := r.stg.GetSportList(context.Background(), 2)
+		r.NoError(err)
+		r.Equal([]s.Sport{
+			{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+		}, res)
+	})
+
+	r.Run("delete sport for user 2", func() {
+		r.NoError(r.stg.DeleteSport(context.Background(), 2, "sport1 key"))
+	})
+
+	r.Run("check empty sport list for user 2", func() {
+		_, err := r.stg.GetSportList(context.Background(), 2)
+		r.ErrorIs(err, s.ErrEmptyResult)
+	})
+}
+
+//
 // Backup/restore.
 //
 
@@ -98,6 +158,11 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 1, Timestamp: 2000, Value: 92.1},
 			{UserID: 2, Timestamp: 1000, Value: 87.8},
 		},
+		Sport: []s.SportBackup{
+			{UserID: 1, Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+			{UserID: 1, Key: "sport2 key", Name: "sport2 name", Comment: "sport2 comment"},
+			{UserID: 2, Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+		},
 	}
 
 	r.Run("restore backup", func() {
@@ -106,18 +171,37 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 
 	r.Run("check db after restore", func() {
 		// Weight.
-		res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 3000)
-		r.NoError(err)
-		r.Equal([]s.Weight{
-			{Timestamp: 1000, Value: 90.1},
-			{Timestamp: 2000, Value: 92.1},
-		}, res)
+		{
+			res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 3000)
+			r.NoError(err)
+			r.Equal([]s.Weight{
+				{Timestamp: 1000, Value: 90.1},
+				{Timestamp: 2000, Value: 92.1},
+			}, res)
 
-		res, err = r.stg.GetWeightList(context.Background(), 2, 1000, 3000)
-		r.NoError(err)
-		r.Equal([]s.Weight{
-			{Timestamp: 1000, Value: 87.8},
-		}, res)
+			res, err = r.stg.GetWeightList(context.Background(), 2, 1000, 3000)
+			r.NoError(err)
+			r.Equal([]s.Weight{
+				{Timestamp: 1000, Value: 87.8},
+			}, res)
+		}
+
+		// Sport2.
+		{
+			res, err := r.stg.GetSportList(context.Background(), 1)
+			r.NoError(err)
+			r.Equal([]s.Sport{
+				{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+				{Key: "sport2 key", Name: "sport2 name", Comment: "sport2 comment"},
+			}, res)
+
+			res, err = r.stg.GetSportList(context.Background(), 2)
+			r.NoError(err)
+			r.Equal([]s.Sport{
+				{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+			}, res)
+		}
+
 	})
 
 	r.Run("do backup and check with initial", func() {
@@ -125,6 +209,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 		r.NoError(err)
 
 		r.Equal(backup.Weight, backup2.Weight)
+		r.Equal(backup.Sport, backup2.Sport)
 	})
 }
 

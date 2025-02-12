@@ -74,6 +74,7 @@ func getAllMigrations() []migration {
 	return []migration{
 		{1, createInitialMigration},
 		{2, createTableWeight},
+		{3, createTableSport},
 	}
 }
 
@@ -84,5 +85,10 @@ func createInitialMigration(ctx context.Context, tx *sql.Tx) error {
 
 func createTableWeight(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, _sqlCreateTableWeight)
+	return err
+}
+
+func createTableSport(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, _sqlCreateTableSport)
 	return err
 }
