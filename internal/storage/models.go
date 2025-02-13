@@ -146,24 +146,45 @@ type SportActivity struct {
 }
 
 func (r *SportActivity) Validate() bool {
-	return r.SportKey != "" && len(r.Sets) != 0
+	allPositive := true
+	for _, s := range r.Sets {
+		if s <= 0 {
+			allPositive = false
+			break
+		}
+	}
+	return r.SportKey != "" && len(r.Sets) != 0 && allPositive
+}
+
+type SportActivityReport struct {
+	SportName string
+	Timestamp Timestamp
+	Sets      []int64
 }
 
 type Backup struct {
-	Timestamp Timestamp      `json:"timestamp"`
-	Weight    []WeightBackup `json:"weight"`
-	Sport     []SportBackup  `json:"sport"`
+	Timestamp     Timestamp             `json:"timestamp"`
+	Weight        []WeightBackup        `json:"weight"`
+	Sport         []SportBackup         `json:"sport"`
+	SportActivity []SportActivityBackup `json:"sport_activity"`
 }
 
 type WeightBackup struct {
-	UserID    int64     `json:"userID"`
+	UserID    int64     `json:"user_id"`
 	Timestamp Timestamp `json:"timestamp"`
 	Value     float64   `json:"value"`
 }
 
 type SportBackup struct {
-	UserID  int64  `json:"userID"`
+	UserID  int64  `json:"user_id"`
 	Key     string `json:"key"`
 	Name    string `json:"name"`
 	Comment string `json:"comment"`
+}
+
+type SportActivityBackup struct {
+	UserID    int64     `json:"user_id"`
+	SportKey  string    `json:"sport_key"`
+	Timestamp Timestamp `json:"timestamp"`
+	Sets      string    `json:"sets"`
 }
