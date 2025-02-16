@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/devldavydov/myhealth/internal/myhealthbot/cmdproc"
 	s "github.com/devldavydov/myhealth/internal/storage"
@@ -17,7 +19,7 @@ import (
 )
 
 const (
-	_backupFile = "backup.tar.gz"
+	_backupFile = "backup.json.gz"
 )
 
 type Service struct {
@@ -89,9 +91,16 @@ func (r *Service) onText(c tele.Context) error {
 }
 
 func (r *Service) tryRestoreFromBackup(stg s.Storage) error {
-	r.logger.Info("trying to restore from backup")
+	ex, err := os.Executable()
+	if err != nil {
+		r.logger.Error("failed to get executable path", zap.Error(err))
+		return err
+	}
 
-	f, err := os.Open(_backupFile)
+	backupFilePath := path.Join(filepath.Dir(ex), _backupFile)
+	r.logger.Info(fmt.Sprintf("trying to restore from backup: %s", backupFilePath))
+
+	f, err := os.Open(backupFilePath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			r.logger.Info("backup file not found")
@@ -102,6 +111,8 @@ func (r *Service) tryRestoreFromBackup(stg s.Storage) error {
 		return err
 	}
 	defer f.Close()
+
+	r.logger.Info("backup file found")
 
 	gr, err := gzip.NewReader(f)
 	if err != nil {

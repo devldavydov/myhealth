@@ -6,5 +6,8 @@ const (
 	MsgErrInternal       = "Внутренняя ошибка"
 	MsgErrEmptyResult    = "Пустой результат"
 
+	MsgErrSportNotFound = "Спорт не найден"
+	MsgErrSportIsUsed   = "Спорт используется в активностях"
+
 	MsgOK = "OK"
 )
