@@ -5,7 +5,10 @@ import (
 	"time"
 )
 
-const StorageOperationTimeout = 15 * time.Second
+const (
+	StorageOperationTimeout = 15 * time.Second
+	StorageRestoreTimeout   = 1 * time.Minute
+)
 
 type Storage interface {
 	// Weight
