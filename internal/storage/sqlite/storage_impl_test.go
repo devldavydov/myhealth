@@ -21,7 +21,7 @@ func (r *StorageSQLiteTestSuite) TestMigrations() {
 	r.Run("check last migration", func() {
 		migrationID, err := r.stg.getLastMigrationID(context.Background())
 		r.NoError(err)
-		r.Equal(int64(4), migrationID)
+		r.Equal(int64(5), migrationID)
 	})
 }
 
@@ -271,6 +271,37 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 	})
 }
 
+func (r *StorageSQLiteTestSuite) TestUserSettingsCRUD() {
+	r.Run("get empty user settings", func() {
+		_, err := r.stg.GetUserSettings(context.Background(), 1)
+		r.ErrorIs(err, s.ErrUserSettingsNotFound)
+	})
+
+	r.Run("set invalid settings", func() {
+		r.ErrorIs(r.stg.SetUserSettings(context.Background(), 1, &s.UserSettings{}), s.ErrUserSettingsInvalid)
+	})
+
+	r.Run("set user settings", func() {
+		r.NoError(r.stg.SetUserSettings(context.Background(), 1, &s.UserSettings{CalLimit: 123.123}))
+	})
+
+	r.Run("get user settings", func() {
+		res, err := r.stg.GetUserSettings(context.Background(), 1)
+		r.NoError(err)
+		r.Equal(&s.UserSettings{CalLimit: 123.123}, res)
+	})
+
+	r.Run("update user settings", func() {
+		r.NoError(r.stg.SetUserSettings(context.Background(), 1, &s.UserSettings{CalLimit: 456.456}))
+	})
+
+	r.Run("get updated user settings", func() {
+		res, err := r.stg.GetUserSettings(context.Background(), 1)
+		r.NoError(err)
+		r.Equal(&s.UserSettings{CalLimit: 456.456}, res)
+	})
+}
+
 func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 	backup := &s.Backup{
 		Timestamp: 1000,
@@ -288,6 +319,10 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 1, SportKey: "sport1 key", Timestamp: 1, Sets: "[1,2,3]"},
 			{UserID: 1, SportKey: "sport2 key", Timestamp: 2, Sets: "[4,5,6]"},
 			{UserID: 2, SportKey: "sport1 key", Timestamp: 1, Sets: "[7,8,9]"},
+		},
+		UserSettings: []s.UserSettingsBackup{
+			{UserID: 1, CalLimit: 123.123},
+			{UserID: 2, CalLimit: 456.456},
 		},
 	}
 
@@ -344,6 +379,16 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			}, res)
 		}
 
+		// UserSettings.
+		{
+			res, err := r.stg.GetUserSettings(context.Background(), 1)
+			r.NoError(err)
+			r.Equal(&s.UserSettings{CalLimit: 123.123}, res)
+
+			res, err = r.stg.GetUserSettings(context.Background(), 2)
+			r.NoError(err)
+			r.Equal(&s.UserSettings{CalLimit: 456.456}, res)
+		}
 	})
 
 	r.Run("do backup and check with initial", func() {
@@ -353,6 +398,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 		r.Equal(backup.Weight, backup2.Weight)
 		r.Equal(backup.Sport, backup2.Sport)
 		r.Equal(backup.SportActivity, backup2.SportActivity)
+		r.Equal(backup.UserSettings, backup2.UserSettings)
 	})
 }
 

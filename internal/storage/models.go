@@ -167,6 +167,7 @@ type Backup struct {
 	Weight        []WeightBackup        `json:"weight"`
 	Sport         []SportBackup         `json:"sport"`
 	SportActivity []SportActivityBackup `json:"sport_activity"`
+	UserSettings  []UserSettingsBackup  `json:"user_settings"`
 }
 
 type WeightBackup struct {
@@ -187,4 +188,9 @@ type SportActivityBackup struct {
 	SportKey  string    `json:"sport_key"`
 	Timestamp Timestamp `json:"timestamp"`
 	Sets      string    `json:"sets"`
+}
+
+type UserSettingsBackup struct {
+	UserID   int64   `json:"user_id"`
+	CalLimit float64 `json:"cal_limit"`
 }

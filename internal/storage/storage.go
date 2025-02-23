@@ -27,6 +27,10 @@ type Storage interface {
 	DeleteSportActivity(ctx context.Context, userID int64, timestamp Timestamp, sport_key string) error
 	GetSportActivityReport(ctx context.Context, userID int64, from, to Timestamp) ([]SportActivityReport, error)
 
+	// UserSettings
+	GetUserSettings(ctx context.Context, userID int64) (*UserSettings, error)
+	SetUserSettings(ctx context.Context, userID int64, us *UserSettings) error
+
 	// Backup/restore
 	Backup(ctx context.Context) (*Backup, error)
 	Restore(ctx context.Context, backup *Backup) error

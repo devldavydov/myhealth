@@ -54,7 +54,7 @@ func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
 		resp = r.processJournal(cmdParts[1:], userID)
 	case "b":
 		resp = r.processBundle(cmdParts[1:], userID)
-	case "cc":
+	case "c":
 		resp = r.processCalcCal(cmdParts[1:], userID)
 	case "u":
 		resp = r.processUserSettings(cmdParts[1:], userID)

@@ -9,5 +9,7 @@ const (
 	MsgErrSportNotFound = "Спорт не найден"
 	MsgErrSportIsUsed   = "Спорт используется в активностях"
 
+	MsgErrUserSettingsNotFound = "Настройки пользователя не найдены"
+
 	MsgOK = "OK"
 )

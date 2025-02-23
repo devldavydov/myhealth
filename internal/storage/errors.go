@@ -17,6 +17,10 @@ var (
 	// SportActivity
 	ErrSportActivityInvalid = errors.New("invalid sport activity")
 
+	// UserSettings
+	ErrUserSettingsNotFound = errors.New("user settings not found")
+	ErrUserSettingsInvalid  = errors.New("invalid user settings")
+
 	// Common
 	ErrEmptyResult = errors.New("empty result")
 )

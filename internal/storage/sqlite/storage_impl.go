@@ -252,6 +252,34 @@ func (r *StorageSQLite) GetSportActivityReport(ctx context.Context, userID int64
 }
 
 //
+// UserSettings.
+//
+
+func (r *StorageSQLite) GetUserSettings(ctx context.Context, userID int64) (*s.UserSettings, error) {
+	var us s.UserSettings
+	err := r.db.
+		QueryRowContext(ctx, _sqlGetUserSettings, userID).
+		Scan(&us.CalLimit)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, s.ErrUserSettingsNotFound
+		}
+		return nil, err
+	}
+
+	return &us, nil
+}
+
+func (r *StorageSQLite) SetUserSettings(ctx context.Context, userID int64, us *s.UserSettings) error {
+	if !us.Validate() {
+		return s.ErrUserSettingsInvalid
+	}
+
+	_, err := r.db.ExecContext(ctx, _sqlSetUserSettings, userID, us.CalLimit)
+	return err
+}
+
+//
 // Backup/restore.
 //
 
@@ -332,6 +360,30 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 	}
 
+	// UserSettings
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlUserSettingsBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.UserSettings = []s.UserSettingsBackup{}
+		for rows.Next() {
+			var us s.UserSettingsBackup
+			err = rows.Scan(&us.UserID, &us.CalLimit)
+			if err != nil {
+				return nil, err
+			}
+
+			backup.UserSettings = append(backup.UserSettings, us)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
 	// Result
 	return backup, nil
 }
@@ -368,6 +420,16 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 			Timestamp: sa.Timestamp,
 			Sets:      sets,
 		}); err != nil {
+			return err
+		}
+	}
+
+	for _, us := range backup.UserSettings {
+		if err := r.SetUserSettings(
+			ctx,
+			us.UserID,
+			&s.UserSettings{CalLimit: us.CalLimit},
+		); err != nil {
 			return err
 		}
 	}

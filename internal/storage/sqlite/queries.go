@@ -164,4 +164,37 @@ const (
 	FROM sport_activity
 	ORDER BY user_id, timestamp, sport_key
 	`
+
+	//
+	// UserSettings.
+	//
+
+	_sqlCreateTableUserSettings = `
+	CREATE TABLE user_settings (
+        user_id   INTEGER NOT NULL PRIMARY KEY,
+        cal_limit REAL    NOT NULL
+    ) STRICT
+	`
+
+	_sqlGetUserSettings = `
+	SELECT cal_limit
+    FROM user_settings
+    WHERE user_id = $1
+	`
+
+	_sqlSetUserSettings = `
+	INSERT INTO user_settings (
+        user_id, cal_limit
+    )
+    VALUES ($1, $2)
+    ON CONFLICT (user_id) DO
+    UPDATE SET
+        cal_limit = $2
+	`
+
+	_sqlUserSettingsBackup = `
+	SELECT user_id, cal_limit
+    FROM user_settings
+    ORDER BY user_id
+	`
 )
