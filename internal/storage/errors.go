@@ -9,6 +9,11 @@ var (
 	// Weight
 	ErrWeightInvalid = errors.New("invalid weight")
 
+	// Food
+	ErrFoodNotFound = errors.New("food not found")
+	ErrFoodInvalid  = errors.New("invalid food")
+	ErrFoodIsUsed   = errors.New("food is used")
+
 	// Sport
 	ErrSportInvalid  = errors.New("invalid sport")
 	ErrSportNotFound = errors.New("sport not found")

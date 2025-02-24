@@ -21,7 +21,7 @@ func (r *StorageSQLiteTestSuite) TestMigrations() {
 	r.Run("check last migration", func() {
 		migrationID, err := r.stg.getLastMigrationID(context.Background())
 		r.NoError(err)
-		r.Equal(int64(5), migrationID)
+		r.Equal(int64(6), migrationID)
 	})
 }
 

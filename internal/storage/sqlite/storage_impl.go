@@ -116,6 +116,118 @@ func (r *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestam
 }
 
 //
+// Food.
+//
+
+func (r *StorageSQLite) GetFood(ctx context.Context, userID int64, key string) (*s.Food, error) {
+	var f s.Food
+	err := r.db.
+		QueryRowContext(ctx, _sqlGetFood, userID, key).
+		Scan(&f.Key, &f.Name, &f.Brand, &f.Cal100, &f.Prot100, &f.Fat100, &f.Carb100, &f.Comment)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, s.ErrFoodNotFound
+		}
+		return nil, err
+	}
+
+	return &f, nil
+}
+
+func (r *StorageSQLite) GetFoodList(ctx context.Context, userID int64) ([]s.Food, error) {
+	rows, err := r.db.QueryContext(ctx, _sqlGetFoodList, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []s.Food{}
+	for rows.Next() {
+		var f s.Food
+		err = rows.Scan(&f.Key, &f.Name, &f.Brand, &f.Cal100, &f.Prot100, &f.Fat100, &f.Carb100, &f.Comment)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, f)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(list) == 0 {
+		return nil, s.ErrEmptyResult
+	}
+
+	return list, nil
+}
+
+func (r *StorageSQLite) FindFood(ctx context.Context, userID int64, pattern string) ([]s.Food, error) {
+	rows, err := r.db.QueryContext(ctx, _sqlFindFood, userID, pattern)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []s.Food{}
+	for rows.Next() {
+		var f s.Food
+		err = rows.Scan(&f.Key, &f.Name, &f.Brand, &f.Cal100, &f.Prot100, &f.Fat100, &f.Carb100, &f.Comment)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, f)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(list) == 0 {
+		return nil, s.ErrEmptyResult
+	}
+
+	return list, nil
+}
+
+func (r *StorageSQLite) SetFood(ctx context.Context, userID int64, food *s.Food) error {
+	if !food.Validate() {
+		return s.ErrFoodNotFound
+	}
+
+	_, err := r.db.ExecContext(ctx,
+		_sqlSetFood,
+		userID,
+		food.Key,
+		food.Name,
+		food.Brand,
+		food.Cal100,
+		food.Prot100,
+		food.Fat100,
+		food.Carb100,
+		food.Comment,
+	)
+	return err
+}
+
+func (r *StorageSQLite) DeleteFood(ctx context.Context, userID int64, key string) error {
+	_, err := r.db.ExecContext(ctx, _sqlDeleteFood, userID, key)
+	if err != nil {
+		var errSql gsql.Error
+		if errors.As(err, &errSql) && errSql.Error() == _errForeignKey {
+			return s.ErrFoodIsUsed
+		}
+		return err
+
+		// TODO: add bundle check
+	}
+
+	return nil
+}
+
+//
 // Sport.
 //
 

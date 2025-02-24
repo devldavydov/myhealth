@@ -197,4 +197,71 @@ const (
     FROM user_settings
     ORDER BY user_id
 	`
+
+	//
+	// Food.
+	//
+
+	_sqlCreateTableFood = `
+	CREATE TABLE food (
+		user_id INTEGER NOT NULL,
+        key     TEXT NOT NULL,
+        name    TEXT NOT NULL,
+        brand   TEXT NULL,
+        cal100  REAL NOT NULL,
+        prot100 REAL NOT NULL, 
+        fat100  REAL NOT NULL,
+        carb100 REAL NOT NULL,
+        comment TEXT NULL,
+		PRIMARY KEY (user_id, key)
+    ) STRICT
+	`
+
+	_sqlGetFood = `
+	SELECT 
+        key, name, brand, cal100,
+        prot100, fat100, carb100, comment
+    FROM food
+    WHERE user_id = $1 AND key = $2
+	`
+
+	_sqlGetFoodList = `
+	SELECT 
+        key, name, brand, cal100,
+        prot100, fat100, carb100, comment
+    FROM food
+    WHERE user_id = $1
+	ORDER BY name, key
+	`
+
+	_sqlFindFood = `
+	SELECT 
+        key, name, brand, cal100,
+        prot100, fat100, carb100, comment
+    FROM food
+    WHERE
+        r_upper(key)     LIKE '%' || $1 || '%' OR
+        r_upper(name)    LIKE '%' || $1 || '%' OR
+        r_upper(brand)   LIKE '%' || $1 || '%' OR
+        r_upper(comment) LIKE '%' || $1 || '%'
+    ORDER BY name, key
+	`
+
+	_sqlSetFood = `
+	INSERT INTO food (
+        user_id, key, name, brand, cal100,
+        prot100, fat100, carb100, comment
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    ON CONFLICT (user_id, key) DO
+    UPDATE SET
+        name = $3, brand = $4, cal100 = $5,
+        prot100 = $6, fat100 = $7, carb100 = $8,
+        comment = $9
+	`
+
+	_sqlDeleteFood = `
+	DELETE FROM food
+    WHERE user_id = $1 AND key = $2
+	`
 )
