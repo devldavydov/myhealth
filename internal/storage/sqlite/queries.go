@@ -240,10 +240,13 @@ const (
         prot100, fat100, carb100, comment
     FROM food
     WHERE
-        r_upper(key)     LIKE '%' || $1 || '%' OR
-        r_upper(name)    LIKE '%' || $1 || '%' OR
-        r_upper(brand)   LIKE '%' || $1 || '%' OR
-        r_upper(comment) LIKE '%' || $1 || '%'
+		user_id = $1 AND
+		(
+        	go_upper(key)     LIKE '%' || $2 || '%' OR
+        	go_upper(name)    LIKE '%' || $2 || '%' OR
+        	go_upper(brand)   LIKE '%' || $2 || '%' OR
+        	go_upper(comment) LIKE '%' || $2 || '%'
+		)
     ORDER BY name, key
 	`
 

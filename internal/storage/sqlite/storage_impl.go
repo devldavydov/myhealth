@@ -164,7 +164,7 @@ func (r *StorageSQLite) GetFoodList(ctx context.Context, userID int64) ([]s.Food
 }
 
 func (r *StorageSQLite) FindFood(ctx context.Context, userID int64, pattern string) ([]s.Food, error) {
-	rows, err := r.db.QueryContext(ctx, _sqlFindFood, userID, pattern)
+	rows, err := r.db.QueryContext(ctx, _sqlFindFood, userID, strings.ToUpper(pattern))
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (r *StorageSQLite) FindFood(ctx context.Context, userID int64, pattern stri
 
 func (r *StorageSQLite) SetFood(ctx context.Context, userID int64, food *s.Food) error {
 	if !food.Validate() {
-		return s.ErrFoodNotFound
+		return s.ErrFoodInvalid
 	}
 
 	_, err := r.db.ExecContext(ctx,
