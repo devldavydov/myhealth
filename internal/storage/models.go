@@ -168,6 +168,7 @@ type Backup struct {
 	Sport         []SportBackup         `json:"sport"`
 	SportActivity []SportActivityBackup `json:"sport_activity"`
 	UserSettings  []UserSettingsBackup  `json:"user_settings"`
+	Food          []FoodBackup          `json:"food"`
 }
 
 type WeightBackup struct {
@@ -193,4 +194,16 @@ type SportActivityBackup struct {
 type UserSettingsBackup struct {
 	UserID   int64   `json:"user_id"`
 	CalLimit float64 `json:"cal_limit"`
+}
+
+type FoodBackup struct {
+	UserID  int64   `json:"user_id"`
+	Key     string  `json:"key"`
+	Name    string  `json:"name"`
+	Brand   string  `json:"brand"`
+	Cal100  float64 `json:"cal100"`
+	Prot100 float64 `json:"prot100"`
+	Fat100  float64 `json:"fat100"`
+	Carb100 float64 `json:"carb100"`
+	Comment string  `json:"comment"`
 }

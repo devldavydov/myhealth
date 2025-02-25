@@ -324,6 +324,20 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 1, CalLimit: 123.123},
 			{UserID: 2, CalLimit: 456.456},
 		},
+		Food: []s.FoodBackup{
+			{
+				UserID: 1, Key: "food1_key", Name: "food1_name", Brand: "food1_brand",
+				Cal100: 1.1, Prot100: 2.2, Fat100: 3.3, Carb100: 4.4, Comment: "food1_comment",
+			},
+			{
+				UserID: 1, Key: "food2_key", Name: "food2_name", Brand: "food2_brand",
+				Cal100: 5.5, Prot100: 6.6, Fat100: 7.7, Carb100: 8.8, Comment: "food2_comment",
+			},
+			{
+				UserID: 2, Key: "food1_key", Name: "food1_name", Brand: "food1_brand",
+				Cal100: 1.1, Prot100: 2.2, Fat100: 3.3, Carb100: 4.4, Comment: "food1_comment",
+			},
+		},
 	}
 
 	r.Run("restore backup", func() {
@@ -389,6 +403,49 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			r.NoError(err)
 			r.Equal(&s.UserSettings{CalLimit: 456.456}, res)
 		}
+
+		// Food
+		{
+			res, err := r.stg.GetFoodList(context.Background(), 1)
+			r.NoError(err)
+			r.Equal([]s.Food{
+				{
+					Key:     "food1_key",
+					Name:    "food1_name",
+					Brand:   "food1_brand",
+					Cal100:  1.1,
+					Prot100: 2.2,
+					Fat100:  3.3,
+					Carb100: 4.4,
+					Comment: "food1_comment",
+				},
+				{
+					Key:     "food2_key",
+					Name:    "food2_name",
+					Brand:   "food2_brand",
+					Cal100:  5.5,
+					Prot100: 6.6,
+					Fat100:  7.7,
+					Carb100: 8.8,
+					Comment: "food2_comment",
+				},
+			}, res)
+
+			res, err = r.stg.GetFoodList(context.Background(), 2)
+			r.NoError(err)
+			r.Equal([]s.Food{
+				{
+					Key:     "food1_key",
+					Name:    "food1_name",
+					Brand:   "food1_brand",
+					Cal100:  1.1,
+					Prot100: 2.2,
+					Fat100:  3.3,
+					Carb100: 4.4,
+					Comment: "food1_comment",
+				},
+			}, res)
+		}
 	})
 
 	r.Run("do backup and check with initial", func() {
@@ -399,6 +456,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 		r.Equal(backup.Sport, backup2.Sport)
 		r.Equal(backup.SportActivity, backup2.SportActivity)
 		r.Equal(backup.UserSettings, backup2.UserSettings)
+		r.Equal(backup.Food, backup2.Food)
 	})
 }
 

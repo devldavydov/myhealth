@@ -264,4 +264,12 @@ const (
 	DELETE FROM food
     WHERE user_id = $1 AND key = $2
 	`
+
+	_sqlFoodBackup = `
+	SELECT 
+        user_id, key, name, brand, cal100,
+        prot100, fat100, carb100, comment
+    FROM food
+	ORDER BY user_id, key
+	`
 )

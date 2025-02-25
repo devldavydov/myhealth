@@ -496,6 +496,40 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 	}
 
+	// Food
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlFoodBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.Food = []s.FoodBackup{}
+		for rows.Next() {
+			var f s.FoodBackup
+			err = rows.Scan(
+				&f.UserID,
+				&f.Key,
+				&f.Name,
+				&f.Brand,
+				&f.Cal100,
+				&f.Prot100,
+				&f.Fat100,
+				&f.Carb100,
+				&f.Comment,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			backup.Food = append(backup.Food, f)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
 	// Result
 	return backup, nil
 }
@@ -541,6 +575,25 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 			ctx,
 			us.UserID,
 			&s.UserSettings{CalLimit: us.CalLimit},
+		); err != nil {
+			return err
+		}
+	}
+
+	for _, f := range backup.Food {
+		if err := r.SetFood(
+			ctx,
+			f.UserID,
+			&s.Food{
+				Key:     f.Key,
+				Name:    f.Name,
+				Brand:   f.Brand,
+				Cal100:  f.Cal100,
+				Prot100: f.Prot100,
+				Fat100:  f.Fat100,
+				Carb100: f.Carb100,
+				Comment: f.Comment,
+			},
 		); err != nil {
 			return err
 		}
