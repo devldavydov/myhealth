@@ -9,6 +9,9 @@ const (
 	MsgErrSportNotFound = "Спорт не найден"
 	MsgErrSportIsUsed   = "Спорт используется в активностях"
 
+	MsgErrFoodNotFound = "Еда не найдена"
+	MsgErrFoodIsUsed   = "Еда уже используется в журнале приема пищи или бандле"
+
 	MsgErrUserSettingsNotFound = "Настройки пользователя не найдены"
 
 	MsgOK = "OK"
