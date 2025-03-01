@@ -14,6 +14,14 @@ var (
 	ErrFoodInvalid  = errors.New("invalid food")
 	ErrFoodIsUsed   = errors.New("food is used")
 
+	// Bundle
+	ErrBundleNotFound          = errors.New("bundle not found")
+	ErrBundleInvalid           = errors.New("invalid bundle")
+	ErrBundleDepFoodNotFound   = errors.New("dependent food not found")
+	ErrBundleDepBundleNotFound = errors.New("dependent bundle not found")
+	ErrBundleDepRecursive      = errors.New("dependent recursive bundle not allowed")
+	ErrBundleIsUsed            = errors.New("bundle is used")
+
 	// Sport
 	ErrSportInvalid  = errors.New("invalid sport")
 	ErrSportNotFound = errors.New("sport not found")

@@ -213,18 +213,157 @@ func (r *StorageSQLite) SetFood(ctx context.Context, userID int64, food *s.Food)
 }
 
 func (r *StorageSQLite) DeleteFood(ctx context.Context, userID int64, key string) error {
-	_, err := r.db.ExecContext(ctx, _sqlDeleteFood, userID, key)
+	bndlList, err := r.GetBundleList(ctx, userID)
+	if err != nil && !errors.Is(err, s.ErrEmptyResult) {
+		return err
+	}
+
+	for _, bndl := range bndlList {
+		for k, v := range bndl.Data {
+			if v != 0 && k == key {
+				return s.ErrFoodIsUsed
+			}
+		}
+	}
+
+	_, err = r.db.ExecContext(ctx, _sqlDeleteFood, userID, key)
 	if err != nil {
 		var errSql gsql.Error
 		if errors.As(err, &errSql) && errSql.Error() == _errForeignKey {
 			return s.ErrFoodIsUsed
 		}
 		return err
-
-		// TODO: add bundle check
 	}
 
 	return nil
+}
+
+//
+// Bundle.
+//
+
+func (r *StorageSQLite) SetBundle(ctx context.Context, userID int64, bndl *s.Bundle, checkDeps bool) error {
+	if !bndl.Validate() {
+		return s.ErrBundleInvalid
+	}
+
+	if checkDeps {
+		for k, v := range bndl.Data {
+			if v == 0 {
+				if k == bndl.Key {
+					return s.ErrBundleDepRecursive
+				}
+
+				_, err := r.GetBundle(ctx, userID, k)
+				if err != nil {
+					if errors.Is(err, s.ErrBundleNotFound) {
+						return s.ErrBundleDepBundleNotFound
+					}
+
+					return err
+				}
+			} else {
+				_, err := r.GetFood(ctx, userID, k)
+				if err != nil {
+					if errors.Is(err, s.ErrFoodNotFound) {
+						return s.ErrBundleDepFoodNotFound
+					}
+
+					return err
+				}
+			}
+		}
+	}
+
+	bData, err := json.Marshal(&bndl.Data)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx,
+		_sqlSetBundle,
+		userID,
+		bndl.Key,
+		string(bData),
+	)
+	return err
+}
+
+func (r *StorageSQLite) GetBundle(ctx context.Context, userID int64, key string) (*s.Bundle, error) {
+	var b s.Bundle
+	var bData string
+	err := r.db.
+		QueryRowContext(ctx, _sqlGetBundle, userID, key).
+		Scan(&b.Key, &bData)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, s.ErrBundleNotFound
+		}
+		return nil, err
+	}
+
+	if err := json.Unmarshal([]byte(bData), &b.Data); err != nil {
+		return nil, err
+	}
+
+	return &b, nil
+}
+
+func (r *StorageSQLite) GetBundleList(ctx context.Context, userID int64) ([]s.Bundle, error) {
+	rows, err := r.db.QueryContext(ctx, _sqlGetBundleList, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []s.Bundle{}
+	for rows.Next() {
+		var b s.Bundle
+		var bData string
+		err = rows.Scan(&b.Key, &bData)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal([]byte(bData), &b.Data); err != nil {
+			return nil, err
+		}
+
+		list = append(list, b)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(list) == 0 {
+		return nil, s.ErrEmptyResult
+	}
+
+	return list, nil
+}
+
+func (r *StorageSQLite) DeleteBundle(ctx context.Context, userID int64, key string) error {
+	bndlList, err := r.GetBundleList(ctx, userID)
+	if err != nil {
+		if errors.Is(err, s.ErrEmptyResult) {
+			return nil
+		}
+
+		return err
+	}
+
+	for _, bndl := range bndlList {
+		for k, v := range bndl.Data {
+			if v == 0 && k == key {
+				return s.ErrBundleIsUsed
+			}
+		}
+	}
+
+	_, err = r.db.ExecContext(ctx, _sqlDeleteBundle, userID, key)
+
+	return err
 }
 
 //
@@ -459,8 +598,13 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		backup.SportActivity = []s.SportActivityBackup{}
 		for rows.Next() {
 			var sa s.SportActivityBackup
-			err = rows.Scan(&sa.UserID, &sa.Timestamp, &sa.SportKey, &sa.Sets)
+			var saSets string
+			err = rows.Scan(&sa.UserID, &sa.Timestamp, &sa.SportKey, &saSets)
 			if err != nil {
+				return nil, err
+			}
+
+			if err := json.Unmarshal([]byte(saSets), &sa.Sets); err != nil {
 				return nil, err
 			}
 
@@ -530,6 +674,40 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 	}
 
+	// Bundle
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlBundleBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.Bundle = []s.BundleBackup{}
+		for rows.Next() {
+			var b s.BundleBackup
+			var bData string
+
+			err = rows.Scan(
+				&b.UserID,
+				&b.Key,
+				&bData,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			if err := json.Unmarshal([]byte(bData), &b.Data); err != nil {
+				return nil, err
+			}
+
+			backup.Bundle = append(backup.Bundle, b)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
 	// Result
 	return backup, nil
 }
@@ -556,15 +734,10 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 	}
 
 	for _, sa := range backup.SportActivity {
-		var sets []int64
-		if err := json.Unmarshal([]byte(sa.Sets), &sets); err != nil {
-			return err
-		}
-
 		if err := r.SetSportActivity(ctx, sa.UserID, &s.SportActivity{
 			SportKey:  sa.SportKey,
 			Timestamp: sa.Timestamp,
-			Sets:      sets,
+			Sets:      sa.Sets,
 		}); err != nil {
 			return err
 		}
@@ -595,6 +768,15 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 				Comment: f.Comment,
 			},
 		); err != nil {
+			return err
+		}
+	}
+
+	for _, b := range backup.Bundle {
+		if err := r.SetBundle(ctx, b.UserID, &s.Bundle{
+			Key:  b.Key,
+			Data: b.Data,
+		}, false); err != nil {
 			return err
 		}
 	}

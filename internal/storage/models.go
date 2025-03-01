@@ -169,6 +169,7 @@ type Backup struct {
 	SportActivity []SportActivityBackup `json:"sport_activity"`
 	UserSettings  []UserSettingsBackup  `json:"user_settings"`
 	Food          []FoodBackup          `json:"food"`
+	Bundle        []BundleBackup        `json:"bundle"`
 }
 
 type WeightBackup struct {
@@ -188,7 +189,7 @@ type SportActivityBackup struct {
 	UserID    int64     `json:"user_id"`
 	SportKey  string    `json:"sport_key"`
 	Timestamp Timestamp `json:"timestamp"`
-	Sets      string    `json:"sets"`
+	Sets      []int64   `json:"sets"`
 }
 
 type UserSettingsBackup struct {
@@ -206,4 +207,10 @@ type FoodBackup struct {
 	Fat100  float64 `json:"fat100"`
 	Carb100 float64 `json:"carb100"`
 	Comment string  `json:"comment"`
+}
+
+type BundleBackup struct {
+	UserID int64              `json:"user_id"`
+	Key    string             `json:"key"`
+	Data   map[string]float64 `json:"data"`
 }

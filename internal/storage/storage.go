@@ -23,6 +23,12 @@ type Storage interface {
 	FindFood(ctx context.Context, userID int64, pattern string) ([]Food, error)
 	DeleteFood(ctx context.Context, userID int64, key string) error
 
+	// Bundle
+	SetBundle(ctx context.Context, userID int64, bndl *Bundle, checkDeps bool) error
+	GetBundle(ctx context.Context, userID int64, key string) (*Bundle, error)
+	GetBundleList(ctx context.Context, userID int64) ([]Bundle, error)
+	DeleteBundle(ctx context.Context, userID int64, key string) error
+
 	// Sport
 	GetSport(ctx context.Context, userID int64, key string) (*Sport, error)
 	GetSportList(ctx context.Context, userID int64) ([]Sport, error)

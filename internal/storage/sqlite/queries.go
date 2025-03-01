@@ -275,4 +275,51 @@ const (
     FROM food
 	ORDER BY user_id, key
 	`
+
+	//
+	// Bundle.
+	//
+
+	_sqlCreateTableBundle = `
+	    CREATE TABLE bundle (
+        user_id    INTEGER NOT NULL,
+        key        TEXT    NOT NULL, 
+        data       TEXT    NOT NULL,  
+        PRIMARY KEY (user_id, key)
+    ) STRICT
+	`
+
+	_sqlGetBundle = `
+	SELECT key, data
+    FROM bundle
+    WHERE user_id = $1 AND key = $2
+	`
+
+	_sqlGetBundleList = `
+	SELECT key, data
+    FROM bundle
+    WHERE user_id = $1
+	ORDER BY key
+	`
+
+	_sqlSetBundle = `
+	INSERT INTO bundle (
+        user_id, key, data
+    )
+    VALUES ($1, $2, $3)
+    ON CONFLICT (user_id, key) DO
+    UPDATE SET
+        data = $3
+	`
+
+	_sqlDeleteBundle = `
+	DELETE FROM bundle
+    WHERE user_id = $1 AND key = $2
+	`
+
+	_sqlBundleBackup = `
+	SELECT user_id, key, data
+	FROM bundle
+	ORDER BY user_id, key
+	`
 )
