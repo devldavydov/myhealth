@@ -322,4 +322,87 @@ const (
 	FROM bundle
 	ORDER BY user_id, key
 	`
+
+	//
+	// Journal.
+	//
+
+	_sqlCreateTableJournal = `
+	CREATE TABLE journal (
+        user_id    INTEGER NOT NULL,
+        timestamp  INTEGER NOT NULL,
+        meal       INTEGER NOT NULL,
+        foodkey    TEXT NOT NULL,
+        foodweight REAL NOT NULL,
+        PRIMARY KEY (user_id, timestamp, meal, foodkey),
+        FOREIGN KEY (foodkey) REFERENCES food(key) ON DELETE RESTRICT
+    ) STRICT
+	`
+
+	_sqlSetJournal = `
+	INSERT INTO journal (
+        user_id, timestamp, meal, foodkey, foodweight
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (user_id, timestamp, meal, foodkey) DO
+    UPDATE SET
+        foodweight = $5
+	`
+
+	_sqlDeleteJournal = `
+    DELETE FROM journal
+    WHERE user_id = $1 AND
+          timestamp = $2 AND
+          meal = $3 AND
+          foodkey = $4
+	`
+
+	_sqlDeleteJournalMeal = `
+	DELETE FROM journal
+	WHERE user_id = $1 AND
+		timestamp = $2 AND
+		meal = $3
+	`
+
+	_sqlJournalFoodAvgWeight = `
+	SELECT coalesce(avg(foodweight), 0.0) AS avg_food_weight
+    FROM journal j
+    WHERE
+        j.user_id = $1 AND
+        j.foodkey = $2 AND
+        j.timestamp >= $3 AND
+        j.timestamp <= $4
+	`
+
+	_sqlGetJournalReport = `
+    SELECT
+        j.timestamp,
+        j.meal,
+        j.foodkey,
+        f.name AS foodname,
+        f.brand AS foodbrand,
+        j.foodweight,
+        j.foodweight / 100 * f.cal100 AS cal,
+        j.foodweight / 100 * f.prot100 AS prot,
+        j.foodweight / 100 * f.fat100 AS fat,
+        j.foodweight / 100 * f.carb100 AS carb
+    FROM journal j, food f
+    WHERE
+        j.foodkey = f.key AND
+        j.user_id = $1 AND
+        j.timestamp >= $2 AND
+        j.timestamp <= $3
+    ORDER BY
+        j.timestamp,
+        j.meal,
+        f.name
+	`
+
+	_sqlGetJournalListForCopy = `
+	SELECT foodkey, foodweight
+	FROM journal
+	WHERE user_id = $1 AND
+		timestamp = $2 AND
+		meal = $3 AND
+	`
 )

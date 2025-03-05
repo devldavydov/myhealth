@@ -79,6 +79,7 @@ func getAllMigrations() []migration {
 		{5, createTableUserSettings},
 		{6, createTableFood},
 		{7, createTableBundle},
+		{8, createTableJournal},
 	}
 }
 
@@ -114,5 +115,10 @@ func createTableFood(ctx context.Context, tx *sql.Tx) error {
 
 func createTableBundle(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, _sqlCreateTableBundle)
+	return err
+}
+
+func createTableJournal(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, _sqlCreateTableJournal)
 	return err
 }

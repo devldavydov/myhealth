@@ -36,7 +36,7 @@ func (r *Food) Validate() bool {
 		r.Carb100 >= 0
 }
 
-type Meal int64
+type Meal int
 
 func NewMealFromString(m string) (Meal, error) {
 	switch strings.ToUpper(m) {
@@ -86,6 +86,19 @@ func (r *Journal) Validate() bool {
 	return r.Meal >= 0 &&
 		r.FoodKey != "" &&
 		r.FoodWeight > 0
+}
+
+type JournalReport struct {
+	Timestamp  time.Time
+	Meal       Meal
+	FoodKey    string
+	FoodName   string
+	FoodBrand  string
+	FoodWeight float64
+	Cal        float64
+	Prot       float64
+	Fat        float64
+	Carb       float64
 }
 
 type Weight struct {

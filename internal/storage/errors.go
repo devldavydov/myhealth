@@ -22,6 +22,9 @@ var (
 	ErrBundleDepRecursive      = errors.New("dependent recursive bundle not allowed")
 	ErrBundleIsUsed            = errors.New("bundle is used")
 
+	// Journal
+	ErrJournalInvalid = errors.New("journal invalid")
+
 	// Sport
 	ErrSportInvalid  = errors.New("invalid sport")
 	ErrSportNotFound = errors.New("sport not found")

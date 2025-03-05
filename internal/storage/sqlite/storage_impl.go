@@ -120,8 +120,23 @@ func (r *StorageSQLite) DeleteWeight(ctx context.Context, userID int64, timestam
 //
 
 func (r *StorageSQLite) GetFood(ctx context.Context, userID int64, key string) (*s.Food, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	food, err := getFood(ctx, tx, userID, key)
+	if err != nil {
+		return nil, err
+	}
+
+	return food, tx.Commit()
+}
+
+func getFood(ctx context.Context, tx *sql.Tx, userID int64, key string) (*s.Food, error) {
 	var f s.Food
-	err := r.db.
+	err := tx.
 		QueryRowContext(ctx, _sqlGetFood, userID, key).
 		Scan(&f.Key, &f.Name, &f.Brand, &f.Cal100, &f.Prot100, &f.Fat100, &f.Carb100, &f.Comment)
 	if err != nil {
@@ -290,9 +305,24 @@ func (r *StorageSQLite) SetBundle(ctx context.Context, userID int64, bndl *s.Bun
 }
 
 func (r *StorageSQLite) GetBundle(ctx context.Context, userID int64, key string) (*s.Bundle, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	bndl, err := getBundle(ctx, tx, userID, key)
+	if err != nil {
+		return nil, err
+	}
+
+	return bndl, tx.Commit()
+}
+
+func getBundle(ctx context.Context, tx *sql.Tx, userID int64, key string) (*s.Bundle, error) {
 	var b s.Bundle
 	var bData string
-	err := r.db.
+	err := tx.
 		QueryRowContext(ctx, _sqlGetBundle, userID, key).
 		Scan(&b.Key, &bData)
 	if err != nil {
@@ -364,6 +394,218 @@ func (r *StorageSQLite) DeleteBundle(ctx context.Context, userID int64, key stri
 	_, err = r.db.ExecContext(ctx, _sqlDeleteBundle, userID, key)
 
 	return err
+}
+
+//
+// Journal.
+//
+
+func (r *StorageSQLite) SetJournal(ctx context.Context, userID int64, journal *s.Journal) error {
+	if !journal.Validate() {
+		return s.ErrJournalInvalid
+	}
+
+	_, err := r.db.ExecContext(ctx,
+		_sqlSetJournal,
+		userID,
+		journal.Timestamp,
+		journal.Meal,
+		journal.FoodKey,
+		journal.FoodWeight,
+	)
+	if err != nil {
+		var errSql gsql.Error
+		if errors.As(err, &errSql) && errSql.Error() == _errForeignKey {
+			return s.ErrFoodNotFound
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (r *StorageSQLite) SetJournalBundle(ctx context.Context, userID int64, timestamp time.Time, meal s.Meal, bndlKey string) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	foodItems, err := getBundleFoodItems(ctx, tx, userID, bndlKey)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range foodItems {
+		if _, err := tx.ExecContext(ctx,
+			_sqlSetJournal,
+			userID,
+			timestamp,
+			meal,
+			item.foodKey,
+			item.foodWeight,
+		); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+type bundleFoodItem struct {
+	foodKey    string
+	foodWeight float64
+}
+
+func getBundleFoodItems(ctx context.Context, tx *sql.Tx, userID int64, bndlKey string) ([]bundleFoodItem, error) {
+	foodItems := []bundleFoodItem{}
+	bndlList := []string{bndlKey}
+	i := 0
+
+	for i < len(bndlList) {
+		nextBndlKey := bndlList[i]
+		bndl, err := getBundle(ctx, tx, userID, nextBndlKey)
+		if err != nil {
+			return nil, err
+		}
+
+		for k, v := range bndl.Data {
+			if v == 0 {
+				bndlList = append(bndlList, k)
+				continue
+			}
+
+			_, err := getFood(ctx, tx, userID, k)
+			if err != nil {
+				return nil, err
+			}
+
+			foodItems = append(foodItems, bundleFoodItem{foodKey: k, foodWeight: v})
+		}
+
+		i++
+	}
+
+	return foodItems, nil
+}
+
+func (r *StorageSQLite) DeleteJournal(ctx context.Context, userID int64, timestamp time.Time, meal s.Meal, foodkey string) error {
+	_, err := r.db.ExecContext(ctx, _sqlDeleteJournal, userID, timestamp, meal, foodkey)
+	return err
+}
+
+func (r *StorageSQLite) DeleteJournalMeal(ctx context.Context, userID int64, timestamp time.Time, meal s.Meal) error {
+	_, err := r.db.ExecContext(ctx, _sqlDeleteJournalMeal, userID, timestamp, meal)
+	return err
+}
+
+func (r *StorageSQLite) GetJournalReport(ctx context.Context, userID int64, from, to time.Time) ([]s.JournalReport, error) {
+	rows, err := r.db.QueryContext(ctx, _sqlGetJournalReport, userID, from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []s.JournalReport{}
+	for rows.Next() {
+		var jr s.JournalReport
+		err = rows.Scan(
+			&jr.Timestamp,
+			&jr.Meal,
+			&jr.FoodKey,
+			&jr.FoodName,
+			&jr.FoodBrand,
+			&jr.Cal,
+			&jr.Prot,
+			&jr.Fat,
+			&jr.Carb,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, jr)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(list) == 0 {
+		return nil, s.ErrEmptyResult
+	}
+
+	return list, nil
+}
+
+func (r *StorageSQLite) CopyJournal(ctx context.Context, userID int64, from time.Time, mealFrom s.Meal, to time.Time, mealTo s.Meal) (int, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	// Get journal data for mealFrom
+	type jData struct {
+		foodKey    string
+		foodWeight string
+	}
+
+	rows, err := r.db.QueryContext(ctx, _sqlGetJournalListForCopy, userID, from, mealFrom)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	list := []jData{}
+	for rows.Next() {
+		var jd jData
+		err = rows.Scan(
+			&jd.foodKey,
+			&jd.foodWeight,
+		)
+		if err != nil {
+			return 0, err
+		}
+
+		list = append(list, jd)
+	}
+
+	if err = rows.Err(); err != nil {
+		return 0, err
+	}
+
+	if len(list) == 0 {
+		return 0, s.ErrEmptyResult
+	}
+
+	// Save to new meal
+	for _, item := range list {
+		if _, err := tx.ExecContext(ctx,
+			_sqlSetJournal,
+			userID,
+			to,
+			mealTo,
+			item.foodKey,
+			item.foodWeight,
+		); err != nil {
+			return 0, err
+		}
+	}
+
+	return len(list), tx.Commit()
+}
+
+func (r *StorageSQLite) GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to time.Time, foodkey string) (float64, error) {
+	var foodAvgWeight float64
+
+	if err := r.db.
+		QueryRowContext(ctx, _sqlJournalFoodAvgWeight, userID, foodkey, from, to).
+		Scan(&foodAvgWeight); err != nil {
+		return 0, err
+	}
+
+	return foodAvgWeight, nil
 }
 
 //
