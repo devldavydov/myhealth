@@ -991,6 +991,11 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 1, Key: "bundle2", Data: map[string]float64{"food2_key": 456}},
 			{UserID: 2, Key: "bundle1", Data: map[string]float64{"food1_key": 789}},
 		},
+		Journal: []s.JournalBackup{
+			{UserID: 1, Timestamp: 1, Meal: s.Meal(0), FoodKey: "food1_key", FoodWeight: 100},
+			{UserID: 1, Timestamp: 1, Meal: s.Meal(1), FoodKey: "food2_key", FoodWeight: 200},
+			{UserID: 2, Timestamp: 2, Meal: s.Meal(2), FoodKey: "food1_key", FoodWeight: 100},
+		},
 	}
 
 	r.Run("restore backup", func() {
@@ -998,7 +1003,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 	})
 
 	r.Run("check db after restore", func() {
-		// Weight.
+		// Weight
 		{
 			res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 3000)
 			r.NoError(err)
@@ -1014,7 +1019,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			}, res)
 		}
 
-		// Sport.
+		// Sport
 		{
 			res, err := r.stg.GetSportList(context.Background(), 1)
 			r.NoError(err)
@@ -1030,7 +1035,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			}, res)
 		}
 
-		// SportActivity.
+		// SportActivity
 		{
 			res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 			r.NoError(err)
@@ -1046,7 +1051,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			}, res)
 		}
 
-		// UserSettings.
+		// UserSettings
 		{
 			res, err := r.stg.GetUserSettings(context.Background(), 1)
 			r.NoError(err)
@@ -1122,6 +1127,25 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 				}},
 			}, res)
 		}
+
+		// Journal
+		{
+			rep, err := r.stg.GetJournalReport(context.Background(), 1, 1, 2)
+			r.NoError(err)
+			r.Equal([]s.JournalReport{
+				{Timestamp: 1, Meal: s.Meal(0), FoodKey: "food1_key", FoodName: "food1_name", FoodBrand: "food1_brand",
+					FoodWeight: 100, Cal: 1.1, Prot: 2.2, Fat: 3.3, Carb: 4.4},
+				{Timestamp: 1, Meal: s.Meal(1), FoodKey: "food2_key", FoodName: "food2_name", FoodBrand: "food2_brand",
+					FoodWeight: 200, Cal: 11, Prot: 13.2, Fat: 15.4, Carb: 17.6},
+			}, rep)
+
+			rep, err = r.stg.GetJournalReport(context.Background(), 2, 1, 2)
+			r.NoError(err)
+			r.Equal([]s.JournalReport{
+				{Timestamp: 2, Meal: s.Meal(2), FoodKey: "food1_key", FoodName: "food1_name", FoodBrand: "food1_brand",
+					FoodWeight: 100, Cal: 1.1, Prot: 2.2, Fat: 3.3, Carb: 4.4},
+			}, rep)
+		}
 	})
 
 	r.Run("do backup and check with initial", func() {
@@ -1134,6 +1158,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 		r.Equal(backup.UserSettings, backup2.UserSettings)
 		r.Equal(backup.Food, backup2.Food)
 		r.Equal(backup.Bundle, backup2.Bundle)
+		r.Equal(backup.Journal, backup2.Journal)
 	})
 }
 

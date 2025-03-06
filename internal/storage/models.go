@@ -183,6 +183,7 @@ type Backup struct {
 	UserSettings  []UserSettingsBackup  `json:"user_settings"`
 	Food          []FoodBackup          `json:"food"`
 	Bundle        []BundleBackup        `json:"bundle"`
+	Journal       []JournalBackup       `json:"journal"`
 }
 
 type WeightBackup struct {
@@ -226,4 +227,12 @@ type BundleBackup struct {
 	UserID int64              `json:"user_id"`
 	Key    string             `json:"key"`
 	Data   map[string]float64 `json:"data"`
+}
+
+type JournalBackup struct {
+	UserID     int64     `json:"user_id"`
+	Timestamp  Timestamp `json:"timestamp"`
+	Meal       Meal      `json:"meal"`
+	FoodKey    string    `json:"food_key"`
+	FoodWeight float64   `json:"food_weight"`
 }

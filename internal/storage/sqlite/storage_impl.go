@@ -951,6 +951,37 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 	}
 
+	// Journal
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlJournalBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.Journal = []s.JournalBackup{}
+		for rows.Next() {
+			var j s.JournalBackup
+
+			err = rows.Scan(
+				&j.UserID,
+				&j.Timestamp,
+				&j.Meal,
+				&j.FoodKey,
+				&j.FoodWeight,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			backup.Journal = append(backup.Journal, j)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
 	// Result
 	return backup, nil
 }
@@ -1020,6 +1051,17 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 			Key:  b.Key,
 			Data: b.Data,
 		}, false); err != nil {
+			return err
+		}
+	}
+
+	for _, j := range backup.Journal {
+		if err := r.SetJournal(ctx, j.UserID, &s.Journal{
+			Timestamp:  j.Timestamp,
+			Meal:       j.Meal,
+			FoodKey:    j.FoodKey,
+			FoodWeight: j.FoodWeight,
+		}); err != nil {
 			return err
 		}
 	}

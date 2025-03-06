@@ -406,4 +406,10 @@ const (
 		timestamp = $2 AND
 		meal = $3
 	`
+
+	_sqlJournalBackup = `
+	SELECT user_id, timestamp, meal, foodkey, foodweight
+	FROM journal
+	ORDER BY user_id, timestamp, meal, foodkey
+	`
 )
