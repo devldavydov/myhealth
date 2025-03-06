@@ -31,12 +31,12 @@ type Storage interface {
 
 	// Journal
 	SetJournal(ctx context.Context, userID int64, journal *Journal) error
-	SetJournalBundle(ctx context.Context, userID int64, timestamp time.Time, meal Meal, bndlKey string) error
-	DeleteJournal(ctx context.Context, userID int64, timestamp time.Time, meal Meal, foodkey string) error
-	DeleteJournalMeal(ctx context.Context, userID int64, timestamp time.Time, meal Meal) error
-	GetJournalReport(ctx context.Context, userID int64, from, to time.Time) ([]JournalReport, error)
-	CopyJournal(ctx context.Context, userID int64, from time.Time, mealFrom Meal, to time.Time, mealTo Meal) (int, error)
-	GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to time.Time, foodkey string) (float64, error)
+	SetJournalBundle(ctx context.Context, userID int64, timestamp Timestamp, meal Meal, bndlKey string) error
+	DeleteJournal(ctx context.Context, userID int64, timestamp Timestamp, meal Meal, foodkey string) error
+	DeleteJournalMeal(ctx context.Context, userID int64, timestamp Timestamp, meal Meal) error
+	GetJournalReport(ctx context.Context, userID int64, from, to Timestamp) ([]JournalReport, error)
+	CopyJournal(ctx context.Context, userID int64, from Timestamp, mealFrom Meal, to Timestamp, mealTo Meal) (int, error)
+	GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to Timestamp, foodkey string) (float64, error)
 
 	// Sport
 	GetSport(ctx context.Context, userID int64, key string) (*Sport, error)

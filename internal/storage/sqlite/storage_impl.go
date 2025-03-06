@@ -424,7 +424,7 @@ func (r *StorageSQLite) SetJournal(ctx context.Context, userID int64, journal *s
 	return nil
 }
 
-func (r *StorageSQLite) SetJournalBundle(ctx context.Context, userID int64, timestamp time.Time, meal s.Meal, bndlKey string) error {
+func (r *StorageSQLite) SetJournalBundle(ctx context.Context, userID int64, timestamp s.Timestamp, meal s.Meal, bndlKey string) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -489,17 +489,17 @@ func getBundleFoodItems(ctx context.Context, tx *sql.Tx, userID int64, bndlKey s
 	return foodItems, nil
 }
 
-func (r *StorageSQLite) DeleteJournal(ctx context.Context, userID int64, timestamp time.Time, meal s.Meal, foodkey string) error {
+func (r *StorageSQLite) DeleteJournal(ctx context.Context, userID int64, timestamp s.Timestamp, meal s.Meal, foodkey string) error {
 	_, err := r.db.ExecContext(ctx, _sqlDeleteJournal, userID, timestamp, meal, foodkey)
 	return err
 }
 
-func (r *StorageSQLite) DeleteJournalMeal(ctx context.Context, userID int64, timestamp time.Time, meal s.Meal) error {
+func (r *StorageSQLite) DeleteJournalMeal(ctx context.Context, userID int64, timestamp s.Timestamp, meal s.Meal) error {
 	_, err := r.db.ExecContext(ctx, _sqlDeleteJournalMeal, userID, timestamp, meal)
 	return err
 }
 
-func (r *StorageSQLite) GetJournalReport(ctx context.Context, userID int64, from, to time.Time) ([]s.JournalReport, error) {
+func (r *StorageSQLite) GetJournalReport(ctx context.Context, userID int64, from, to s.Timestamp) ([]s.JournalReport, error) {
 	rows, err := r.db.QueryContext(ctx, _sqlGetJournalReport, userID, from, to)
 	if err != nil {
 		return nil, err
@@ -515,6 +515,7 @@ func (r *StorageSQLite) GetJournalReport(ctx context.Context, userID int64, from
 			&jr.FoodKey,
 			&jr.FoodName,
 			&jr.FoodBrand,
+			&jr.FoodWeight,
 			&jr.Cal,
 			&jr.Prot,
 			&jr.Fat,
@@ -538,7 +539,7 @@ func (r *StorageSQLite) GetJournalReport(ctx context.Context, userID int64, from
 	return list, nil
 }
 
-func (r *StorageSQLite) CopyJournal(ctx context.Context, userID int64, from time.Time, mealFrom s.Meal, to time.Time, mealTo s.Meal) (int, error) {
+func (r *StorageSQLite) CopyJournal(ctx context.Context, userID int64, from s.Timestamp, mealFrom s.Meal, to s.Timestamp, mealTo s.Meal) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return 0, err
@@ -576,7 +577,7 @@ func (r *StorageSQLite) CopyJournal(ctx context.Context, userID int64, from time
 	}
 
 	if len(list) == 0 {
-		return 0, s.ErrEmptyResult
+		return 0, nil
 	}
 
 	// Save to new meal
@@ -596,7 +597,7 @@ func (r *StorageSQLite) CopyJournal(ctx context.Context, userID int64, from time
 	return len(list), tx.Commit()
 }
 
-func (r *StorageSQLite) GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to time.Time, foodkey string) (float64, error) {
+func (r *StorageSQLite) GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to s.Timestamp, foodkey string) (float64, error) {
 	var foodAvgWeight float64
 
 	if err := r.db.

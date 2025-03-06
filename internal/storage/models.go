@@ -89,7 +89,7 @@ func (r *Journal) Validate() bool {
 }
 
 type JournalReport struct {
-	Timestamp  time.Time
+	Timestamp  Timestamp
 	Meal       Meal
 	FoodKey    string
 	FoodName   string

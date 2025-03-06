@@ -335,7 +335,7 @@ const (
         foodkey    TEXT NOT NULL,
         foodweight REAL NOT NULL,
         PRIMARY KEY (user_id, timestamp, meal, foodkey),
-        FOREIGN KEY (foodkey) REFERENCES food(key) ON DELETE RESTRICT
+        FOREIGN KEY (user_id, foodkey) REFERENCES food(user_id, key) ON DELETE RESTRICT
     ) STRICT
 	`
 
@@ -389,6 +389,7 @@ const (
     FROM journal j, food f
     WHERE
         j.foodkey = f.key AND
+		f.user_id = $1 AND
         j.user_id = $1 AND
         j.timestamp >= $2 AND
         j.timestamp <= $3
@@ -403,6 +404,6 @@ const (
 	FROM journal
 	WHERE user_id = $1 AND
 		timestamp = $2 AND
-		meal = $3 AND
+		meal = $3
 	`
 )
