@@ -32,6 +32,8 @@ func (r *CmdProcessor) processWeight(cmdParts []string, userID int64) []CmdRespo
 		resp = r.weightDelCommand(cmdParts[1:], userID)
 	case "list":
 		resp = r.weightListCommand(cmdParts[1:], userID)
+	case "h":
+		resp = r.weightHelpCommand()
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -277,4 +279,28 @@ func (r *CmdProcessor) weightListCommand(cmdParts []string, userID int64) []CmdR
 		MIME:     "text/html",
 		FileName: fmt.Sprintf("weight_%s_%s.html", tsFromStr, tsToStr),
 	})
+}
+
+func (r *CmdProcessor) weightHelpCommand() []CmdResponse {
+	return NewSingleCmdResponse(
+		newCmdHelpBuilder("Управление весом").
+			addCmd(
+				"Установка",
+				"w,set",
+				"[Дата]",
+				"Значение [Дробное>0]",
+			).
+			addCmd(
+				"Удаление",
+				"w,del",
+				"[Дата]",
+			).
+			addCmd(
+				"Отчет за период",
+				"w,list",
+				"С [Дата]",
+				"По [Дата]",
+			).
+			build(),
+		optsHTML)
 }

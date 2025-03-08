@@ -86,10 +86,6 @@ func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
 	return nil
 }
 
-func (r *CmdProcessor) processHelp(userID int64) []CmdResponse {
-	return NewSingleCmdResponse(MsgErrNotImplemented)
-}
-
 type CmdResponse struct {
 	what any
 	opts []any

@@ -1,7 +1,7 @@
 package cmdproc
 
 const (
-	MsgErrInvalidCommand = "Неправильная команда"
+	MsgErrInvalidCommand = "Неправильная команда (h для помощи)"
 	MsgErrNotImplemented = "В разработке"
 	MsgErrInternal       = "Внутренняя ошибка"
 	MsgErrEmptyResult    = "Пустой результат"

@@ -39,6 +39,8 @@ func (r *CmdProcessor) processFood(cmdParts []string, userID int64) []CmdRespons
 		resp = r.foodListCommand(userID)
 	case "del":
 		resp = r.foodDelCommand(cmdParts[1:], userID)
+	case "h":
+		resp = r.foodHelpCommand()
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -377,4 +379,48 @@ func (r *CmdProcessor) foodDelCommand(cmdParts []string, userID int64) []CmdResp
 	}
 
 	return NewSingleCmdResponse(MsgOK)
+}
+
+func (r *CmdProcessor) foodHelpCommand() []CmdResponse {
+	return NewSingleCmdResponse(
+		newCmdHelpBuilder("Управление едой").
+			addCmd(
+				"Установка",
+				"f,set",
+				"Ключ [Строка>0]",
+				"Наименование [Строка>0]",
+				"Бренд [Строка>=0]",
+				"ККал 100г [Дробное>=0]",
+				"Б 100г [Дробное>=0]",
+				"Ж 100г [Дробное>=0]",
+				"У 100г [Дробное>=0]",
+				"Комментарий [Строка>=0]",
+			).
+			addCmd(
+				"Шаблон команды установки",
+				"f,st",
+				"Ключ [Строка>0]",
+			).
+			addCmd(
+				"Поиск",
+				"f,find",
+				"Подстрока [Строка>=0]",
+			).
+			addCmd(
+				"Расчет КБЖУ",
+				"f,calc",
+				"Ключ [Строка>0]",
+				"Вес [Дробное>=0]",
+			).
+			addCmd(
+				"Список",
+				"f,list",
+			).
+			addCmd(
+				"Удаление",
+				"f,del",
+				"Ключ [Строка>0]",
+			).
+			build(),
+		optsHTML)
 }

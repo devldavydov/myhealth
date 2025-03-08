@@ -44,6 +44,8 @@ func (r *CmdProcessor) processJournal(cmdParts []string, userID int64) []CmdResp
 		resp = r.journalTemplateMealCommand(cmdParts[1:], userID)
 	case "fa":
 		resp = r.journalFoodAvgWeightCommand(cmdParts[1:], userID)
+	case "h":
+		resp = r.journalHelpCommand()
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -715,4 +717,63 @@ func calDiffSnippet(diff float64) html.IELement {
 	default:
 		return html.NewS(fmt.Sprintf("%.2f", diff))
 	}
+}
+
+func (r *CmdProcessor) journalHelpCommand() []CmdResponse {
+	return NewSingleCmdResponse(
+		newCmdHelpBuilder("Управление журналом приема пищи").
+			addCmd(
+				"Установка",
+				"j,set",
+				"[Дата]",
+				"[Прием пищи]",
+				"Ключ еды [Строка>0]",
+				"Вес [Дробное>0]",
+			).
+			addCmd(
+				"Установка бандлом",
+				"j,sb",
+				"[Дата]",
+				"[Прием пищи]",
+				"Ключ бандла [Строка>0]",
+			).
+			addCmd(
+				"Удаление",
+				"j,del",
+				"[Дата]",
+				"[Прием пищи]",
+				"Ключ еды [Строка>0]",
+			).
+			addCmd(
+				"Удаление приема пищи",
+				"j,dm",
+				"[Дата]",
+				"[Прием пищи]",
+			).
+			addCmd(
+				"Копирование",
+				"j,cp",
+				"Откуда [Дата]",
+				"Откуда [Прием пищи]",
+				"Куда [Дата]",
+				"Куда [Прием пищи]",
+			).
+			addCmd(
+				"Отчет за день",
+				"j,rd",
+				"[Дата]",
+			).
+			addCmd(
+				"Шаблоны команд приема пищи",
+				"j,tm",
+				"[Дата]",
+				"[Прием пищи]",
+			).
+			addCmd(
+				"Средний вес еды",
+				"j,fa",
+				"Ключ еды [Строка>0]",
+			).
+			build(),
+		optsHTML)
 }
