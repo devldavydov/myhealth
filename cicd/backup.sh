@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Add to cron
+# 0 2 * * * /root/MyProjects/myhealth/backup.sh
+
 cd /root/MyProjects/myhealth
 
 sqlite3 myhealth.db ".backup 'myhealth_$(date +%Y%m%d).db'"
