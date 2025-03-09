@@ -47,21 +47,21 @@ func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
 	case "h":
 		resp = r.processHelp(userID)
 	case "w":
-		resp = r.processWeight(cmdParts[1:], userID)
+		resp = r.processWeight("w", cmdParts[1:], userID)
 	case "f":
-		resp = r.processFood(cmdParts[1:], userID)
+		resp = r.processFood("f", cmdParts[1:], userID)
 	case "j":
-		resp = r.processJournal(cmdParts[1:], userID)
+		resp = r.processJournal("j", cmdParts[1:], userID)
 	case "b":
-		resp = r.processBundle(cmdParts[1:], userID)
+		resp = r.processBundle("b", cmdParts[1:], userID)
 	case "c":
-		resp = r.processCalcCal(cmdParts[1:], userID)
+		resp = r.processCalcCal("c", cmdParts[1:], userID)
 	case "u":
-		resp = r.processUserSettings(cmdParts[1:], userID)
+		resp = r.processUserSettings("u", cmdParts[1:], userID)
 	case "s":
-		resp = r.processSport(cmdParts[1:], userID)
+		resp = r.processSport("s", cmdParts[1:], userID)
 	case "m":
-		resp = r.processMaintenance(cmdParts[1:], userID)
+		resp = r.processMaintenance("m", cmdParts[1:], userID)
 	default:
 		r.logger.Error(
 			"unknown command",

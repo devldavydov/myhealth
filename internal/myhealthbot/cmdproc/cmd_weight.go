@@ -13,7 +13,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processWeight(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) processWeight(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -33,7 +33,7 @@ func (r *CmdProcessor) processWeight(cmdParts []string, userID int64) []CmdRespo
 	case "list":
 		resp = r.weightListCommand(cmdParts[1:], userID)
 	case "h":
-		resp = r.weightHelpCommand()
+		resp = r.weightHelpCommand(baseCmd)
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -281,23 +281,23 @@ func (r *CmdProcessor) weightListCommand(cmdParts []string, userID int64) []CmdR
 	})
 }
 
-func (r *CmdProcessor) weightHelpCommand() []CmdResponse {
+func (r *CmdProcessor) weightHelpCommand(baseCmd string) []CmdResponse {
 	return NewSingleCmdResponse(
-		newCmdHelpBuilder("Управление весом").
+		newCmdHelpBuilder(baseCmd, "Управление весом").
 			addCmd(
 				"Установка",
-				"w,set",
+				"set",
 				"[Дата]",
 				"Значение [Дробное>0]",
 			).
 			addCmd(
 				"Удаление",
-				"w,del",
+				"del",
 				"[Дата]",
 			).
 			addCmd(
-				"Отчет за период",
-				"w,list",
+				"Отчет",
+				"list",
 				"С [Дата]",
 				"По [Дата]",
 			).

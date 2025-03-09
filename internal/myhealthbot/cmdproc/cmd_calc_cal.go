@@ -8,7 +8,36 @@ import (
 	"go.uber.org/zap"
 )
 
-func (r *CmdProcessor) processCalcCal(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) processCalcCal(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "c":
+		resp = r.calcCalCalcCommand(cmdParts[1:], userID)
+	case "h":
+		resp = r.calcCalHelpCommand(baseCmd)
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
+func (r *CmdProcessor) calcCalCalcCommand(cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) != 4 {
 		r.logger.Error("invalid command",
 			zap.Strings("cmdParts", cmdParts),
@@ -59,16 +88,16 @@ func (r *CmdProcessor) processCalcCal(cmdParts []string, userID int64) []CmdResp
 	sb.WriteString("<b>Уровень Базального Метаболизма (УБМ)</b>\n")
 	sb.WriteString(fmt.Sprintf("%d ккал\n\n", int64(ubm)))
 
-	sb.WriteString("<b>Усредненные значения по активностям</b>\n\n")
+	sb.WriteString("<b>Усредненные значения по активностям</b>\n")
 	for _, i := range []struct {
 		name string
 		k    float64
 	}{
-		{name: "Сидячая активность", k: 1.2},
-		{name: "Легкая активность", k: 1.375},
-		{name: "Средняя активность", k: 1.55},
-		{name: "Полноценная активность", k: 1.725},
-		{name: "Супер активность", k: 1.9},
+		{name: "\u2022 Сидячая активность", k: 1.2},
+		{name: "\u2022 Легкая активность", k: 1.375},
+		{name: "\u2022 Средняя активность", k: 1.55},
+		{name: "\u2022 Полноценная активность", k: 1.725},
+		{name: "\u2022 Супер активность", k: 1.9},
 	} {
 		sb.WriteString(fmt.Sprintf("<b>%s</b>\n", i.name))
 		sb.WriteString(fmt.Sprintf("ККал: %d\n", int64(ubm*i.k)))
@@ -76,4 +105,19 @@ func (r *CmdProcessor) processCalcCal(cmdParts []string, userID int64) []CmdResp
 	}
 
 	return NewSingleCmdResponse(sb.String(), optsHTML)
+}
+
+func (r *CmdProcessor) calcCalHelpCommand(baseCmd string) []CmdResponse {
+	return NewSingleCmdResponse(
+		newCmdHelpBuilder(baseCmd, "Расчет лимита калорий").
+			addCmd(
+				"Расчет",
+				"c",
+				"[Пол]",
+				"Вес [Дробное>0]",
+				"Рост [Дробное>0]",
+				"Возраст [Дробное>0]",
+			).
+			build(),
+		optsHTML)
 }

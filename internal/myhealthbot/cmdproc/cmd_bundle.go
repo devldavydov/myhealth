@@ -14,7 +14,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processBundle(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) processBundle(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -35,6 +35,8 @@ func (r *CmdProcessor) processBundle(cmdParts []string, userID int64) []CmdRespo
 		resp = r.bundleListCommand(userID)
 	case "del":
 		resp = r.bundleDelCommand(cmdParts[1:], userID)
+	case "h":
+		resp = r.bundleHelpCommand(baseCmd)
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -250,4 +252,32 @@ func (r *CmdProcessor) bundleDelCommand(cmdParts []string, userID int64) []CmdRe
 	}
 
 	return NewSingleCmdResponse(MsgOK)
+}
+
+func (r *CmdProcessor) bundleHelpCommand(baseCmd string) []CmdResponse {
+	return NewSingleCmdResponse(
+		newCmdHelpBuilder(baseCmd, "Управление бандлами").
+			addCmd(
+				"Установка",
+				"set",
+				"Ключ [Строка>0]",
+				"Ключ бандла [Строка>0]|Ключ еды [Строка>0]:Вес [Дробное>0]",
+				"...",
+			).
+			addCmd(
+				"Шаблон команды установки",
+				"st",
+				"Ключ [Строка>0]",
+			).
+			addCmd(
+				"Список",
+				"list",
+			).
+			addCmd(
+				"Удаление",
+				"del",
+				"Ключ [Строка>0]",
+			).
+			build(),
+		optsHTML)
 }

@@ -14,14 +14,15 @@ func (r *CmdProcessor) processHelp(userID int64) []CmdResponse {
 	sb.WriteString("<b>\u2022 b,h</b> - бандлы\n")
 	sb.WriteString("<b>\u2022 u,h</b> - настройки пользователя\n")
 	sb.WriteString("<b>\u2022 s,h</b> - спорт\n")
-	sb.WriteString("<b>\u2022 c,h</b> - расчет калорий\n")
-	sb.WriteString("<b>\u2022 m,h</b> - служебный раздел\n\n")
+	sb.WriteString("<b>\u2022 c,h</b> - расчет лимита калорий\n")
+	sb.WriteString("<b>\u2022 m,h</b> - служебные настройки\n\n")
 	sb.WriteString("<b>Типы данных:</b>\n")
 	sb.WriteString("<b>\u2022 Дата</b> - дата в формате DD.MM.YYYY или пустая строка для текущей даты\n")
 	sb.WriteString("<b>\u2022 Строка>0</b> - строка длинной >0\n")
 	sb.WriteString("<b>\u2022 Строка>=0</b> - строка длинной >=0\n")
 	sb.WriteString("<b>\u2022 Дробное>0</b> - дробное число >0\n")
 	sb.WriteString("<b>\u2022 Дробное>=0</b> - дробное число >=0\n")
+	sb.WriteString("<b>\u2022 Целое>0</b> - целое число >0\n")
 	sb.WriteString("<b>\u2022 Прием пищи</b> - одно из значений\n")
 	sb.WriteString("<b>  \u2022</b> завтрак\n")
 	sb.WriteString("<b>  \u2022</b> до обеда\n")
@@ -29,6 +30,7 @@ func (r *CmdProcessor) processHelp(userID int64) []CmdResponse {
 	sb.WriteString("<b>  \u2022</b> полдник\n")
 	sb.WriteString("<b>  \u2022</b> до ужина\n")
 	sb.WriteString("<b>  \u2022</b> ужин\n")
+	sb.WriteString("<b>\u2022 Пол</b> - одно из значений m|f\n")
 	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
@@ -39,12 +41,13 @@ type cmdHelpItem struct {
 }
 
 type cmdHelpBuilder struct {
-	label string
-	items []cmdHelpItem
+	baseCmd string
+	label   string
+	items   []cmdHelpItem
 }
 
-func newCmdHelpBuilder(label string) *cmdHelpBuilder {
-	return &cmdHelpBuilder{label: label}
+func newCmdHelpBuilder(baseCmd, label string) *cmdHelpBuilder {
+	return &cmdHelpBuilder{baseCmd: baseCmd, label: label}
 }
 
 func (r *cmdHelpBuilder) addCmd(label, cmd string, args ...string) *cmdHelpBuilder {
@@ -61,12 +64,25 @@ func (r *cmdHelpBuilder) build() string {
 	sb.WriteString(fmt.Sprintf("<b>%s</b>\n", r.label))
 	for i, item := range r.items {
 		sb.WriteString(fmt.Sprintf("<b>\u2022 %s</b>\n", item.label))
-		sb.WriteString(fmt.Sprintf("%s,\n", item.cmd))
+		sb.WriteString(fmt.Sprintf("%s,%s", r.baseCmd, item.cmd))
+
+		if len(item.args) > 0 {
+			sb.WriteString(",\n")
+		} else {
+			sb.WriteString("\n")
+		}
+
 		for j, arg := range item.args {
+			sArg := arg
+			if strings.Contains(sArg, "|") {
+				parts := strings.Split(sArg, "|")
+				sArg = fmt.Sprintf("%s\n ИЛИ\n %s", parts[0], parts[1])
+			}
+
 			if j == len(item.args)-1 {
-				sb.WriteString(fmt.Sprintf(" %s\n", arg))
+				sb.WriteString(fmt.Sprintf(" %s\n", sArg))
 			} else {
-				sb.WriteString(fmt.Sprintf(" %s,\n", arg))
+				sb.WriteString(fmt.Sprintf(" %s,\n", sArg))
 			}
 		}
 

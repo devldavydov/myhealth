@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (r *CmdProcessor) processUserSettings(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) processUserSettings(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -30,6 +30,8 @@ func (r *CmdProcessor) processUserSettings(cmdParts []string, userID int64) []Cm
 		resp = r.userSettingsGetCommand(userID)
 	case "st":
 		resp = r.userSettingsSetTemplateCommand(userID)
+	case "h":
+		resp = r.userSettingsHelpCommand(baseCmd)
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -131,4 +133,24 @@ func (r *CmdProcessor) userSettingsSetTemplateCommand(userID int64) []CmdRespons
 	}
 
 	return NewSingleCmdResponse(fmt.Sprintf("u,set,%.2f", us.CalLimit))
+}
+
+func (r *CmdProcessor) userSettingsHelpCommand(baseCmd string) []CmdResponse {
+	return NewSingleCmdResponse(
+		newCmdHelpBuilder(baseCmd, "Управление настройками пользователя").
+			addCmd(
+				"Установка",
+				"set",
+				"Лимит калорий [Дробное>0]",
+			).
+			addCmd(
+				"Шаблон команды установки",
+				"st",
+			).
+			addCmd(
+				"Получение",
+				"get",
+			).
+			build(),
+		optsHTML)
 }

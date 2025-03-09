@@ -15,7 +15,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processJournal(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) processJournal(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -45,7 +45,7 @@ func (r *CmdProcessor) processJournal(cmdParts []string, userID int64) []CmdResp
 	case "fa":
 		resp = r.journalFoodAvgWeightCommand(cmdParts[1:], userID)
 	case "h":
-		resp = r.journalHelpCommand()
+		resp = r.journalHelpCommand(baseCmd)
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -719,12 +719,12 @@ func calDiffSnippet(diff float64) html.IELement {
 	}
 }
 
-func (r *CmdProcessor) journalHelpCommand() []CmdResponse {
+func (r *CmdProcessor) journalHelpCommand(baseCmd string) []CmdResponse {
 	return NewSingleCmdResponse(
-		newCmdHelpBuilder("Управление журналом приема пищи").
+		newCmdHelpBuilder(baseCmd, "Управление журналом приема пищи").
 			addCmd(
 				"Установка",
-				"j,set",
+				"set",
 				"[Дата]",
 				"[Прием пищи]",
 				"Ключ еды [Строка>0]",
@@ -732,27 +732,27 @@ func (r *CmdProcessor) journalHelpCommand() []CmdResponse {
 			).
 			addCmd(
 				"Установка бандлом",
-				"j,sb",
+				"sb",
 				"[Дата]",
 				"[Прием пищи]",
 				"Ключ бандла [Строка>0]",
 			).
 			addCmd(
 				"Удаление",
-				"j,del",
+				"del",
 				"[Дата]",
 				"[Прием пищи]",
 				"Ключ еды [Строка>0]",
 			).
 			addCmd(
 				"Удаление приема пищи",
-				"j,dm",
+				"dm",
 				"[Дата]",
 				"[Прием пищи]",
 			).
 			addCmd(
 				"Копирование",
-				"j,cp",
+				"cp",
 				"Откуда [Дата]",
 				"Откуда [Прием пищи]",
 				"Куда [Дата]",
@@ -760,18 +760,18 @@ func (r *CmdProcessor) journalHelpCommand() []CmdResponse {
 			).
 			addCmd(
 				"Отчет за день",
-				"j,rd",
+				"rd",
 				"[Дата]",
 			).
 			addCmd(
 				"Шаблоны команд приема пищи",
-				"j,tm",
+				"tm",
 				"[Дата]",
 				"[Прием пищи]",
 			).
 			addCmd(
 				"Средний вес еды",
-				"j,fa",
+				"fa",
 				"Ключ еды [Строка>0]",
 			).
 			build(),

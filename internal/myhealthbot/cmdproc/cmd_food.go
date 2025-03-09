@@ -14,7 +14,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processFood(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) processFood(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -40,7 +40,7 @@ func (r *CmdProcessor) processFood(cmdParts []string, userID int64) []CmdRespons
 	case "del":
 		resp = r.foodDelCommand(cmdParts[1:], userID)
 	case "h":
-		resp = r.foodHelpCommand()
+		resp = r.foodHelpCommand(baseCmd)
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -381,12 +381,12 @@ func (r *CmdProcessor) foodDelCommand(cmdParts []string, userID int64) []CmdResp
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) foodHelpCommand() []CmdResponse {
+func (r *CmdProcessor) foodHelpCommand(baseCmd string) []CmdResponse {
 	return NewSingleCmdResponse(
-		newCmdHelpBuilder("Управление едой").
+		newCmdHelpBuilder(baseCmd, "Управление едой").
 			addCmd(
 				"Установка",
-				"f,set",
+				"set",
 				"Ключ [Строка>0]",
 				"Наименование [Строка>0]",
 				"Бренд [Строка>=0]",
@@ -398,27 +398,27 @@ func (r *CmdProcessor) foodHelpCommand() []CmdResponse {
 			).
 			addCmd(
 				"Шаблон команды установки",
-				"f,st",
+				"st",
 				"Ключ [Строка>0]",
 			).
 			addCmd(
 				"Поиск",
-				"f,find",
+				"find",
 				"Подстрока [Строка>=0]",
 			).
 			addCmd(
 				"Расчет КБЖУ",
-				"f,calc",
+				"calc",
 				"Ключ [Строка>0]",
 				"Вес [Дробное>=0]",
 			).
 			addCmd(
 				"Список",
-				"f,list",
+				"list",
 			).
 			addCmd(
 				"Удаление",
-				"f,del",
+				"del",
 				"Ключ [Строка>0]",
 			).
 			build(),

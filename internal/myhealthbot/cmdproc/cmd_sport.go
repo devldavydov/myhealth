@@ -15,7 +15,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processSport(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) processSport(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -36,7 +36,7 @@ func (r *CmdProcessor) processSport(cmdParts []string, userID int64) []CmdRespon
 	case "del":
 		resp = r.sportDelCommand(cmdParts[1:], userID)
 	case "list":
-		resp = r.sportListCommand(cmdParts[1:], userID)
+		resp = r.sportListCommand(userID)
 	// Sport activity
 	case "as":
 		resp = r.sportActivitySetCommand(cmdParts[1:], userID)
@@ -44,6 +44,9 @@ func (r *CmdProcessor) processSport(cmdParts []string, userID int64) []CmdRespon
 		resp = r.sportActivityDelCommand(cmdParts[1:], userID)
 	case "ar":
 		resp = r.sportActivityReportCommand(cmdParts[1:], userID)
+	//
+	case "h":
+		resp = r.sportHelpCommand(baseCmd)
 	default:
 		r.logger.Error(
 			"invalid command",
@@ -157,7 +160,7 @@ func (r *CmdProcessor) sportDelCommand(cmdParts []string, userID int64) []CmdRes
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) sportListCommand(cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) sportListCommand(userID int64) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -171,7 +174,6 @@ func (r *CmdProcessor) sportListCommand(cmdParts []string, userID int64) []CmdRe
 		r.logger.Error(
 			"sport list command DB error",
 			zap.Int64("userID", userID),
-			zap.Strings("cmdParts", cmdParts),
 			zap.Error(err),
 		)
 
@@ -436,4 +438,52 @@ func (r *CmdProcessor) sportActivityReportCommand(cmdParts []string, userID int6
 		MIME:     "text/html",
 		FileName: fmt.Sprintf("sport_act_%s_%s.html", tsFromStr, tsToStr),
 	})
+}
+
+func (r *CmdProcessor) sportHelpCommand(baseCmd string) []CmdResponse {
+	return NewSingleCmdResponse(
+		newCmdHelpBuilder(baseCmd, "Управление спортом").
+			addCmd(
+				"Установка",
+				"set",
+				"Ключ [Строка>0]",
+				"Наименование [Строка>0]",
+				"Комментарий [Строка>=0]",
+			).
+			addCmd(
+				"Шаблон команды установки",
+				"st",
+				"Ключ [Строка>0]",
+			).
+			addCmd(
+				"Удаление",
+				"del",
+				"Ключ [Строка>0]",
+			).
+			addCmd(
+				"Список",
+				"list",
+			).
+			addCmd(
+				"Установка активности",
+				"as",
+				"[Дата]",
+				"Ключ спорта [Строка>0]",
+				"Подход1 [Целое>0]",
+				"...",
+			).
+			addCmd(
+				"Удаление активности",
+				"ad",
+				"[Дата]",
+				"Ключ спорта [Строка>0]",
+			).
+			addCmd(
+				"Отчет по активности",
+				"ar",
+				"С [Дата]",
+				"По [Дата]",
+			).
+			build(),
+		optsHTML)
 }
