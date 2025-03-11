@@ -1,3 +1,5 @@
+//go:generate go run ./gen/gen.go -in commands.yaml -out cmdproc_generated.go
+
 package cmdproc
 
 import (

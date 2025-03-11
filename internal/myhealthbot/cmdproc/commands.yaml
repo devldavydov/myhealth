@@ -1,0 +1,50 @@
+commands:
+  - name: w
+    description: Управление весом
+    description_short: Вес
+    subcommands:
+    - name: set
+      func: weightSetCommand
+      description: Установка
+      args:
+      - name: Дата
+        type: date
+      - name: Значение
+        type: floatG0
+    - name: del
+      func: weightDelCommand
+      description: Удаление
+      args:
+      - name: Дата
+        type: date
+    - name: list
+      func: weightListCommand
+      description: Отчет
+      args:
+      - name: С
+        type: date
+      - name: По
+        type: date
+  - name: u
+    description: Управление настройками пользователя
+    description_short: Настройки пользователя
+    subcommands:
+    - name: set
+      func: userSettingsSetCommand
+      description: Установка
+      args:
+      - name: Лимит калорий
+        type: floatG0
+    - name: st
+      func: userSettingsSetTemplateCommand
+      description: Шаблон команды установки
+    - name: get
+      func: userSettingsGetCommand
+      description: Получение      
+types:
+  - name: date
+    description: дата в формате DD.MM.YYYY или пустая строка для текущей даты
+    description_short: Дата
+  - name: floatG0
+    description: дробное число >0
+    description_short: Дробное>0
