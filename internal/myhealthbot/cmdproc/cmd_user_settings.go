@@ -89,6 +89,10 @@ func (r *CmdProcessor) userSettingsSetCommand(cmdParts []string, userID int64) [
 	return NewSingleCmdResponse(MsgOK)
 }
 
+func (r *CmdProcessor) userSettingsSetCommand2(userID int64, calLimit float64) []CmdResponse {
+	return nil
+}
+
 func (r *CmdProcessor) userSettingsGetCommand(userID int64) []CmdResponse {
 	// Get from DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)

@@ -1,10 +1,12 @@
 package cmdproc
 
 const (
-	MsgErrInvalidCommand = "Неправильная команда (h для помощи)"
-	MsgErrNotImplemented = "В разработке"
-	MsgErrInternal       = "Внутренняя ошибка"
-	MsgErrEmptyResult    = "Пустой результат"
+	MsgErrInvalidCommand   = "Неправильная команда (h для помощи)"
+	MsgErrInvalidArgsCount = "Неверное количество аргументов"
+	MsgErrInvalidArg       = "Неверный аргумент"
+
+	MsgErrInternal    = "Внутренняя ошибка"
+	MsgErrEmptyResult = "Пустой результат"
 
 	MsgErrSportNotFound = "Спорт не найден"
 	MsgErrSportIsUsed   = "Спорт используется в активностях"

@@ -48,8 +48,6 @@ func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
 	switch cmdParts[0] {
 	case "h":
 		resp = r.processHelp(userID)
-	case "w":
-		resp = r.processWeight("w", cmdParts[1:], userID)
 	case "f":
 		resp = r.processFood("f", cmdParts[1:], userID)
 	case "j":
@@ -101,4 +99,24 @@ func NewSingleCmdResponse(what any, opts ...any) []CmdResponse {
 	return []CmdResponse{
 		{what: what, opts: opts},
 	}
+}
+
+func (r *CmdProcessor) parseTimestamp(sTimestamp string) (time.Time, error) {
+	var t time.Time
+	var err error
+
+	if sTimestamp == "" {
+		t = time.Now().In(r.tz)
+	} else {
+		t, err = time.Parse("02.01.2006", sTimestamp)
+		if err != nil {
+			return time.Time{}, err
+		}
+	}
+
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, r.tz), nil
+}
+
+func formatTimestamp(ts time.Time) string {
+	return ts.Format("02.01.2006")
 }
