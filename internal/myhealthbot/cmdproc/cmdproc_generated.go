@@ -31,9 +31,11 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 
 	switch cmdParts[0] {
 	case "w":
-		resp = r._process_w("w", cmdParts[1:], userID)
+		resp = r.process_w("w", cmdParts[1:], userID)
 	case "u":
-		resp = r._process_u("u", cmdParts[1:], userID)
+		resp = r.process_u("u", cmdParts[1:], userID)
+	case "f":
+		resp = r.process_f("f", cmdParts[1:], userID)
 	case "h":
 		resp = r._processHelp()
 	default:
@@ -60,7 +62,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 	return nil	
 }
 
-func (r *CmdProcessor) _process_w(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) process_w(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -171,7 +173,7 @@ func (r *CmdProcessor) _process_w(baseCmd string, cmdParts []string, userID int6
 	return resp
 }
 
-func (r *CmdProcessor) _process_u(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) process_u(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -196,7 +198,7 @@ func (r *CmdProcessor) _process_u(baseCmd string, cmdParts []string, userID int6
 			return argError("Лимит калорий")
 		}
 		
-		resp = r.userSettingsSetCommand2(
+		resp = r.userSettingsSetCommand(
 			userID,
 			val0,
 			)
@@ -222,6 +224,210 @@ func (r *CmdProcessor) _process_u(baseCmd string, cmdParts []string, userID int6
 			addCmd(
 				"Получение",
 				"get",
+				).
+			build(),
+		optsHTML)
+
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
+func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "set":
+		if len(cmdParts[1:]) != 8 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Наименование")
+		}
+		
+		val2, err := parseStringGE0(cmdParts[2])
+		if err != nil {
+			return argError("Бренд")
+		}
+		
+		val3, err := parseFloatGE0(cmdParts[3])
+		if err != nil {
+			return argError("ККал 100г")
+		}
+		
+		val4, err := parseFloatGE0(cmdParts[4])
+		if err != nil {
+			return argError("Б 100г")
+		}
+		
+		val5, err := parseFloatGE0(cmdParts[5])
+		if err != nil {
+			return argError("Ж 100г")
+		}
+		
+		val6, err := parseFloatGE0(cmdParts[6])
+		if err != nil {
+			return argError("У 100г")
+		}
+		
+		val7, err := parseStringGE0(cmdParts[7])
+		if err != nil {
+			return argError("Комментарий")
+		}
+		
+		resp = r.foodSetCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			val3,
+			val4,
+			val5,
+			val6,
+			val7,
+			)
+				
+	case "st":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.foodSetTemplateCommand(
+			userID,
+			val0,
+			)
+				
+	case "find":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringGE0(cmdParts[0])
+		if err != nil {
+			return argError("Подстрока")
+		}
+		
+		resp = r.foodFindCommand(
+			userID,
+			val0,
+			)
+				
+	case "calc":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		val1, err := parseFloatGE0(cmdParts[1])
+		if err != nil {
+			return argError("Вес")
+		}
+		
+		resp = r.foodCalcCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "list":
+		resp = r.foodListCommand(userID)
+				
+	case "del":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.foodDelCommand(
+			userID,
+			val0,
+			)
+				
+	case "h":
+		return NewSingleCmdResponse(
+			newCmdHelpBuilder(baseCmd, "Управление едой").
+			addCmd(
+				"Установка",
+				"set",
+				"Ключ [Строка>0]",
+				"Наименование [Строка>0]",
+				"Бренд [Строка>=0]",
+				"ККал 100г [Дробное>=0]",
+				"Б 100г [Дробное>=0]",
+				"Ж 100г [Дробное>=0]",
+				"У 100г [Дробное>=0]",
+				"Комментарий [Строка>=0]",
+				).
+			addCmd(
+				"Шаблон команды установки",
+				"st",
+				"Ключ [Строка>0]",
+				).
+			addCmd(
+				"Поиск",
+				"find",
+				"Подстрока [Строка>=0]",
+				).
+			addCmd(
+				"Расчет КБЖУ",
+				"calc",
+				"Ключ [Строка>0]",
+				"Вес [Дробное>=0]",
+				).
+			addCmd(
+				"Список",
+				"list",
+				).
+			addCmd(
+				"Удаление",
+				"del",
+				"Ключ [Строка>0]",
 				).
 			build(),
 		optsHTML)
@@ -269,6 +475,31 @@ func parseFloatG0(arg string) (float64, error) {
 	}
 
 	return val, nil
+}
+
+func parseFloatGE0(arg string) (float64, error) {
+	val, err := strconv.ParseFloat(arg, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	if val < 0 {
+		return 0, fmt.Errorf("not above or equal zero")
+	}
+
+	return val, nil
+}
+
+func parseStringG0(arg string) (string, error) {
+	if len(arg) == 0 {
+		return "", fmt.Errorf("empty string")
+	}
+	
+	return arg, nil
+}
+
+func parseStringGE0(arg string) (string, error) {
+	return arg, nil
 }
 
 func argError(argName string) []CmdResponse {

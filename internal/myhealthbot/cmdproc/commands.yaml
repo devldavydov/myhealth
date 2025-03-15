@@ -30,7 +30,7 @@ commands:
     description_short: Настройки пользователя
     subcommands:
     - name: set
-      func: userSettingsSetCommand2
+      func: userSettingsSetCommand
       description: Установка
       args:
       - name: Лимит калорий
@@ -41,6 +41,59 @@ commands:
     - name: get
       func: userSettingsGetCommand
       description: Получение      
+  - name: f
+    description: Управление едой
+    description_short: Еда
+    subcommands:
+    - name: set
+      func: foodSetCommand
+      description: Установка
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Наименование
+        type: stringG0
+      - name: Бренд
+        type: stringGE0
+      - name: ККал 100г
+        type: floatGE0
+      - name: Б 100г
+        type: floatGE0          
+      - name: Ж 100г
+        type: floatGE0          
+      - name: У 100г
+        type: floatGE0          
+      - name: Комментарий
+        type: stringGE0
+    - name: st
+      func: foodSetTemplateCommand
+      description: Шаблон команды установки
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: find
+      func: foodFindCommand
+      description: Поиск
+      args:
+      - name: Подстрока
+        type: stringGE0
+    - name: calc
+      func: foodCalcCommand
+      description: Расчет КБЖУ
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Вес
+        type: floatGE0
+    - name: list
+      func: foodListCommand
+      description: Список
+    - name: del
+      func: foodDelCommand
+      description: Удаление
+      args:
+      - name: Ключ
+        type: stringG0      
 types:
   - name: timestamp
     description: дата в формате DD.MM.YYYY или пустая строка для текущей даты
@@ -48,3 +101,12 @@ types:
   - name: floatG0
     description: дробное число >0
     description_short: Дробное>0
+  - name: floatGE0
+    description: дробное число >=0
+    description_short: Дробное>=0    
+  - name: stringG0
+    description: строка длиной >0
+    description_short: Строка>0
+  - name: stringGE0
+    description: строка длиной >=0
+    description_short: Строка>=0    

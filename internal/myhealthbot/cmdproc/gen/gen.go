@@ -44,7 +44,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 	switch cmdParts[0] {
 	{{ range .Config.Commands -}}
 	case "{{ .Name }}":
-		resp = r._process_{{ .Name }}("{{ .Name }}", cmdParts[1:], userID)
+		resp = r.process_{{ .Name }}("{{ .Name }}", cmdParts[1:], userID)
 	{{ end -}}
 	case "h":
 		resp = r._processHelp()
@@ -73,7 +73,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 }
 {{ range $cfg.Config.Commands }}
 {{ with $cmd := . -}}
-func (r *CmdProcessor) _process_{{ $cmd.Name }}(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -101,6 +101,15 @@ func (r *CmdProcessor) _process_{{ $cmd.Name }}(baseCmd string, cmdParts []strin
 		{{- if (eq $arg.Type "floatG0") }}
 		val{{ $index }}, err := parseFloatG0(cmdParts[{{ $index }}])
 		{{ end -}}
+		{{- if (eq $arg.Type "floatGE0") }}
+		val{{ $index }}, err := parseFloatGE0(cmdParts[{{ $index }}])
+		{{ end -}}		 
+		{{- if (eq $arg.Type "stringG0") }}
+		val{{ $index }}, err := parseStringG0(cmdParts[{{ $index }}])
+		{{ end -}}		 
+		{{- if (eq $arg.Type "stringGE0") }}
+		val{{ $index }}, err := parseStringGE0(cmdParts[{{ $index }}])
+		{{ end -}}		 
 		if err != nil {
 			return argError("{{ $arg.Name }}")
 		}
@@ -174,6 +183,31 @@ func parseFloatG0(arg string) (float64, error) {
 	}
 
 	return val, nil
+}
+
+func parseFloatGE0(arg string) (float64, error) {
+	val, err := strconv.ParseFloat(arg, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	if val < 0 {
+		return 0, fmt.Errorf("not above or equal zero")
+	}
+
+	return val, nil
+}
+
+func parseStringG0(arg string) (string, error) {
+	if len(arg) == 0 {
+		return "", fmt.Errorf("empty string")
+	}
+	
+	return arg, nil
+}
+
+func parseStringGE0(arg string) (string, error) {
+	return arg, nil
 }
 
 func argError(argName string) []CmdResponse {

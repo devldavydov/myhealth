@@ -157,27 +157,3 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 		FileName: fmt.Sprintf("weight_%s_%s.html", tsFromStr, tsToStr),
 	})
 }
-
-func (r *CmdProcessor) weightHelpCommand(baseCmd string) []CmdResponse {
-	return NewSingleCmdResponse(
-		newCmdHelpBuilder(baseCmd, "Управление весом").
-			addCmd(
-				"Установка",
-				"set",
-				"[Дата]",
-				"Значение [Дробное>0]",
-			).
-			addCmd(
-				"Удаление",
-				"del",
-				"[Дата]",
-			).
-			addCmd(
-				"Отчет",
-				"list",
-				"С [Дата]",
-				"По [Дата]",
-			).
-			build(),
-		optsHTML)
-}

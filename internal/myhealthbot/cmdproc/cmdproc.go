@@ -48,16 +48,12 @@ func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
 	switch cmdParts[0] {
 	case "h":
 		resp = r.processHelp(userID)
-	case "f":
-		resp = r.processFood("f", cmdParts[1:], userID)
 	case "j":
 		resp = r.processJournal("j", cmdParts[1:], userID)
 	case "b":
 		resp = r.processBundle("b", cmdParts[1:], userID)
 	case "c":
 		resp = r.processCalcCal("c", cmdParts[1:], userID)
-	case "u":
-		resp = r.processUserSettings("u", cmdParts[1:], userID)
 	case "s":
 		resp = r.processSport("s", cmdParts[1:], userID)
 	case "m":

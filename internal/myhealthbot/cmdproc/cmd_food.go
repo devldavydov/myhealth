@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
@@ -14,110 +13,27 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processFood(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) == 0 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	var resp []CmdResponse
-
-	switch cmdParts[0] {
-	case "set":
-		resp = r.foodSetCommand(cmdParts[1:], userID)
-	case "st":
-		resp = r.foodSetTemplateCommand(cmdParts[1:], userID)
-	case "find":
-		resp = r.foodFindCommand(cmdParts[1:], userID)
-	case "calc":
-		resp = r.foodCalcCommand(cmdParts[1:], userID)
-	case "list":
-		resp = r.foodListCommand(userID)
-	case "del":
-		resp = r.foodDelCommand(cmdParts[1:], userID)
-	case "h":
-		resp = r.foodHelpCommand(baseCmd)
-	default:
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	return resp
-}
-
-func (r *CmdProcessor) foodSetCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 8 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse fields
+func (r *CmdProcessor) foodSetCommand(
+	userID int64,
+	key string,
+	name string,
+	brand string,
+	cal100 float64,
+	prot100 float64,
+	fat100 float64,
+	carb100 float64,
+	comment string,
+) []CmdResponse {
 	food := &storage.Food{
-		Key:     cmdParts[0],
-		Name:    cmdParts[1],
-		Brand:   cmdParts[2],
-		Comment: cmdParts[7],
+		Key:     key,
+		Name:    name,
+		Brand:   brand,
+		Cal100:  cal100,
+		Prot100: prot100,
+		Fat100:  fat100,
+		Carb100: carb100,
+		Comment: comment,
 	}
-
-	cal100, err := strconv.ParseFloat(cmdParts[3], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-	food.Cal100 = cal100
-
-	prot100, err := strconv.ParseFloat(cmdParts[4], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-	food.Prot100 = prot100
-
-	fat100, err := strconv.ParseFloat(cmdParts[5], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-	food.Fat100 = fat100
-
-	carb100, err := strconv.ParseFloat(cmdParts[6], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-	food.Carb100 = carb100
 
 	// Save in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
@@ -130,7 +46,6 @@ func (r *CmdProcessor) foodSetCommand(cmdParts []string, userID int64) []CmdResp
 
 		r.logger.Error(
 			"food set command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -141,21 +56,12 @@ func (r *CmdProcessor) foodSetCommand(cmdParts []string, userID int64) []CmdResp
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) foodSetTemplateCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) foodSetTemplateCommand(userID int64, key string) []CmdResponse {
 	// Get food from DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	food, err := r.stg.GetFood(ctx, userID, cmdParts[0])
+	food, err := r.stg.GetFood(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrFoodNotFound) {
 			return NewSingleCmdResponse(MsgErrFoodNotFound)
@@ -163,7 +69,6 @@ func (r *CmdProcessor) foodSetTemplateCommand(cmdParts []string, userID int64) [
 
 		r.logger.Error(
 			"food set template command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -185,21 +90,12 @@ func (r *CmdProcessor) foodSetTemplateCommand(cmdParts []string, userID int64) [
 	return NewSingleCmdResponse(foodSetTemplate, optsHTML)
 }
 
-func (r *CmdProcessor) foodFindCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) foodFindCommand(userID int64, pattern string) []CmdResponse {
 	// Get in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	foodLst, err := r.stg.FindFood(ctx, userID, cmdParts[0])
+	foodLst, err := r.stg.FindFood(ctx, userID, pattern)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
 			return NewSingleCmdResponse(MsgErrEmptyResult)
@@ -207,7 +103,6 @@ func (r *CmdProcessor) foodFindCommand(cmdParts []string, userID int64) []CmdRes
 
 		r.logger.Error(
 			"food find command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -235,32 +130,12 @@ func (r *CmdProcessor) foodFindCommand(cmdParts []string, userID int64) []CmdRes
 	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
-func (r *CmdProcessor) foodCalcCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 2 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	foodWeight, err := strconv.ParseFloat(cmdParts[1], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) foodCalcCommand(userID int64, key string, foodWeight float64) []CmdResponse {
 	// Get in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	food, err := r.stg.GetFood(ctx, userID, cmdParts[0])
+	food, err := r.stg.GetFood(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrFoodNotFound) {
 			return NewSingleCmdResponse(MsgErrFoodNotFound)
@@ -268,7 +143,6 @@ func (r *CmdProcessor) foodCalcCommand(cmdParts []string, userID int64) []CmdRes
 
 		r.logger.Error(
 			"food calc command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -349,28 +223,18 @@ func (r *CmdProcessor) foodListCommand(userID int64) []CmdResponse {
 	})
 }
 
-func (r *CmdProcessor) foodDelCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) foodDelCommand(userID int64, key string) []CmdResponse {
 	// Delete from DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	if err := r.stg.DeleteFood(ctx, userID, cmdParts[0]); err != nil {
+	if err := r.stg.DeleteFood(ctx, userID, key); err != nil {
 		if errors.Is(err, storage.ErrFoodIsUsed) {
 			return NewSingleCmdResponse(MsgErrFoodIsUsed)
 		}
 
 		r.logger.Error(
 			"food del command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -379,48 +243,4 @@ func (r *CmdProcessor) foodDelCommand(cmdParts []string, userID int64) []CmdResp
 	}
 
 	return NewSingleCmdResponse(MsgOK)
-}
-
-func (r *CmdProcessor) foodHelpCommand(baseCmd string) []CmdResponse {
-	return NewSingleCmdResponse(
-		newCmdHelpBuilder(baseCmd, "Управление едой").
-			addCmd(
-				"Установка",
-				"set",
-				"Ключ [Строка>0]",
-				"Наименование [Строка>0]",
-				"Бренд [Строка>=0]",
-				"ККал 100г [Дробное>=0]",
-				"Б 100г [Дробное>=0]",
-				"Ж 100г [Дробное>=0]",
-				"У 100г [Дробное>=0]",
-				"Комментарий [Строка>=0]",
-			).
-			addCmd(
-				"Шаблон команды установки",
-				"st",
-				"Ключ [Строка>0]",
-			).
-			addCmd(
-				"Поиск",
-				"find",
-				"Подстрока [Строка>=0]",
-			).
-			addCmd(
-				"Расчет КБЖУ",
-				"calc",
-				"Ключ [Строка>0]",
-				"Вес [Дробное>=0]",
-			).
-			addCmd(
-				"Список",
-				"list",
-			).
-			addCmd(
-				"Удаление",
-				"del",
-				"Ключ [Строка>0]",
-			).
-			build(),
-		optsHTML)
 }
