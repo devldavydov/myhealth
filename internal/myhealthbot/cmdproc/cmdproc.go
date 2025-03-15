@@ -56,8 +56,6 @@ func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
 		resp = r.processCalcCal("c", cmdParts[1:], userID)
 	case "s":
 		resp = r.processSport("s", cmdParts[1:], userID)
-	case "m":
-		resp = r.processMaintenance("m", cmdParts[1:], userID)
 	default:
 		r.logger.Error(
 			"unknown command",

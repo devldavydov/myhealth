@@ -93,7 +93,14 @@ commands:
       description: Удаление
       args:
       - name: Ключ
-        type: stringG0      
+        type: stringG0 
+  - name: m
+    description: Управление служебными настройками
+    description_short: Cлужебные настройки
+    subcommands:
+    - name: backup
+      func: maintenanceBackupCommand
+      description: Бэкап
 types:
   - name: timestamp
     description: дата в формате DD.MM.YYYY или пустая строка для текущей даты

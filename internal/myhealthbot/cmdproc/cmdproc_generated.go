@@ -36,6 +36,8 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_u("u", cmdParts[1:], userID)
 	case "f":
 		resp = r.process_f("f", cmdParts[1:], userID)
+	case "m":
+		resp = r.process_m("m", cmdParts[1:], userID)
 	case "h":
 		resp = r._processHelp()
 	default:
@@ -428,6 +430,44 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 				"Удаление",
 				"del",
 				"Ключ [Строка>0]",
+				).
+			build(),
+		optsHTML)
+
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
+func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "backup":
+		resp = r.maintenanceBackupCommand(userID)
+				
+	case "h":
+		return NewSingleCmdResponse(
+			newCmdHelpBuilder(baseCmd, "Управление служебными настройками").
+			addCmd(
+				"Бэкап",
+				"backup",
 				).
 			build(),
 		optsHTML)
