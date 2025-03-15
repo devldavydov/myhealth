@@ -103,13 +103,16 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 		{{ end -}}
 		{{- if (eq $arg.Type "floatGE0") }}
 		val{{ $index }}, err := parseFloatGE0(cmdParts[{{ $index }}])
-		{{ end -}}		 
+		{{ end -}}
 		{{- if (eq $arg.Type "stringG0") }}
 		val{{ $index }}, err := parseStringG0(cmdParts[{{ $index }}])
-		{{ end -}}		 
+		{{ end -}}
 		{{- if (eq $arg.Type "stringGE0") }}
 		val{{ $index }}, err := parseStringGE0(cmdParts[{{ $index }}])
-		{{ end -}}		 
+		{{ end -}}
+		{{- if (eq $arg.Type "gender") }}
+		val{{ $index }}, err := parseGender(cmdParts[{{ $index }}])
+		{{ end -}}
 		if err != nil {
 			return argError("{{ $arg.Name }}")
 		}
@@ -208,6 +211,15 @@ func parseStringG0(arg string) (string, error) {
 
 func parseStringGE0(arg string) (string, error) {
 	return arg, nil
+}
+
+func parseGender(arg string) (string, error) {
+	switch arg {
+	case "m", "f":
+		return arg, nil
+	default:
+		return "", fmt.Errorf("wrong gender")
+	}
 }
 
 func argError(argName string) []CmdResponse {

@@ -40,7 +40,7 @@ commands:
       description: Шаблон команды установки
     - name: get
       func: userSettingsGetCommand
-      description: Получение      
+      description: Получение
   - name: f
     description: Управление едой
     description_short: Еда
@@ -58,11 +58,11 @@ commands:
       - name: ККал 100г
         type: floatGE0
       - name: Б 100г
-        type: floatGE0          
+        type: floatGE0
       - name: Ж 100г
-        type: floatGE0          
+        type: floatGE0
       - name: У 100г
-        type: floatGE0          
+        type: floatGE0
       - name: Комментарий
         type: stringGE0
     - name: st
@@ -101,19 +101,38 @@ commands:
     - name: backup
       func: maintenanceBackupCommand
       description: Бэкап
+  - name: c
+    description: Расчет лимита калорий
+    description_short: Расчет лимита калорий
+    subcommands:
+    - name: c
+      func: calcCalCalcCommand
+      description: Расчет
+      args:
+      - name: Пол
+        type: gender
+      - name: Вес
+        type: floatG0
+      - name: Рост
+        type: floatG0
+      - name: Возраст
+        type: floatG0
 types:
   - name: timestamp
-    description: дата в формате DD.MM.YYYY или пустая строка для текущей даты
+    description: Дата в формате DD.MM.YYYY или пустая строка для текущей даты
     description_short: Дата
   - name: floatG0
-    description: дробное число >0
+    description: Дробное число >0
     description_short: Дробное>0
   - name: floatGE0
-    description: дробное число >=0
-    description_short: Дробное>=0    
+    description: Дробное число >=0
+    description_short: Дробное>=0
   - name: stringG0
-    description: строка длиной >0
+    description: Строка длиной >0
     description_short: Строка>0
   - name: stringGE0
-    description: строка длиной >=0
-    description_short: Строка>=0    
+    description: Строка длиной >=0
+    description_short: Строка>=0
+  - name: gender
+    description: Одно из значений m|f
+    description_short: Пол

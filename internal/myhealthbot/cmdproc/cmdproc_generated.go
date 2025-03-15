@@ -38,6 +38,8 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_f("f", cmdParts[1:], userID)
 	case "m":
 		resp = r.process_m("m", cmdParts[1:], userID)
+	case "c":
+		resp = r.process_c("c", cmdParts[1:], userID)
 	case "h":
 		resp = r._processHelp()
 	default:
@@ -484,6 +486,80 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 	return resp
 }
 
+func (r *CmdProcessor) process_c(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "c":
+		if len(cmdParts[1:]) != 4 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseGender(cmdParts[0])
+		if err != nil {
+			return argError("Пол")
+		}
+		
+		val1, err := parseFloatG0(cmdParts[1])
+		if err != nil {
+			return argError("Вес")
+		}
+		
+		val2, err := parseFloatG0(cmdParts[2])
+		if err != nil {
+			return argError("Рост")
+		}
+		
+		val3, err := parseFloatG0(cmdParts[3])
+		if err != nil {
+			return argError("Возраст")
+		}
+		
+		resp = r.calcCalCalcCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			val3,
+			)
+				
+	case "h":
+		return NewSingleCmdResponse(
+			newCmdHelpBuilder(baseCmd, "Расчет лимита калорий").
+			addCmd(
+				"Расчет",
+				"c",
+				"Пол [Пол]",
+				"Вес [Дробное>0]",
+				"Рост [Дробное>0]",
+				"Возраст [Дробное>0]",
+				).
+			build(),
+		optsHTML)
+
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
 func (r *CmdProcessor) _processHelp() []CmdResponse {
 	return nil
 }
@@ -540,6 +616,15 @@ func parseStringG0(arg string) (string, error) {
 
 func parseStringGE0(arg string) (string, error) {
 	return arg, nil
+}
+
+func parseGender(arg string) (string, error) {
+	switch arg {
+	case "m", "f":
+		return arg, nil
+	default:
+		return "", fmt.Errorf("wrong gender")
+	}
 }
 
 func argError(argName string) []CmdResponse {
