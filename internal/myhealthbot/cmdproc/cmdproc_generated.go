@@ -40,6 +40,8 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_m("m", cmdParts[1:], userID)
 	case "c":
 		resp = r.process_c("c", cmdParts[1:], userID)
+	case "b":
+		resp = r.process_b("b", cmdParts[1:], userID)
 	case "h":
 		resp = r._processHelp()
 	default:
@@ -560,6 +562,118 @@ func (r *CmdProcessor) process_c(baseCmd string, cmdParts []string, userID int64
 	return resp
 }
 
+func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "set":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		val1, err := parseStringArr(cmdParts[1])
+		if err != nil {
+			return argError("Состав бандла")
+		}
+		
+		resp = r.bundleSetCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "st":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.bundleSetTemplateCommand(
+			userID,
+			val0,
+			)
+				
+	case "list":
+		resp = r.bundleListCommand(userID)
+				
+	case "del":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.bundleDelCommand(
+			userID,
+			val0,
+			)
+				
+	case "h":
+		return NewSingleCmdResponse(
+			newCmdHelpBuilder(baseCmd, "Управление бандлами").
+			addCmdWithComment(
+				"Установка",
+				"set",
+				"Элемент бандла имеет формат 'Ключ бандла [Строка>0]' или 'Ключ еды [Строка>0]:Вес [Дробное>0]'",
+				"Ключ [Строка>0]",
+				"Состав бандла [Массив строк]",
+				).	
+			addCmd(
+				"Шаблон команды установки",
+				"st",
+				"Ключ [Строка>0]",
+				).
+			addCmd(
+				"Список",
+				"list",
+				).
+			addCmd(
+				"Удаление",
+				"del",
+				"Ключ [Строка>0]",
+				).
+			build(),
+		optsHTML)
+
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
 func (r *CmdProcessor) _processHelp() []CmdResponse {
 	return nil
 }
@@ -625,6 +739,19 @@ func parseGender(arg string) (string, error) {
 	default:
 		return "", fmt.Errorf("wrong gender")
 	}
+}
+
+func parseStringArr(arg string) ([]string, error) {
+	parts := []string{}
+	for _, part := range strings.Split(arg, "|") {
+		parts = append(parts, strings.Trim(part, " "))
+	}
+
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("empty array")
+	}
+
+	return parts, nil
 }
 
 func argError(argName string) []CmdResponse {

@@ -50,8 +50,6 @@ func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
 		resp = r.processHelp(userID)
 	case "j":
 		resp = r.processJournal("j", cmdParts[1:], userID)
-	case "b":
-		resp = r.processBundle("b", cmdParts[1:], userID)
 	case "s":
 		resp = r.processSport("s", cmdParts[1:], userID)
 	default:

@@ -35,9 +35,10 @@ func (r *CmdProcessor) processHelp(userID int64) []CmdResponse {
 }
 
 type cmdHelpItem struct {
-	label string
-	cmd   string
-	args  []string
+	label   string
+	cmd     string
+	comment string
+	args    []string
 }
 
 type cmdHelpBuilder struct {
@@ -55,6 +56,16 @@ func (r *cmdHelpBuilder) addCmd(label, cmd string, args ...string) *cmdHelpBuild
 		label: label,
 		cmd:   cmd,
 		args:  args,
+	})
+	return r
+}
+
+func (r *cmdHelpBuilder) addCmdWithComment(label, cmd, comment string, args ...string) *cmdHelpBuilder {
+	r.items = append(r.items, cmdHelpItem{
+		label:   label,
+		cmd:     cmd,
+		comment: comment,
+		args:    args,
 	})
 	return r
 }

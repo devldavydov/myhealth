@@ -117,6 +117,34 @@ commands:
         type: floatG0
       - name: Возраст
         type: floatG0
+  - name: b
+    description: Управление бандлами
+    description_short: Бандлы
+    subcommands:
+    - name: set
+      func: bundleSetCommand
+      description: Установка
+      comment: Элемент бандла имеет формат 'Ключ бандла [Строка>0]' или 'Ключ еды [Строка>0]:Вес [Дробное>0]'
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Состав бандла
+        type: stringArr
+    - name: st
+      func: bundleSetTemplateCommand
+      description: Шаблон команды установки
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: list
+      func: bundleListCommand
+      description: Список
+    - name: del
+      func: bundleDelCommand
+      description: Удаление
+      args:
+      - name: Ключ
+        type: stringG0
 types:
   - name: timestamp
     description: Дата в формате DD.MM.YYYY или пустая строка для текущей даты
@@ -134,5 +162,8 @@ types:
     description: Строка длиной >=0
     description_short: Строка>=0
   - name: gender
-    description: Одно из значений m|f
+    description: Пол - одно из значений m|f
     description_short: Пол
+  - name: stringArr
+    description: Массив строк (разделитель |, длина > 0)
+    description_short: Массив строк

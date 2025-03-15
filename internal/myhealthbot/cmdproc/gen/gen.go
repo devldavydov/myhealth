@@ -113,6 +113,9 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 		{{- if (eq $arg.Type "gender") }}
 		val{{ $index }}, err := parseGender(cmdParts[{{ $index }}])
 		{{ end -}}
+		{{- if (eq $arg.Type "stringArr") }}
+		val{{ $index }}, err := parseStringArr(cmdParts[{{ $index }}])
+		{{ end -}}		 
 		if err != nil {
 			return argError("{{ $arg.Name }}")
 		}
@@ -131,6 +134,7 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 		return NewSingleCmdResponse(
 			newCmdHelpBuilder(baseCmd, "{{ $cmd.Description }}").
 			{{ range $cmd.SubCommands -}}
+			{{ if (eq .Comment "") -}}
 			addCmd(
 				"{{ .Description }}",
 				"{{ .Name }}",
@@ -138,6 +142,16 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 				"{{ .Name }} [{{ (index $cfg.TypesMap .Type).DescriptionShort }}]",
 				{{ end -}}
 			).
+			{{ else -}}
+			addCmdWithComment(
+				"{{ .Description }}",
+				"{{ .Name }}",
+				"{{ .Comment }}",
+				{{ range .Args -}}
+				"{{ .Name }} [{{ (index $cfg.TypesMap .Type).DescriptionShort }}]",
+				{{ end -}}
+			).	
+			{{ end -}}		 
 			{{ end -}}
 			build(),
 		optsHTML)
@@ -222,6 +236,19 @@ func parseGender(arg string) (string, error) {
 	}
 }
 
+func parseStringArr(arg string) ([]string, error) {
+	parts := []string{}
+	for _, part := range strings.Split(arg, "|") {
+		parts = append(parts, strings.Trim(part, " "))
+	}
+
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("empty array")
+	}
+
+	return parts, nil
+}
+
 func argError(argName string) []CmdResponse {
 	return NewSingleCmdResponse(fmt.Sprintf("%s: %s", MsgErrInvalidArg, argName))
 }
@@ -243,6 +270,7 @@ type SubCommand struct {
 	Name        string `yaml:"name"`
 	Func        string `yaml:"func"`
 	Description string `yaml:"description"`
+	Comment     string `yaml:"comment"`
 	Args        []Arg  `yaml:"args"`
 }
 
