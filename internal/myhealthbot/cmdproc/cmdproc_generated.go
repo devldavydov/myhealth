@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"	
 
+	"github.com/devldavydov/myhealth/internal/storage"
+
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
 )	
@@ -42,6 +44,8 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_c("c", cmdParts[1:], userID)
 	case "b":
 		resp = r.process_b("b", cmdParts[1:], userID)
+	case "j":
+		resp = r.process_j("j", cmdParts[1:], userID)
 	case "h":
 		resp = r._processHelp()
 	default:
@@ -674,6 +678,297 @@ func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64
 	return resp
 }
 
+func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "set":
+		if len(cmdParts[1:]) != 4 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseMeal(cmdParts[1])
+		if err != nil {
+			return argError("Прием пищи")
+		}
+		
+		val2, err := parseStringG0(cmdParts[2])
+		if err != nil {
+			return argError("Ключ еды")
+		}
+		
+		val3, err := parseFloatG0(cmdParts[3])
+		if err != nil {
+			return argError("Вес")
+		}
+		
+		resp = r.journalSetCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			val3,
+			)
+				
+	case "sb":
+		if len(cmdParts[1:]) != 3 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseMeal(cmdParts[1])
+		if err != nil {
+			return argError("Прием пищи")
+		}
+		
+		val2, err := parseStringG0(cmdParts[2])
+		if err != nil {
+			return argError("Ключ бандла")
+		}
+		
+		resp = r.journalSetBundleCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			)
+				
+	case "del":
+		if len(cmdParts[1:]) != 3 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseMeal(cmdParts[1])
+		if err != nil {
+			return argError("Прием пищи")
+		}
+		
+		val2, err := parseStringG0(cmdParts[2])
+		if err != nil {
+			return argError("Ключ еды")
+		}
+		
+		resp = r.journalDelCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			)
+				
+	case "dm":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseMeal(cmdParts[1])
+		if err != nil {
+			return argError("Прием пищи")
+		}
+		
+		resp = r.journalDelMealCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "cp":
+		if len(cmdParts[1:]) != 4 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Откуда")
+		}
+		
+		val1, err := parseMeal(cmdParts[1])
+		if err != nil {
+			return argError("Откуда")
+		}
+		
+		val2, err := parseTimestamp(r.tz, cmdParts[2])
+		if err != nil {
+			return argError("Куда")
+		}
+		
+		val3, err := parseMeal(cmdParts[3])
+		if err != nil {
+			return argError("Куда")
+		}
+		
+		resp = r.journalCopyCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			val3,
+			)
+				
+	case "rd":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		resp = r.journalReportDayCommand(
+			userID,
+			val0,
+			)
+				
+	case "tm":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseMeal(cmdParts[1])
+		if err != nil {
+			return argError("Прием пищи")
+		}
+		
+		resp = r.journalTemplateMealCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "fa":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ еды")
+		}
+		
+		resp = r.journalFoodAvgWeightCommand(
+			userID,
+			val0,
+			)
+				
+	case "h":
+		return NewSingleCmdResponse(
+			newCmdHelpBuilder(baseCmd, "Управление журналом приема пищи").
+			addCmd(
+				"Установка",
+				"set",
+				"Дата [Дата]",
+				"Прием пищи [Прием пищи]",
+				"Ключ еды [Строка>0]",
+				"Вес [Дробное>0]",
+				).
+			addCmd(
+				"Установка бандлом",
+				"sb",
+				"Дата [Дата]",
+				"Прием пищи [Прием пищи]",
+				"Ключ бандла [Строка>0]",
+				).
+			addCmd(
+				"Удаление",
+				"del",
+				"Дата [Дата]",
+				"Прием пищи [Прием пищи]",
+				"Ключ еды [Строка>0]",
+				).
+			addCmd(
+				"Удаление приема пищи",
+				"dm",
+				"Дата [Дата]",
+				"Прием пищи [Прием пищи]",
+				).
+			addCmd(
+				"Копирование",
+				"cp",
+				"Откуда [Дата]",
+				"Откуда [Прием пищи]",
+				"Куда [Дата]",
+				"Куда [Прием пищи]",
+				).
+			addCmd(
+				"Отчет за день",
+				"rd",
+				"Дата [Дата]",
+				).
+			addCmd(
+				"Шаблоны команд приема пищи",
+				"tm",
+				"Дата [Дата]",
+				"Прием пищи [Прием пищи]",
+				).
+			addCmd(
+				"Средний вес еды",
+				"fa",
+				"Ключ еды [Строка>0]",
+				).
+			build(),
+		optsHTML)
+
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
 func (r *CmdProcessor) _processHelp() []CmdResponse {
 	return nil
 }
@@ -739,6 +1034,10 @@ func parseGender(arg string) (string, error) {
 	default:
 		return "", fmt.Errorf("wrong gender")
 	}
+}
+
+func parseMeal(arg string) (storage.Meal, error) {
+	return storage.NewMealFromString(arg)
 }
 
 func parseStringArr(arg string) ([]string, error) {

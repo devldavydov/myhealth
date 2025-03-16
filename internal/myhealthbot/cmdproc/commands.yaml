@@ -145,6 +145,82 @@ commands:
       args:
       - name: Ключ
         type: stringG0
+  - name: j
+    description: Управление журналом приема пищи
+    description_short: Журнал приема пищи
+    subcommands:
+    - name: set
+      func: journalSetCommand
+      description: Установка
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+      - name: Ключ еды
+        type: stringG0
+      - name: Вес
+        type: floatG0
+    - name: sb
+      func: journalSetBundleCommand
+      description: Установка бандлом
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+      - name: Ключ бандла
+        type: stringG0
+    - name: del
+      func: journalDelCommand
+      description: Удаление
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+      - name: Ключ еды
+        type: stringG0
+    - name: dm
+      func: journalDelMealCommand
+      description: Удаление приема пищи
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+    - name: cp
+      func: journalCopyCommand
+      description: Копирование
+      args:
+      - name: Откуда
+        type: timestamp
+      - name: Откуда
+        type: meal
+      - name: Куда
+        type: timestamp
+      - name: Куда
+        type: meal
+    - name: rd
+      func: journalReportDayCommand
+      description: Отчет за день
+      args:
+      - name: Дата
+        type: timestamp
+    - name: tm
+      func: journalTemplateMealCommand
+      description: Шаблоны команд приема пищи
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+    - name: fa
+      func: journalFoodAvgWeightCommand
+      description: Средний вес еды
+      args:
+      - name: Ключ еды
+        type: stringG0
 types:
   - name: timestamp
     description: Дата в формате DD.MM.YYYY или пустая строка для текущей даты
@@ -164,6 +240,9 @@ types:
   - name: gender
     description: Пол - одно из значений m|f
     description_short: Пол
+  - name: meal
+    description: Прием пищи - одно из значений завтрак|до обеда|обед|полдник|до ужина|ужин
+    description_short: Прием пищи
   - name: stringArr
     description: Массив строк (разделитель |, длина > 0)
     description_short: Массив строк

@@ -20,6 +20,8 @@ import (
 	"strconv"
 	"strings"	
 
+	"github.com/devldavydov/myhealth/internal/storage"
+
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
 )	
@@ -113,6 +115,9 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 		{{- if (eq $arg.Type "gender") }}
 		val{{ $index }}, err := parseGender(cmdParts[{{ $index }}])
 		{{ end -}}
+		{{- if (eq $arg.Type "meal") }}
+		val{{ $index }}, err := parseMeal(cmdParts[{{ $index }}])
+		{{ end -}}		 
 		{{- if (eq $arg.Type "stringArr") }}
 		val{{ $index }}, err := parseStringArr(cmdParts[{{ $index }}])
 		{{ end -}}		 
@@ -234,6 +239,10 @@ func parseGender(arg string) (string, error) {
 	default:
 		return "", fmt.Errorf("wrong gender")
 	}
+}
+
+func parseMeal(arg string) (storage.Meal, error) {
+	return storage.NewMealFromString(arg)
 }
 
 func parseStringArr(arg string) ([]string, error) {
