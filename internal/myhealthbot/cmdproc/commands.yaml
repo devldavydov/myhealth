@@ -1,0 +1,306 @@
+commands:
+  - name: w
+    description: Управление весом
+    description_short: Вес
+    subcommands:
+    - name: set
+      func: weightSetCommand
+      description: Установка
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Значение
+        type: floatG0
+    - name: del
+      func: weightDelCommand
+      description: Удаление
+      args:
+      - name: Дата
+        type: timestamp
+    - name: list
+      func: weightListCommand
+      description: Отчет
+      args:
+      - name: С
+        type: timestamp
+      - name: По
+        type: timestamp
+  - name: u
+    description: Управление настройками пользователя
+    description_short: Настройки пользователя
+    subcommands:
+    - name: set
+      func: userSettingsSetCommand
+      description: Установка
+      args:
+      - name: Лимит калорий
+        type: floatG0
+    - name: st
+      func: userSettingsSetTemplateCommand
+      description: Шаблон команды установки
+    - name: get
+      func: userSettingsGetCommand
+      description: Получение
+  - name: f
+    description: Управление едой
+    description_short: Еда
+    subcommands:
+    - name: set
+      func: foodSetCommand
+      description: Установка
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Наименование
+        type: stringG0
+      - name: Бренд
+        type: stringGE0
+      - name: ККал 100г
+        type: floatGE0
+      - name: Б 100г
+        type: floatGE0
+      - name: Ж 100г
+        type: floatGE0
+      - name: У 100г
+        type: floatGE0
+      - name: Комментарий
+        type: stringGE0
+    - name: st
+      func: foodSetTemplateCommand
+      description: Шаблон команды установки
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: find
+      func: foodFindCommand
+      description: Поиск
+      args:
+      - name: Подстрока
+        type: stringGE0
+    - name: calc
+      func: foodCalcCommand
+      description: Расчет КБЖУ
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Вес
+        type: floatGE0
+    - name: list
+      func: foodListCommand
+      description: Список
+    - name: del
+      func: foodDelCommand
+      description: Удаление
+      args:
+      - name: Ключ
+        type: stringG0 
+  - name: m
+    description: Управление служебными настройками
+    description_short: Cлужебные настройки
+    subcommands:
+    - name: backup
+      func: maintenanceBackupCommand
+      description: Бэкап
+  - name: c
+    description: Расчет лимита калорий
+    description_short: Расчет лимита калорий
+    subcommands:
+    - name: c
+      func: calcCalCalcCommand
+      description: Расчет
+      args:
+      - name: Пол
+        type: gender
+      - name: Вес
+        type: floatG0
+      - name: Рост
+        type: floatG0
+      - name: Возраст
+        type: floatG0
+  - name: b
+    description: Управление бандлами
+    description_short: Бандлы
+    subcommands:
+    - name: set
+      func: bundleSetCommand
+      description: Установка
+      comment: Элемент бандла имеет формат 'Ключ бандла [Строка>0]' или 'Ключ еды [Строка>0]:Вес [Дробное>0]'
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Состав бандла
+        type: stringArr
+    - name: st
+      func: bundleSetTemplateCommand
+      description: Шаблон команды установки
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: list
+      func: bundleListCommand
+      description: Список
+    - name: del
+      func: bundleDelCommand
+      description: Удаление
+      args:
+      - name: Ключ
+        type: stringG0
+  - name: j
+    description: Управление журналом приема пищи
+    description_short: Журнал приема пищи
+    subcommands:
+    - name: set
+      func: journalSetCommand
+      description: Установка
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+      - name: Ключ еды
+        type: stringG0
+      - name: Вес
+        type: floatG0
+    - name: sb
+      func: journalSetBundleCommand
+      description: Установка бандлом
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+      - name: Ключ бандла
+        type: stringG0
+    - name: del
+      func: journalDelCommand
+      description: Удаление
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+      - name: Ключ еды
+        type: stringG0
+    - name: dm
+      func: journalDelMealCommand
+      description: Удаление приема пищи
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+    - name: cp
+      func: journalCopyCommand
+      description: Копирование
+      args:
+      - name: Откуда
+        type: timestamp
+      - name: Откуда
+        type: meal
+      - name: Куда
+        type: timestamp
+      - name: Куда
+        type: meal
+    - name: rd
+      func: journalReportDayCommand
+      description: Отчет за день
+      args:
+      - name: Дата
+        type: timestamp
+    - name: tm
+      func: journalTemplateMealCommand
+      description: Шаблоны команд приема пищи
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+    - name: fa
+      func: journalFoodAvgWeightCommand
+      description: Средний вес еды
+      args:
+      - name: Ключ еды
+        type: stringG0
+  - name: s
+    description: Управление спортом
+    description_short: Спорт
+    subcommands:
+    - name: set
+      func: sportSetCommand
+      description: Установка
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Наименование
+        type: stringG0
+      - name: Комментарий
+        type: stringGE0
+    - name: st
+      func: sportSetTemplateCommand
+      description: Шаблон команды установки
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: del
+      func: sportDelCommand
+      description: Удаление
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: list
+      func: sportListCommand
+      description: Список
+    - name: as
+      func: sportActivitySetCommand
+      description: Установка активности
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Ключ спорта
+        type: stringG0
+      - name: Подходы
+        type: intArr
+    - name: ad
+      func: sportActivityDelCommand
+      description: Удаление активности
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Ключ спорта
+        type: stringG0
+    - name: ar
+      func: sportActivityReportCommand
+      description: Отчет по активности
+      args:
+      - name: С
+        type: timestamp
+      - name: По
+        type: timestamp
+types:
+  - name: timestamp
+    description: Дата в формате DD.MM.YYYY или пустая строка для текущей даты
+    description_short: Дата
+  - name: floatG0
+    description: Дробное число >0
+    description_short: Дробное>0
+  - name: floatGE0
+    description: Дробное число >=0
+    description_short: Дробное>=0
+  - name: stringG0
+    description: Строка длиной >0
+    description_short: Строка>0
+  - name: stringGE0
+    description: Строка длиной >=0
+    description_short: Строка>=0
+  - name: gender
+    description: Пол - одно из значений m|f
+    description_short: Пол
+  - name: meal
+    description: Прием пищи - одно из значений завтрак|до обеда|обед|полдник|до ужина|ужин
+    description_short: Прием пищи
+  - name: stringArr
+    description: Массив строк (разделитель |, длина > 0)
+    description_short: Массив строк
+  - name: intArr
+    description: Массив целых чисел (разделитель |, длина > 0)
+    description_short: Массив целых чисел

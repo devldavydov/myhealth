@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
+	"time"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -13,74 +13,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processWeight(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) == 0 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	var resp []CmdResponse
-
-	switch cmdParts[0] {
-	case "set":
-		resp = r.weightSetCommand(cmdParts[1:], userID)
-	case "del":
-		resp = r.weightDelCommand(cmdParts[1:], userID)
-	case "list":
-		resp = r.weightListCommand(cmdParts[1:], userID)
-	case "h":
-		resp = r.weightHelpCommand(baseCmd)
-	default:
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	return resp
-}
-
-func (r *CmdProcessor) weightSetCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 2 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse timestamp
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse val
-	val, err := strconv.ParseFloat(cmdParts[1], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Save in DB
+func (r *CmdProcessor) weightSetCommand(userID int64, ts time.Time, weight float64) []CmdResponse {
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
@@ -88,7 +21,7 @@ func (r *CmdProcessor) weightSetCommand(cmdParts []string, userID int64) []CmdRe
 		userID,
 		&storage.Weight{
 			Timestamp: storage.NewTimestamp(ts),
-			Value:     val,
+			Value:     weight,
 		},
 	); err != nil {
 		if errors.Is(err, storage.ErrWeightInvalid) {
@@ -97,7 +30,6 @@ func (r *CmdProcessor) weightSetCommand(cmdParts []string, userID int64) []CmdRe
 
 		r.logger.Error(
 			"weight set command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -108,28 +40,7 @@ func (r *CmdProcessor) weightSetCommand(cmdParts []string, userID int64) []CmdRe
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) weightDelCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse timestamp
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Delete from DB
+func (r *CmdProcessor) weightDelCommand(userID int64, ts time.Time) []CmdResponse {
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
@@ -139,7 +50,6 @@ func (r *CmdProcessor) weightDelCommand(cmdParts []string, userID int64) []CmdRe
 	); err != nil {
 		r.logger.Error(
 			"weight del command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -150,38 +60,7 @@ func (r *CmdProcessor) weightDelCommand(cmdParts []string, userID int64) []CmdRe
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) weightListCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 2 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse timestamp
-	tsFrom, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	tsTo, err := r.parseTimestamp(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// List from DB
+func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) []CmdResponse {
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
@@ -197,7 +76,6 @@ func (r *CmdProcessor) weightListCommand(cmdParts []string, userID int64) []CmdR
 
 		r.logger.Error(
 			"weight list command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -255,7 +133,6 @@ func (r *CmdProcessor) weightListCommand(cmdParts []string, userID int64) []CmdR
 	if err != nil {
 		r.logger.Error(
 			"weight list command chart error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -279,28 +156,4 @@ func (r *CmdProcessor) weightListCommand(cmdParts []string, userID int64) []CmdR
 		MIME:     "text/html",
 		FileName: fmt.Sprintf("weight_%s_%s.html", tsFromStr, tsToStr),
 	})
-}
-
-func (r *CmdProcessor) weightHelpCommand(baseCmd string) []CmdResponse {
-	return NewSingleCmdResponse(
-		newCmdHelpBuilder(baseCmd, "Управление весом").
-			addCmd(
-				"Установка",
-				"set",
-				"[Дата]",
-				"Значение [Дробное>0]",
-			).
-			addCmd(
-				"Удаление",
-				"del",
-				"[Дата]",
-			).
-			addCmd(
-				"Отчет",
-				"list",
-				"С [Дата]",
-				"По [Дата]",
-			).
-			build(),
-		optsHTML)
 }

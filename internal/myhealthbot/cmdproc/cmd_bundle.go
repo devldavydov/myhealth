@@ -14,58 +14,13 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processBundle(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) == 0 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	var resp []CmdResponse
-
-	switch cmdParts[0] {
-	case "set":
-		resp = r.bundleSetCommand(cmdParts[1:], userID)
-	case "st":
-		resp = r.bundleSetTemplateCommand(cmdParts[1:], userID)
-	case "list":
-		resp = r.bundleListCommand(userID)
-	case "del":
-		resp = r.bundleDelCommand(cmdParts[1:], userID)
-	case "h":
-		resp = r.bundleHelpCommand(baseCmd)
-	default:
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	return resp
-}
-
-func (r *CmdProcessor) bundleSetCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) < 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	bndlKey := cmdParts[0]
+func (r *CmdProcessor) bundleSetCommand(userID int64, key string, bndlParts []string) []CmdResponse {
 	bndlData := make(map[string]float64)
 
-	for _, cmdPart := range cmdParts[1:] {
-		if strings.Contains(cmdPart, ":") {
+	for _, bndlPart := range bndlParts {
+		if strings.Contains(bndlPart, ":") {
 			// Add dependant food
-			parts := strings.Split(cmdPart, ":")
+			parts := strings.Split(bndlPart, ":")
 			if len(parts) > 2 {
 				return NewSingleCmdResponse(MsgErrInvalidCommand)
 			}
@@ -78,7 +33,7 @@ func (r *CmdProcessor) bundleSetCommand(cmdParts []string, userID int64) []CmdRe
 			bndlData[parts[0]] = weight
 		} else {
 			// Add dependant bundle key.
-			bndlData[cmdPart] = 0
+			bndlData[bndlPart] = 0
 		}
 	}
 
@@ -86,7 +41,7 @@ func (r *CmdProcessor) bundleSetCommand(cmdParts []string, userID int64) []CmdRe
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	if err := r.stg.SetBundle(ctx, userID, &storage.Bundle{Key: bndlKey, Data: bndlData}, true); err != nil {
+	if err := r.stg.SetBundle(ctx, userID, &storage.Bundle{Key: key, Data: bndlData}, true); err != nil {
 		if errors.Is(err, storage.ErrBundleInvalid) {
 			return NewSingleCmdResponse(MsgErrInvalidCommand)
 		}
@@ -102,7 +57,7 @@ func (r *CmdProcessor) bundleSetCommand(cmdParts []string, userID int64) []CmdRe
 
 		r.logger.Error(
 			"bundle set command DB error",
-			zap.Strings("cmdParts", cmdParts),
+			zap.Strings("cmdParts", bndlParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -113,21 +68,12 @@ func (r *CmdProcessor) bundleSetCommand(cmdParts []string, userID int64) []CmdRe
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) bundleSetTemplateCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) bundleSetTemplateCommand(userID int64, key string) []CmdResponse {
 	// Get in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	bndl, err := r.stg.GetBundle(ctx, userID, cmdParts[0])
+	bndl, err := r.stg.GetBundle(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrBundleNotFound) {
 			return NewSingleCmdResponse(MsgErrBundleNotFound)
@@ -135,7 +81,6 @@ func (r *CmdProcessor) bundleSetTemplateCommand(cmdParts []string, userID int64)
 
 		r.logger.Error(
 			"bundle set template command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -222,28 +167,18 @@ func (r *CmdProcessor) bundleListCommand(userID int64) []CmdResponse {
 	})
 }
 
-func (r *CmdProcessor) bundleDelCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) bundleDelCommand(userID int64, key string) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	if err := r.stg.DeleteBundle(ctx, userID, cmdParts[0]); err != nil {
+	if err := r.stg.DeleteBundle(ctx, userID, key); err != nil {
 		if errors.Is(err, storage.ErrBundleIsUsed) {
 			return NewSingleCmdResponse(MsgErrBundleIsUsed)
 		}
 
 		r.logger.Error(
 			"bundle del command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -252,32 +187,4 @@ func (r *CmdProcessor) bundleDelCommand(cmdParts []string, userID int64) []CmdRe
 	}
 
 	return NewSingleCmdResponse(MsgOK)
-}
-
-func (r *CmdProcessor) bundleHelpCommand(baseCmd string) []CmdResponse {
-	return NewSingleCmdResponse(
-		newCmdHelpBuilder(baseCmd, "Управление бандлами").
-			addCmd(
-				"Установка",
-				"set",
-				"Ключ [Строка>0]",
-				"Ключ бандла [Строка>0]|Ключ еды [Строка>0]:Вес [Дробное>0]",
-				"...",
-			).
-			addCmd(
-				"Шаблон команды установки",
-				"st",
-				"Ключ [Строка>0]",
-			).
-			addCmd(
-				"Список",
-				"list",
-			).
-			addCmd(
-				"Удаление",
-				"del",
-				"Ключ [Строка>0]",
-			).
-			build(),
-		optsHTML)
 }

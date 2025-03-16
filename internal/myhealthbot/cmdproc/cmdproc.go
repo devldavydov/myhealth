@@ -1,7 +1,8 @@
+//go:generate go run ./gen/gen.go -in commands.yaml -out cmdproc_generated.go
+
 package cmdproc
 
 import (
-	"strings"
 	"time"
 
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -27,63 +28,7 @@ func (r *CmdProcessor) Stop() {
 }
 
 func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
-	cmdParts := []string{}
-	for _, part := range strings.Split(cmd, ",") {
-		cmdParts = append(cmdParts, strings.Trim(part, " "))
-	}
-
-	if len(cmdParts) == 0 {
-		r.logger.Error(
-			"invalid command",
-			zap.String("command", cmd),
-			zap.Int64("userID", userID),
-		)
-		return c.Send(MsgErrInvalidCommand)
-	}
-
-	var resp []CmdResponse
-
-	switch cmdParts[0] {
-	case "h":
-		resp = r.processHelp(userID)
-	case "w":
-		resp = r.processWeight("w", cmdParts[1:], userID)
-	case "f":
-		resp = r.processFood("f", cmdParts[1:], userID)
-	case "j":
-		resp = r.processJournal("j", cmdParts[1:], userID)
-	case "b":
-		resp = r.processBundle("b", cmdParts[1:], userID)
-	case "c":
-		resp = r.processCalcCal("c", cmdParts[1:], userID)
-	case "u":
-		resp = r.processUserSettings("u", cmdParts[1:], userID)
-	case "s":
-		resp = r.processSport("s", cmdParts[1:], userID)
-	case "m":
-		resp = r.processMaintenance("m", cmdParts[1:], userID)
-	default:
-		r.logger.Error(
-			"unknown command",
-			zap.String("command", cmd),
-			zap.Int64("userID", userID),
-		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	if r.debugMode {
-		if err := c.Send("!!! ОТЛАДОЧНЫЙ РЕЖИМ !!!"); err != nil {
-			return err
-		}
-	}
-
-	for _, rItem := range resp {
-		if err := c.Send(rItem.what, rItem.opts...); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return r.process(c, cmd, userID)
 }
 
 type CmdResponse struct {

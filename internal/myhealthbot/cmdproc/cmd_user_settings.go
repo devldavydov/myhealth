@@ -4,67 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
 )
 
-func (r *CmdProcessor) processUserSettings(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) == 0 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	var resp []CmdResponse
-
-	switch cmdParts[0] {
-	// Sport
-	case "set":
-		resp = r.userSettingsSetCommand(cmdParts[1:], userID)
-	case "get":
-		resp = r.userSettingsGetCommand(userID)
-	case "st":
-		resp = r.userSettingsSetTemplateCommand(userID)
-	case "h":
-		resp = r.userSettingsHelpCommand(baseCmd)
-	default:
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	return resp
-}
-
-func (r *CmdProcessor) userSettingsSetCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	calLimit, err := strconv.ParseFloat(cmdParts[0], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) userSettingsSetCommand(userID int64, calLimit float64) []CmdResponse {
 	// Save in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -78,7 +23,6 @@ func (r *CmdProcessor) userSettingsSetCommand(cmdParts []string, userID int64) [
 
 		r.logger.Error(
 			"user settings set command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -133,24 +77,4 @@ func (r *CmdProcessor) userSettingsSetTemplateCommand(userID int64) []CmdRespons
 	}
 
 	return NewSingleCmdResponse(fmt.Sprintf("u,set,%.2f", us.CalLimit))
-}
-
-func (r *CmdProcessor) userSettingsHelpCommand(baseCmd string) []CmdResponse {
-	return NewSingleCmdResponse(
-		newCmdHelpBuilder(baseCmd, "Управление настройками пользователя").
-			addCmd(
-				"Установка",
-				"set",
-				"Лимит калорий [Дробное>0]",
-			).
-			addCmd(
-				"Шаблон команды установки",
-				"st",
-			).
-			addCmd(
-				"Получение",
-				"get",
-			).
-			build(),
-		optsHTML)
 }

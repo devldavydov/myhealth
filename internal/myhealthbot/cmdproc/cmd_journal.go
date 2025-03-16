@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 	"time"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
@@ -15,95 +14,13 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processJournal(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) == 0 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	var resp []CmdResponse
-
-	switch cmdParts[0] {
-	case "set":
-		resp = r.journalSetCommand(cmdParts[1:], userID)
-	case "sb":
-		resp = r.journalSetBundleCommand(cmdParts[1:], userID)
-	case "del":
-		resp = r.journalDelCommand(cmdParts[1:], userID)
-	case "dm":
-		resp = r.journalDelMealCommand(cmdParts[1:], userID)
-	case "cp":
-		resp = r.journalCopyCommand(cmdParts[1:], userID)
-	case "rd":
-		resp = r.journalReportDayCommand(cmdParts[1:], userID)
-	case "tm":
-		resp = r.journalTemplateMealCommand(cmdParts[1:], userID)
-	case "fa":
-		resp = r.journalFoodAvgWeightCommand(cmdParts[1:], userID)
-	case "h":
-		resp = r.journalHelpCommand(baseCmd)
-	default:
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	return resp
-}
-
-func (r *CmdProcessor) journalSetCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 4 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	meal, err := storage.NewMealFromString(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	food_key := cmdParts[2]
-
-	weight, err := strconv.ParseFloat(cmdParts[3], 64)
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) journalSetCommand(
+	userID int64,
+	ts time.Time,
+	meal storage.Meal,
+	foodKey string,
+	foodWeight float64,
+) []CmdResponse {
 	// Save in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -111,8 +28,8 @@ func (r *CmdProcessor) journalSetCommand(cmdParts []string, userID int64) []CmdR
 	if err := r.stg.SetJournal(ctx, userID, &storage.Journal{
 		Timestamp:  storage.NewTimestamp(ts),
 		Meal:       meal,
-		FoodKey:    food_key,
-		FoodWeight: weight,
+		FoodKey:    foodKey,
+		FoodWeight: foodWeight,
 	}); err != nil {
 		if errors.Is(err, storage.ErrJournalInvalid) {
 			return NewSingleCmdResponse(MsgErrInvalidCommand)
@@ -124,7 +41,6 @@ func (r *CmdProcessor) journalSetCommand(cmdParts []string, userID int64) []CmdR
 
 		r.logger.Error(
 			"journal set command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -135,41 +51,12 @@ func (r *CmdProcessor) journalSetCommand(cmdParts []string, userID int64) []CmdR
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) journalSetBundleCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 3 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	meal, err := storage.NewMealFromString(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	bndlKey := cmdParts[2]
-
+func (r *CmdProcessor) journalSetBundleCommand(
+	userID int64,
+	ts time.Time,
+	meal storage.Meal,
+	bndlKey string,
+) []CmdResponse {
 	// Save in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -185,7 +72,6 @@ func (r *CmdProcessor) journalSetBundleCommand(cmdParts []string, userID int64) 
 
 		r.logger.Error(
 			"journal set bundle command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -196,41 +82,12 @@ func (r *CmdProcessor) journalSetBundleCommand(cmdParts []string, userID int64) 
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) journalDelCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 3 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	meal, err := storage.NewMealFromString(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	foodKey := cmdParts[2]
-
+func (r *CmdProcessor) journalDelCommand(
+	userID int64,
+	ts time.Time,
+	meal storage.Meal,
+	foodKey string,
+) []CmdResponse {
 	// Call DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -238,7 +95,6 @@ func (r *CmdProcessor) journalDelCommand(cmdParts []string, userID int64) []CmdR
 	if err := r.stg.DeleteJournal(ctx, userID, storage.NewTimestamp(ts), meal, foodKey); err != nil {
 		r.logger.Error(
 			"journal del command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -249,39 +105,7 @@ func (r *CmdProcessor) journalDelCommand(cmdParts []string, userID int64) []CmdR
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) journalDelMealCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 2 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	meal, err := storage.NewMealFromString(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) journalDelMealCommand(userID int64, ts time.Time, meal storage.Meal) []CmdResponse {
 	// Call DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -289,7 +113,6 @@ func (r *CmdProcessor) journalDelMealCommand(cmdParts []string, userID int64) []
 	if err := r.stg.DeleteJournalMeal(ctx, userID, storage.NewTimestamp(ts), meal); err != nil {
 		r.logger.Error(
 			"journal del meal command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -300,61 +123,13 @@ func (r *CmdProcessor) journalDelMealCommand(cmdParts []string, userID int64) []
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) journalCopyCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 4 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse
-	tsFrom, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	tsTo, err := r.parseTimestamp(cmdParts[2])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	mealFrom, err := storage.NewMealFromString(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	mealTo, err := storage.NewMealFromString(cmdParts[3])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) journalCopyCommand(
+	userID int64,
+	tsFrom time.Time,
+	mealFrom storage.Meal,
+	tsTo time.Time,
+	mealTo storage.Meal,
+) []CmdResponse {
 	// Call DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -368,7 +143,6 @@ func (r *CmdProcessor) journalCopyCommand(cmdParts []string, userID int64) []Cmd
 	if err != nil {
 		r.logger.Error(
 			"journal copy command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -379,27 +153,7 @@ func (r *CmdProcessor) journalCopyCommand(cmdParts []string, userID int64) []Cmd
 	return NewSingleCmdResponse(fmt.Sprintf("Скопировано записей: %d", cnt))
 }
 
-func (r *CmdProcessor) journalReportDayCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
+func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []CmdResponse {
 	tsStr := formatTimestamp(ts)
 
 	// Get list from DB, user settings
@@ -407,7 +161,7 @@ func (r *CmdProcessor) journalReportDayCommand(cmdParts []string, userID int64) 
 	defer cancel()
 
 	var us *storage.UserSettings
-	us, err = r.stg.GetUserSettings(ctx, userID)
+	us, err := r.stg.GetUserSettings(ctx, userID)
 	if err != nil && !errors.Is(err, storage.ErrUserSettingsNotFound) {
 		r.logger.Error(
 			"user settings get command DB error",
@@ -426,7 +180,6 @@ func (r *CmdProcessor) journalReportDayCommand(cmdParts []string, userID int64) 
 
 		r.logger.Error(
 			"journal report day command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -575,39 +328,7 @@ func (r *CmdProcessor) journalReportDayCommand(cmdParts []string, userID int64) 
 	})
 }
 
-func (r *CmdProcessor) journalTemplateMealCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 2 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	// Parse
-	ts, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	meal, err := storage.NewMealFromString(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, meal storage.Meal) []CmdResponse {
 	// Call DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -620,7 +341,6 @@ func (r *CmdProcessor) journalTemplateMealCommand(cmdParts []string, userID int6
 
 		r.logger.Error(
 			"journal template meal command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -655,16 +375,7 @@ func (r *CmdProcessor) journalTemplateMealCommand(cmdParts []string, userID int6
 	return resp
 }
 
-func (r *CmdProcessor) journalFoodAvgWeightCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) journalFoodAvgWeightCommand(userID int64, foodKey string) []CmdResponse {
 	tsTo := time.Now().In(r.tz)
 	tsFrom := tsTo.AddDate(-1, 0, 0)
 
@@ -676,12 +387,11 @@ func (r *CmdProcessor) journalFoodAvgWeightCommand(cmdParts []string, userID int
 		userID,
 		storage.NewTimestamp(tsFrom),
 		storage.NewTimestamp(tsTo),
-		cmdParts[0],
+		foodKey,
 	)
 	if err != nil {
 		r.logger.Error(
 			"journal food avg command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -717,63 +427,4 @@ func calDiffSnippet(diff float64) html.IELement {
 	default:
 		return html.NewS(fmt.Sprintf("%.2f", diff))
 	}
-}
-
-func (r *CmdProcessor) journalHelpCommand(baseCmd string) []CmdResponse {
-	return NewSingleCmdResponse(
-		newCmdHelpBuilder(baseCmd, "Управление журналом приема пищи").
-			addCmd(
-				"Установка",
-				"set",
-				"[Дата]",
-				"[Прием пищи]",
-				"Ключ еды [Строка>0]",
-				"Вес [Дробное>0]",
-			).
-			addCmd(
-				"Установка бандлом",
-				"sb",
-				"[Дата]",
-				"[Прием пищи]",
-				"Ключ бандла [Строка>0]",
-			).
-			addCmd(
-				"Удаление",
-				"del",
-				"[Дата]",
-				"[Прием пищи]",
-				"Ключ еды [Строка>0]",
-			).
-			addCmd(
-				"Удаление приема пищи",
-				"dm",
-				"[Дата]",
-				"[Прием пищи]",
-			).
-			addCmd(
-				"Копирование",
-				"cp",
-				"Откуда [Дата]",
-				"Откуда [Прием пищи]",
-				"Куда [Дата]",
-				"Куда [Прием пищи]",
-			).
-			addCmd(
-				"Отчет за день",
-				"rd",
-				"[Дата]",
-			).
-			addCmd(
-				"Шаблоны команд приема пищи",
-				"tm",
-				"[Дата]",
-				"[Прием пищи]",
-			).
-			addCmd(
-				"Средний вес еды",
-				"fa",
-				"Ключ еды [Строка>0]",
-			).
-			build(),
-		optsHTML)
 }
