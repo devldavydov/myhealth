@@ -155,6 +155,10 @@ func (r *CmdProcessor) sportActivitySetCommand(
 		Timestamp: storage.NewTimestamp(ts),
 		Sets:      sets,
 	}); err != nil {
+		if errors.Is(err, storage.ErrSportActivityInvalid) {
+			return NewSingleCmdResponse(MsgErrInvalidCommand)
+		}
+
 		if errors.Is(err, storage.ErrSportNotFound) {
 			return NewSingleCmdResponse(MsgErrSportNotFound)
 		}
