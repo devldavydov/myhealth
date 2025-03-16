@@ -183,7 +183,7 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 	{{- range $cfg.Config.Commands }}
 	sb.WriteString("<b>\u2022 {{ .Name }},h</b> - {{ .DescriptionShort }}\n")
 	{{- end }}
-	sb.WriteString("<b>Типы данных:</b>\n")
+	sb.WriteString("\n<b>Типы данных:</b>\n")
 	{{- range $cfg.Config.Types }}
 	sb.WriteString("<b>\u2022 {{ .DescriptionShort }}</b> - {{ .Description }}\n")
 	{{- end }}
@@ -358,6 +358,10 @@ func (r *cmdHelpBuilder) build() string {
 			} else {
 				sb.WriteString(fmt.Sprintf(" %s,\n", sArg))
 			}
+		}
+
+		if item.comment != "" {
+			sb.WriteString(fmt.Sprintf("\n<i>Примечание</i>: %s\n", item.comment))
 		}
 
 		if i != len(r.items)-1 {

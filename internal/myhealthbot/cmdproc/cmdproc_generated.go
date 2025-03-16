@@ -1194,7 +1194,7 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 	sb.WriteString("<b>\u2022 b,h</b> - Бандлы\n")
 	sb.WriteString("<b>\u2022 j,h</b> - Журнал приема пищи\n")
 	sb.WriteString("<b>\u2022 s,h</b> - Спорт\n")
-	sb.WriteString("<b>Типы данных:</b>\n")
+	sb.WriteString("\n<b>Типы данных:</b>\n")
 	sb.WriteString("<b>\u2022 Дата</b> - Дата в формате DD.MM.YYYY или пустая строка для текущей даты\n")
 	sb.WriteString("<b>\u2022 Дробное>0</b> - Дробное число >0\n")
 	sb.WriteString("<b>\u2022 Дробное>=0</b> - Дробное число >=0\n")
@@ -1375,6 +1375,10 @@ func (r *cmdHelpBuilder) build() string {
 			} else {
 				sb.WriteString(fmt.Sprintf(" %s,\n", sArg))
 			}
+		}
+
+		if item.comment != "" {
+			sb.WriteString(fmt.Sprintf("\n<i>Примечание</i>: %s\n", item.comment))
 		}
 
 		if i != len(r.items)-1 {
