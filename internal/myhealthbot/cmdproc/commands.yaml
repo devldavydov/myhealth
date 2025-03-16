@@ -221,6 +221,61 @@ commands:
       args:
       - name: Ключ еды
         type: stringG0
+  - name: s
+    description: Управление спортом
+    description_short: Спорт
+    subcommands:
+    - name: set
+      func: sportSetCommand
+      description: Установка
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Наименование
+        type: stringG0
+      - name: Комментарий
+        type: stringGE0
+    - name: st
+      func: sportSetTemplateCommand
+      description: Шаблон команды установки
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: del
+      func: sportDelCommand
+      description: Удаление
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: list
+      func: sportListCommand
+      description: Список
+    - name: as
+      func: sportActivitySetCommand
+      description: Установка активности
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Ключ спорта
+        type: stringG0
+      - name: Подходы
+        type: intArr
+    - name: ad
+      func: sportActivityDelCommand
+      description: Удаление активности
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Ключ спорта
+        type: stringG0
+    - name: ar
+      func: sportActivityReportCommand
+      description: Отчет по активности
+      args:
+      - name: С
+        type: timestamp
+      - name: По
+        type: timestamp
 types:
   - name: timestamp
     description: Дата в формате DD.MM.YYYY или пустая строка для текущей даты
@@ -246,3 +301,6 @@ types:
   - name: stringArr
     description: Массив строк (разделитель |, длина > 0)
     description_short: Массив строк
+  - name: intArr
+    description: Массив целых чисел (разделитель |, длина > 0)
+    description_short: Массив целых чисел

@@ -49,7 +49,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_{{ .Name }}("{{ .Name }}", cmdParts[1:], userID)
 	{{ end -}}
 	case "h":
-		resp = r._processHelp()
+		resp = r.processHelp()
 	default:
 		r.logger.Error(
 			"unknown command",
@@ -117,10 +117,13 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 		{{ end -}}
 		{{- if (eq $arg.Type "meal") }}
 		val{{ $index }}, err := parseMeal(cmdParts[{{ $index }}])
-		{{ end -}}		 
+		{{ end -}}
 		{{- if (eq $arg.Type "stringArr") }}
 		val{{ $index }}, err := parseStringArr(cmdParts[{{ $index }}])
-		{{ end -}}		 
+		{{ end -}}
+		{{- if (eq $arg.Type "intArr") }}
+		val{{ $index }}, err := parseIntArr(cmdParts[{{ $index }}])
+		{{ end -}}			 
 		if err != nil {
 			return argError("{{ $arg.Name }}")
 		}
@@ -174,8 +177,17 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 }
 {{ end -}}
 {{ end }}
-func (r *CmdProcessor) _processHelp() []CmdResponse {
-	return nil
+func (r *CmdProcessor) processHelp() []CmdResponse {
+	var sb strings.Builder
+	sb.WriteString("<b>Команды помощи по разделам:</b>\n")
+	{{- range $cfg.Config.Commands }}
+	sb.WriteString("<b>\u2022 {{ .Name }},h</b> - {{ .DescriptionShort }}\n")
+	{{- end }}
+	sb.WriteString("<b>Типы данных:</b>\n")
+	{{- range $cfg.Config.Types }}
+	sb.WriteString("<b>\u2022 {{ .DescriptionShort }}</b> - {{ .Description }}\n")
+	{{- end }}
+	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
 func parseTimestamp(tz *time.Location, arg string) (time.Time, error) {
@@ -258,8 +270,102 @@ func parseStringArr(arg string) ([]string, error) {
 	return parts, nil
 }
 
+func parseIntArr(arg string) ([]int64, error) {
+	parts := []int64{}
+	for _, part := range strings.Split(arg, "|") {
+		part = strings.Trim(part, " ")
+		val, err := strconv.ParseInt(part, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		parts = append(parts, val)
+	}
+
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("empty array")
+	}
+
+	return parts, nil
+}
+
 func argError(argName string) []CmdResponse {
 	return NewSingleCmdResponse(fmt.Sprintf("%s: %s", MsgErrInvalidArg, argName))
+}
+
+func formatTimestamp(ts time.Time) string {
+	return ts.Format("02.01.2006")
+}
+
+type cmdHelpItem struct {
+	label   string
+	cmd     string
+	comment string
+	args    []string
+}
+
+type cmdHelpBuilder struct {
+	baseCmd string
+	label   string
+	items   []cmdHelpItem
+}
+
+func newCmdHelpBuilder(baseCmd, label string) *cmdHelpBuilder {
+	return &cmdHelpBuilder{baseCmd: baseCmd, label: label}
+}
+
+func (r *cmdHelpBuilder) addCmd(label, cmd string, args ...string) *cmdHelpBuilder {
+	r.items = append(r.items, cmdHelpItem{
+		label: label,
+		cmd:   cmd,
+		args:  args,
+	})
+	return r
+}
+
+func (r *cmdHelpBuilder) addCmdWithComment(label, cmd, comment string, args ...string) *cmdHelpBuilder {
+	r.items = append(r.items, cmdHelpItem{
+		label:   label,
+		cmd:     cmd,
+		comment: comment,
+		args:    args,
+	})
+	return r
+}
+
+func (r *cmdHelpBuilder) build() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("<b>%s</b>\n", r.label))
+	for i, item := range r.items {
+		sb.WriteString(fmt.Sprintf("<b>\u2022 %s</b>\n", item.label))
+		sb.WriteString(fmt.Sprintf("%s,%s", r.baseCmd, item.cmd))
+
+		if len(item.args) > 0 {
+			sb.WriteString(",\n")
+		} else {
+			sb.WriteString("\n")
+		}
+
+		for j, arg := range item.args {
+			sArg := arg
+			if strings.Contains(sArg, "|") {
+				parts := strings.Split(sArg, "|")
+				sArg = fmt.Sprintf("%s\n ИЛИ\n %s", parts[0], parts[1])
+			}
+
+			if j == len(item.args)-1 {
+				sb.WriteString(fmt.Sprintf(" %s\n", sArg))
+			} else {
+				sb.WriteString(fmt.Sprintf(" %s,\n", sArg))
+			}
+		}
+
+		if i != len(r.items)-1 {
+			sb.WriteString("\n")
+		}
+	}
+
+	return sb.String()
 }
 `))
 

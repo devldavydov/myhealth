@@ -46,8 +46,10 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_b("b", cmdParts[1:], userID)
 	case "j":
 		resp = r.process_j("j", cmdParts[1:], userID)
+	case "s":
+		resp = r.process_s("s", cmdParts[1:], userID)
 	case "h":
-		resp = r._processHelp()
+		resp = r.processHelp()
 	default:
 		r.logger.Error(
 			"unknown command",
@@ -969,8 +971,240 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 	return resp
 }
 
-func (r *CmdProcessor) _processHelp() []CmdResponse {
-	return nil
+func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "set":
+		if len(cmdParts[1:]) != 3 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Наименование")
+		}
+		
+		val2, err := parseStringGE0(cmdParts[2])
+		if err != nil {
+			return argError("Комментарий")
+		}
+		
+		resp = r.sportSetCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			)
+				
+	case "st":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.sportSetTemplateCommand(
+			userID,
+			val0,
+			)
+				
+	case "del":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.sportDelCommand(
+			userID,
+			val0,
+			)
+				
+	case "list":
+		resp = r.sportListCommand(userID)
+				
+	case "as":
+		if len(cmdParts[1:]) != 3 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Ключ спорта")
+		}
+		
+		val2, err := parseIntArr(cmdParts[2])
+		if err != nil {
+			return argError("Подходы")
+		}
+		
+		resp = r.sportActivitySetCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			)
+				
+	case "ad":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Ключ спорта")
+		}
+		
+		resp = r.sportActivityDelCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "ar":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("С")
+		}
+		
+		val1, err := parseTimestamp(r.tz, cmdParts[1])
+		if err != nil {
+			return argError("По")
+		}
+		
+		resp = r.sportActivityReportCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "h":
+		return NewSingleCmdResponse(
+			newCmdHelpBuilder(baseCmd, "Управление спортом").
+			addCmd(
+				"Установка",
+				"set",
+				"Ключ [Строка>0]",
+				"Наименование [Строка>0]",
+				"Комментарий [Строка>=0]",
+				).
+			addCmd(
+				"Шаблон команды установки",
+				"st",
+				"Ключ [Строка>0]",
+				).
+			addCmd(
+				"Удаление",
+				"del",
+				"Ключ [Строка>0]",
+				).
+			addCmd(
+				"Список",
+				"list",
+				).
+			addCmd(
+				"Установка активности",
+				"as",
+				"Дата [Дата]",
+				"Ключ спорта [Строка>0]",
+				"Подходы [Массив целых чисел]",
+				).
+			addCmd(
+				"Удаление активности",
+				"ad",
+				"Дата [Дата]",
+				"Ключ спорта [Строка>0]",
+				).
+			addCmd(
+				"Отчет по активности",
+				"ar",
+				"С [Дата]",
+				"По [Дата]",
+				).
+			build(),
+		optsHTML)
+
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
+func (r *CmdProcessor) processHelp() []CmdResponse {
+	var sb strings.Builder
+	sb.WriteString("<b>Команды помощи по разделам:</b>\n")
+	sb.WriteString("<b>\u2022 w,h</b> - Вес\n")
+	sb.WriteString("<b>\u2022 u,h</b> - Настройки пользователя\n")
+	sb.WriteString("<b>\u2022 f,h</b> - Еда\n")
+	sb.WriteString("<b>\u2022 m,h</b> - Cлужебные настройки\n")
+	sb.WriteString("<b>\u2022 c,h</b> - Расчет лимита калорий\n")
+	sb.WriteString("<b>\u2022 b,h</b> - Бандлы\n")
+	sb.WriteString("<b>\u2022 j,h</b> - Журнал приема пищи\n")
+	sb.WriteString("<b>\u2022 s,h</b> - Спорт\n")
+	sb.WriteString("<b>Типы данных:</b>\n")
+	sb.WriteString("<b>\u2022 Дата</b> - Дата в формате DD.MM.YYYY или пустая строка для текущей даты\n")
+	sb.WriteString("<b>\u2022 Дробное>0</b> - Дробное число >0\n")
+	sb.WriteString("<b>\u2022 Дробное>=0</b> - Дробное число >=0\n")
+	sb.WriteString("<b>\u2022 Строка>0</b> - Строка длиной >0\n")
+	sb.WriteString("<b>\u2022 Строка>=0</b> - Строка длиной >=0\n")
+	sb.WriteString("<b>\u2022 Пол</b> - Пол - одно из значений m|f\n")
+	sb.WriteString("<b>\u2022 Прием пищи</b> - Прием пищи - одно из значений завтрак|до обеда|обед|полдник|до ужина|ужин\n")
+	sb.WriteString("<b>\u2022 Массив строк</b> - Массив строк (разделитель |, длина > 0)\n")
+	sb.WriteString("<b>\u2022 Массив целых чисел</b> - Массив целых чисел (разделитель |, длина > 0)\n")
+	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
 func parseTimestamp(tz *time.Location, arg string) (time.Time, error) {
@@ -1053,6 +1287,100 @@ func parseStringArr(arg string) ([]string, error) {
 	return parts, nil
 }
 
+func parseIntArr(arg string) ([]int64, error) {
+	parts := []int64{}
+	for _, part := range strings.Split(arg, "|") {
+		part = strings.Trim(part, " ")
+		val, err := strconv.ParseInt(part, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		parts = append(parts, val)
+	}
+
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("empty array")
+	}
+
+	return parts, nil
+}
+
 func argError(argName string) []CmdResponse {
 	return NewSingleCmdResponse(fmt.Sprintf("%s: %s", MsgErrInvalidArg, argName))
+}
+
+func formatTimestamp(ts time.Time) string {
+	return ts.Format("02.01.2006")
+}
+
+type cmdHelpItem struct {
+	label   string
+	cmd     string
+	comment string
+	args    []string
+}
+
+type cmdHelpBuilder struct {
+	baseCmd string
+	label   string
+	items   []cmdHelpItem
+}
+
+func newCmdHelpBuilder(baseCmd, label string) *cmdHelpBuilder {
+	return &cmdHelpBuilder{baseCmd: baseCmd, label: label}
+}
+
+func (r *cmdHelpBuilder) addCmd(label, cmd string, args ...string) *cmdHelpBuilder {
+	r.items = append(r.items, cmdHelpItem{
+		label: label,
+		cmd:   cmd,
+		args:  args,
+	})
+	return r
+}
+
+func (r *cmdHelpBuilder) addCmdWithComment(label, cmd, comment string, args ...string) *cmdHelpBuilder {
+	r.items = append(r.items, cmdHelpItem{
+		label:   label,
+		cmd:     cmd,
+		comment: comment,
+		args:    args,
+	})
+	return r
+}
+
+func (r *cmdHelpBuilder) build() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("<b>%s</b>\n", r.label))
+	for i, item := range r.items {
+		sb.WriteString(fmt.Sprintf("<b>\u2022 %s</b>\n", item.label))
+		sb.WriteString(fmt.Sprintf("%s,%s", r.baseCmd, item.cmd))
+
+		if len(item.args) > 0 {
+			sb.WriteString(",\n")
+		} else {
+			sb.WriteString("\n")
+		}
+
+		for j, arg := range item.args {
+			sArg := arg
+			if strings.Contains(sArg, "|") {
+				parts := strings.Split(sArg, "|")
+				sArg = fmt.Sprintf("%s\n ИЛИ\n %s", parts[0], parts[1])
+			}
+
+			if j == len(item.args)-1 {
+				sb.WriteString(fmt.Sprintf(" %s\n", sArg))
+			} else {
+				sb.WriteString(fmt.Sprintf(" %s,\n", sArg))
+			}
+		}
+
+		if i != len(r.items)-1 {
+			sb.WriteString("\n")
+		}
+	}
+
+	return sb.String()
 }

@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -15,68 +16,15 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) processSport(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) == 0 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	var resp []CmdResponse
-
-	switch cmdParts[0] {
-	// Sport
-	case "set":
-		resp = r.sportSetCommand(cmdParts[1:], userID)
-	case "st":
-		resp = r.sportSetTemplateCommand(cmdParts[1:], userID)
-	case "del":
-		resp = r.sportDelCommand(cmdParts[1:], userID)
-	case "list":
-		resp = r.sportListCommand(userID)
-	// Sport activity
-	case "as":
-		resp = r.sportActivitySetCommand(cmdParts[1:], userID)
-	case "ad":
-		resp = r.sportActivityDelCommand(cmdParts[1:], userID)
-	case "ar":
-		resp = r.sportActivityReportCommand(cmdParts[1:], userID)
-	//
-	case "h":
-		resp = r.sportHelpCommand(baseCmd)
-	default:
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	return resp
-}
-
-func (r *CmdProcessor) sportSetCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 3 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) sportSetCommand(userID int64, key, name, comment string) []CmdResponse {
 	// Save in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
 	if err := r.stg.SetSport(ctx, userID, &storage.Sport{
-		Key:     cmdParts[0],
-		Name:    cmdParts[1],
-		Comment: cmdParts[2],
+		Key:     key,
+		Name:    name,
+		Comment: comment,
 	}); err != nil {
 		if errors.Is(err, storage.ErrSportInvalid) {
 			return NewSingleCmdResponse(MsgErrInvalidCommand)
@@ -84,7 +32,6 @@ func (r *CmdProcessor) sportSetCommand(cmdParts []string, userID int64) []CmdRes
 
 		r.logger.Error(
 			"sport set command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -95,21 +42,12 @@ func (r *CmdProcessor) sportSetCommand(cmdParts []string, userID int64) []CmdRes
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) sportSetTemplateCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) sportSetTemplateCommand(userID int64, key string) []CmdResponse {
 	// Get from DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	sport, err := r.stg.GetSport(ctx, userID, cmdParts[0])
+	sport, err := r.stg.GetSport(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrSportNotFound) {
 			return NewSingleCmdResponse(MsgErrSportNotFound)
@@ -117,7 +55,6 @@ func (r *CmdProcessor) sportSetTemplateCommand(cmdParts []string, userID int64) 
 
 		r.logger.Error(
 			"sport get command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -128,28 +65,18 @@ func (r *CmdProcessor) sportSetTemplateCommand(cmdParts []string, userID int64) 
 	return NewSingleCmdResponse(fmt.Sprintf("s,set,%s,%s,%s", sport.Key, sport.Name, sport.Comment))
 }
 
-func (r *CmdProcessor) sportDelCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 1 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) sportDelCommand(userID int64, key string) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	if err := r.stg.DeleteSport(ctx, userID, cmdParts[0]); err != nil {
+	if err := r.stg.DeleteSport(ctx, userID, key); err != nil {
 		if errors.Is(err, storage.ErrSportIsUsed) {
 			return NewSingleCmdResponse(MsgErrSportIsUsed)
 		}
 
 		r.logger.Error(
 			"sport del command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -213,48 +140,19 @@ func (r *CmdProcessor) sportListCommand(userID int64) []CmdResponse {
 	})
 }
 
-func (r *CmdProcessor) sportActivitySetCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) < 3 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	timestamp, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	sets := []int64{}
-	for _, part := range cmdParts[2:] {
-		s, err := strconv.ParseInt(part, 10, 64)
-		if err != nil {
-			r.logger.Error(
-				"invalid command",
-				zap.Strings("cmdParts", cmdParts),
-				zap.Int64("userID", userID),
-			)
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
-		}
-
-		sets = append(sets, s)
-	}
-
+func (r *CmdProcessor) sportActivitySetCommand(
+	userID int64,
+	ts time.Time,
+	sportKey string,
+	sets []int64,
+) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
 	if err := r.stg.SetSportActivity(ctx, userID, &storage.SportActivity{
-		SportKey:  cmdParts[1],
-		Timestamp: storage.NewTimestamp(timestamp),
+		SportKey:  sportKey,
+		Timestamp: storage.NewTimestamp(ts),
 		Sets:      sets,
 	}); err != nil {
 		if errors.Is(err, storage.ErrSportNotFound) {
@@ -263,7 +161,6 @@ func (r *CmdProcessor) sportActivitySetCommand(cmdParts []string, userID int64) 
 
 		r.logger.Error(
 			"sport activity set command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -274,34 +171,14 @@ func (r *CmdProcessor) sportActivitySetCommand(cmdParts []string, userID int64) 
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) sportActivityDelCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 2 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	timestamp, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) sportActivityDelCommand(userID int64, ts time.Time, sportKey string) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	if err := r.stg.DeleteSportActivity(ctx, userID, storage.NewTimestamp(timestamp), cmdParts[1]); err != nil {
+	if err := r.stg.DeleteSportActivity(ctx, userID, storage.NewTimestamp(ts), sportKey); err != nil {
 		r.logger.Error(
 			"sport activity del command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -312,36 +189,7 @@ func (r *CmdProcessor) sportActivityDelCommand(cmdParts []string, userID int64) 
 	return NewSingleCmdResponse(MsgOK)
 }
 
-func (r *CmdProcessor) sportActivityReportCommand(cmdParts []string, userID int64) []CmdResponse {
-	if len(cmdParts) != 2 {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	tsFrom, err := r.parseTimestamp(cmdParts[0])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
-	tsTo, err := r.parseTimestamp(cmdParts[1])
-	if err != nil {
-		r.logger.Error(
-			"invalid command",
-			zap.Strings("cmdParts", cmdParts),
-			zap.Int64("userID", userID),
-		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
-	}
-
+func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo time.Time) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -354,7 +202,6 @@ func (r *CmdProcessor) sportActivityReportCommand(cmdParts []string, userID int6
 
 		r.logger.Error(
 			"sport activity report command DB error",
-			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -438,52 +285,4 @@ func (r *CmdProcessor) sportActivityReportCommand(cmdParts []string, userID int6
 		MIME:     "text/html",
 		FileName: fmt.Sprintf("sport_act_%s_%s.html", tsFromStr, tsToStr),
 	})
-}
-
-func (r *CmdProcessor) sportHelpCommand(baseCmd string) []CmdResponse {
-	return NewSingleCmdResponse(
-		newCmdHelpBuilder(baseCmd, "Управление спортом").
-			addCmd(
-				"Установка",
-				"set",
-				"Ключ [Строка>0]",
-				"Наименование [Строка>0]",
-				"Комментарий [Строка>=0]",
-			).
-			addCmd(
-				"Шаблон команды установки",
-				"st",
-				"Ключ [Строка>0]",
-			).
-			addCmd(
-				"Удаление",
-				"del",
-				"Ключ [Строка>0]",
-			).
-			addCmd(
-				"Список",
-				"list",
-			).
-			addCmd(
-				"Установка активности",
-				"as",
-				"[Дата]",
-				"Ключ спорта [Строка>0]",
-				"Подход1 [Целое>0]",
-				"...",
-			).
-			addCmd(
-				"Удаление активности",
-				"ad",
-				"[Дата]",
-				"Ключ спорта [Строка>0]",
-			).
-			addCmd(
-				"Отчет по активности",
-				"ar",
-				"С [Дата]",
-				"По [Дата]",
-			).
-			build(),
-		optsHTML)
 }
