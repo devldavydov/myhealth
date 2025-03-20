@@ -219,6 +219,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 		total     int64
 	}
 	grpData := make(map[storage.Timestamp][]grpItem, len(dbRes))
+	graphData := make(map[string]map[storage.Timestamp]int64, len(dbRes))
 
 	for _, d := range dbRes {
 		total := int64(0)
@@ -234,6 +235,12 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 			sets:      strings.Join(sets, ","),
 			total:     total,
 		})
+
+		_, ok := graphData[d.SportName]
+		if !ok {
+			graphData[d.SportName] = make(map[storage.Timestamp]int64)
+		}
+		graphData[d.SportName][d.Timestamp] = total
 	}
 
 	keys := make([]storage.Timestamp, 0, len(grpData))
@@ -245,6 +252,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 	// Build html
 	htmlBuilder := html.NewBuilder("Спортивная активность за период")
 	tsFromStr, tsToStr := formatTimestamp(tsFrom), formatTimestamp(tsTo)
+	accordion := html.NewAccordion("accordionSA")
 
 	// Table
 	tbl := html.NewTable([]string{"Дата", "Спорт", "Подходы", "Итого"})
@@ -272,16 +280,87 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 			tbl.AddRow(tr)
 		}
 	}
+	accordion.AddItem(html.HewAccordionItem(
+		"tbl",
+		"Таблица активности",
+		tbl,
+	))
+
+	// Graph
+	sportNames := make([]string, 0, len(graphData))
+	for k := range graphData {
+		sportNames = append(sportNames, k)
+	}
+	slices.Sort(sportNames)
+
+	var chartSnippets []html.IELement
+
+	for i, sportName := range sportNames {
+		sportTs := make([]storage.Timestamp, 0, len(graphData[sportName]))
+		for k := range graphData[sportName] {
+			sportTs = append(sportTs, k)
+		}
+		slices.Sort(sportTs)
+
+		xlabels := make([]string, 0, len(sportTs))
+		data := make([]float64, 0, len(sportTs))
+
+		for _, k := range sportTs {
+			xlabels = append(xlabels, formatTimestamp(k.ToTime(r.tz)))
+			data = append(data, float64(graphData[sportName][k]))
+		}
+
+		chartID := fmt.Sprintf("chart%d", i)
+		chart := html.NewCanvas(chartID)
+		accordion.AddItem(html.HewAccordionItem(
+			fmt.Sprintf("sport%d", i),
+			fmt.Sprintf("График спорта: %s", sportName),
+			chart,
+		))
+
+		snippet, err := GetChartSnippet(&ChartData{
+			PlotFunc: fmt.Sprintf("plot%d", i),
+			ElemID:   chartID,
+			XLabels:  xlabels,
+			Type:     "line",
+			Datasets: []ChartDataset{
+				{
+					Data:  data,
+					Label: sportName,
+					Color: ChartColorBlue,
+				},
+			},
+		})
+		if err != nil {
+			r.logger.Error(
+				"sport activity report error",
+				zap.Int64("userID", userID),
+				zap.Error(err),
+			)
+
+			return NewSingleCmdResponse(MsgErrInternal)
+		}
+		chartSnippets = append(chartSnippets, html.NewS(snippet))
+	}
 
 	// Doc
-	htmlBuilder.Add(
-		html.NewContainer().Add(
-			html.NewH(
-				fmt.Sprintf("Спортивная активность за %s - %s", tsFromStr, tsToStr),
-				5,
-				html.Attrs{"align": "center"},
-			),
-			tbl))
+	totalElements := []html.IELement{
+		html.NewH(
+			fmt.Sprintf("Спортивная активность за %s - %s", tsFromStr, tsToStr),
+			5,
+			html.Attrs{"align": "center"},
+		),
+		accordion,
+		html.NewScript(_jsBootstrapURL),
+		html.NewScript(_jsChartURL),
+		html.NewS(GetStartPlotSnippet()),
+	}
+	totalElements = append(totalElements, chartSnippets...)
+	totalElements = append(totalElements, html.NewS(GetEndPlotSnippet()))
+	htmlBuilder.
+		Add(
+			html.NewContainer().Add(totalElements...),
+		)
 
 	// Response
 	return NewSingleCmdResponse(&tele.Document{

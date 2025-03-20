@@ -16,6 +16,7 @@ const (
 )
 
 type ChartData struct {
+	PlotFunc string
 	ElemID   string
 	XLabels  []string
 	Type     string
@@ -33,7 +34,7 @@ func GetChartSnippet(data *ChartData) (string, error) {
 		New("").
 		Parse(`
 <script>
-	function plot() {
+	function {{.PlotFunc}}() {
 		const ctx = document.getElementById('{{.ElemID}}');
 
 		new Chart(ctx, {
@@ -62,7 +63,7 @@ func GetChartSnippet(data *ChartData) (string, error) {
 			}
 		});		
 	}
-	window.onload = plot;
+	plots.push({{.PlotFunc}});
 </script>
 	`))
 
@@ -72,4 +73,24 @@ func GetChartSnippet(data *ChartData) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func GetStartPlotSnippet() string {
+	return `
+		<script>
+			var plots = [];
+		</script>
+	`
+}
+
+func GetEndPlotSnippet() string {
+	return `
+		<script>
+			window.onload = function() {
+				for (f of plots) {
+					f();
+				}
+			}
+		</script>
+	`
 }

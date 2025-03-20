@@ -119,9 +119,10 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 			chart))
 
 	chartSnip, err := GetChartSnippet(&ChartData{
-		ElemID:  "chart",
-		XLabels: xlabels,
-		Type:    "line",
+		PlotFunc: "plot",
+		ElemID:   "chart",
+		XLabels:  xlabels,
+		Type:     "line",
 		Datasets: []ChartDataset{
 			{
 				Data:  data,
@@ -147,7 +148,9 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 		),
 		html.NewScript(_jsBootstrapURL),
 		html.NewScript(_jsChartURL),
+		html.NewS(GetStartPlotSnippet()),
 		html.NewS(chartSnip),
+		html.NewS(GetEndPlotSnippet()),
 	)
 
 	// Response
