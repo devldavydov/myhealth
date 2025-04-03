@@ -189,6 +189,16 @@ commands:
         type: timestamp
       - name: Прием пищи
         type: meal
+    - name: db
+      func: journalDelBundleCommand
+      description: Удаление бандла из журнала
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Прием пищи
+        type: meal
+      - name: Ключ бандла
+        type: stringG0
     - name: cp
       func: journalCopyCommand
       description: Копирование

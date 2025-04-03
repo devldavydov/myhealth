@@ -499,6 +499,33 @@ func (r *StorageSQLite) DeleteJournalMeal(ctx context.Context, userID int64, tim
 	return err
 }
 
+func (r *StorageSQLite) DelJournalBundle(ctx context.Context, userID int64, timestamp s.Timestamp, meal s.Meal, bndlKey string) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	foodItems, err := getBundleFoodItems(ctx, tx, userID, bndlKey)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range foodItems {
+		if _, err := tx.ExecContext(ctx,
+			_sqlDeleteJournal,
+			userID,
+			timestamp,
+			meal,
+			item.foodKey,
+		); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
 func (r *StorageSQLite) GetJournalReport(ctx context.Context, userID int64, from, to s.Timestamp) ([]s.JournalReport, error) {
 	rows, err := r.db.QueryContext(ctx, _sqlGetJournalReport, userID, from, to)
 	if err != nil {

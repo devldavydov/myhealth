@@ -123,6 +123,37 @@ func (r *CmdProcessor) journalDelMealCommand(userID int64, ts time.Time, meal st
 	return NewSingleCmdResponse(MsgOK)
 }
 
+func (r *CmdProcessor) journalDelBundleCommand(
+	userID int64,
+	ts time.Time,
+	meal storage.Meal,
+	bndlKey string,
+) []CmdResponse {
+	// Save in DB
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.DelJournalBundle(ctx, userID, storage.NewTimestamp(ts), meal, bndlKey); err != nil {
+		if errors.Is(err, storage.ErrFoodNotFound) {
+			return NewSingleCmdResponse(MsgErrFoodNotFound)
+		}
+
+		if errors.Is(err, storage.ErrBundleNotFound) {
+			return NewSingleCmdResponse(MsgErrBundleNotFound)
+		}
+
+		r.logger.Error(
+			"journal del bundle command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	return NewSingleCmdResponse(MsgOK)
+}
+
 func (r *CmdProcessor) journalCopyCommand(
 	userID int64,
 	tsFrom time.Time,

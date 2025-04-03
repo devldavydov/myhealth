@@ -34,6 +34,7 @@ type Storage interface {
 	SetJournalBundle(ctx context.Context, userID int64, timestamp Timestamp, meal Meal, bndlKey string) error
 	DeleteJournal(ctx context.Context, userID int64, timestamp Timestamp, meal Meal, foodkey string) error
 	DeleteJournalMeal(ctx context.Context, userID int64, timestamp Timestamp, meal Meal) error
+	DelJournalBundle(ctx context.Context, userID int64, timestamp Timestamp, meal Meal, bndlKey string) error
 	GetJournalReport(ctx context.Context, userID int64, from, to Timestamp) ([]JournalReport, error)
 	CopyJournal(ctx context.Context, userID int64, from Timestamp, mealFrom Meal, to Timestamp, mealTo Meal) (int, error)
 	GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to Timestamp, foodkey string) (float64, error)

@@ -809,6 +809,35 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			val1,
 			)
 				
+	case "db":
+		if len(cmdParts[1:]) != 3 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseMeal(cmdParts[1])
+		if err != nil {
+			return argError("Прием пищи")
+		}
+		
+		val2, err := parseStringG0(cmdParts[2])
+		if err != nil {
+			return argError("Ключ бандла")
+		}
+		
+		resp = r.journalDelBundleCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			)
+				
 	case "cp":
 		if len(cmdParts[1:]) != 4 {
 			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
@@ -931,6 +960,13 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				"dm",
 				"Дата [Дата]",
 				"Прием пищи [Прием пищи]",
+				).
+			addCmd(
+				"Удаление бандла из журнала",
+				"db",
+				"Дата [Дата]",
+				"Прием пищи [Прием пищи]",
+				"Ключ бандла [Строка>0]",
 				).
 			addCmd(
 				"Копирование",

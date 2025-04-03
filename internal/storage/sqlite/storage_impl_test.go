@@ -914,6 +914,14 @@ func (r *StorageSQLiteTestSuite) TestSetJournalBundle() {
 				FoodWeight: 500, Cal: 85, Prot: 90, Fat: 95, Carb: 100},
 		}, rep)
 	})
+
+	r.Run("delete journal bundle", func() {
+		r.NoError(r.stg.DelJournalBundle(context.TODO(), 1, 1, s.Meal(0), "bndl5"))
+		r.NoError(r.stg.DelJournalBundle(context.TODO(), 1, 1, s.Meal(1), "bndlC"))
+
+		_, err := r.stg.GetJournalReport(context.TODO(), 1, 1, 2)
+		r.ErrorIs(err, s.ErrEmptyResult)
+	})
 }
 
 func (r *StorageSQLiteTestSuite) TestUserSettingsCRUD() {
