@@ -259,7 +259,7 @@ func parseMeal(arg string) (storage.Meal, error) {
 
 func parseStringArr(arg string) ([]string, error) {
 	parts := []string{}
-	for _, part := range strings.Split(arg, "|") {
+	for _, part := range strings.Split(arg, "/") {
 		parts = append(parts, strings.Trim(part, " "))
 	}
 
@@ -272,7 +272,7 @@ func parseStringArr(arg string) ([]string, error) {
 
 func parseIntArr(arg string) ([]int64, error) {
 	parts := []int64{}
-	for _, part := range strings.Split(arg, "|") {
+	for _, part := range strings.Split(arg, "/") {
 		part = strings.Trim(part, " ")
 		val, err := strconv.ParseInt(part, 10, 64)
 		if err != nil {

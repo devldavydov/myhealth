@@ -309,8 +309,8 @@ types:
     description: Прием пищи - одно из значений завтрак|до обеда|обед|полдник|до ужина|ужин
     description_short: Прием пищи
   - name: stringArr
-    description: Массив строк (разделитель |, длина > 0)
+    description: Массив строк (разделитель /, длина > 0)
     description_short: Массив строк
   - name: intArr
-    description: Массив целых чисел (разделитель |, длина > 0)
+    description: Массив целых чисел (разделитель /, длина > 0)
     description_short: Массив целых чисел

@@ -1238,8 +1238,8 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 	sb.WriteString("<b>\u2022 Строка>=0</b> - Строка длиной >=0\n")
 	sb.WriteString("<b>\u2022 Пол</b> - Пол - одно из значений m|f\n")
 	sb.WriteString("<b>\u2022 Прием пищи</b> - Прием пищи - одно из значений завтрак|до обеда|обед|полдник|до ужина|ужин\n")
-	sb.WriteString("<b>\u2022 Массив строк</b> - Массив строк (разделитель |, длина > 0)\n")
-	sb.WriteString("<b>\u2022 Массив целых чисел</b> - Массив целых чисел (разделитель |, длина > 0)\n")
+	sb.WriteString("<b>\u2022 Массив строк</b> - Массив строк (разделитель /, длина > 0)\n")
+	sb.WriteString("<b>\u2022 Массив целых чисел</b> - Массив целых чисел (разделитель /, длина > 0)\n")
 	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
@@ -1312,7 +1312,7 @@ func parseMeal(arg string) (storage.Meal, error) {
 
 func parseStringArr(arg string) ([]string, error) {
 	parts := []string{}
-	for _, part := range strings.Split(arg, "|") {
+	for _, part := range strings.Split(arg, "/") {
 		parts = append(parts, strings.Trim(part, " "))
 	}
 
@@ -1325,7 +1325,7 @@ func parseStringArr(arg string) ([]string, error) {
 
 func parseIntArr(arg string) ([]int64, error) {
 	parts := []int64{}
-	for _, part := range strings.Split(arg, "|") {
+	for _, part := range strings.Split(arg, "/") {
 		part = strings.Trim(part, " ")
 		val, err := strconv.ParseInt(part, 10, 64)
 		if err != nil {
