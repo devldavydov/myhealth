@@ -339,6 +339,10 @@ const (
     ) STRICT
 	`
 
+	_sqlCreateTableJournalIndexUserIDFoodKey = `
+	CREATE INDEX journal_userid_foodkey ON journal(user_id, foodkey);
+	`
+
 	_sqlSetJournal = `
 	INSERT INTO journal (
         user_id, timestamp, meal, foodkey, foodweight
@@ -364,14 +368,17 @@ const (
 		meal = $3
 	`
 
-	_sqlJournalFoodAvgWeight = `
-	SELECT coalesce(avg(foodweight), 0.0) AS avg_food_weight
-    FROM journal j
-    WHERE
-        j.user_id = $1 AND
-        j.foodkey = $2 AND
-        j.timestamp >= $3 AND
-        j.timestamp <= $4
+	_sqlJournalFoodStat = `
+	SELECT
+		min(timestamp) AS first_timestamp,
+		max(timestamp) AS last_timestamp,
+		sum(foodweight) AS total_weight,
+		avg(foodweight) AS avg_weight,
+		count(*) AS total_cnt
+	FROM journal j
+	WHERE
+		j.user_id = $1 AND
+		j.foodkey = $2
 	`
 
 	_sqlGetJournalReport = `

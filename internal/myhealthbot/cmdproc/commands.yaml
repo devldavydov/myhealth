@@ -93,7 +93,7 @@ commands:
       description: Удаление
       args:
       - name: Ключ
-        type: stringG0 
+        type: stringG0
   - name: m
     description: Управление служебными настройками
     description_short: Cлужебные настройки
@@ -225,9 +225,9 @@ commands:
         type: timestamp
       - name: Прием пищи
         type: meal
-    - name: fa
-      func: journalFoodAvgWeightCommand
-      description: Средний вес еды
+    - name: fs
+      func: journalFoodStatCommand
+      description: Статистика по еде
       args:
       - name: Ключ еды
         type: stringG0

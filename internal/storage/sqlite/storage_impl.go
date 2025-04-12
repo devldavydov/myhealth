@@ -624,16 +624,19 @@ func (r *StorageSQLite) CopyJournal(ctx context.Context, userID int64, from s.Ti
 	return len(list), tx.Commit()
 }
 
-func (r *StorageSQLite) GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to s.Timestamp, foodkey string) (float64, error) {
-	var foodAvgWeight float64
-
-	if err := r.db.
-		QueryRowContext(ctx, _sqlJournalFoodAvgWeight, userID, foodkey, from, to).
-		Scan(&foodAvgWeight); err != nil {
-		return 0, err
+func (r *StorageSQLite) GetJournalFoodStat(ctx context.Context, userID int64, foodkey string) (*s.JournalFoodStat, error) {
+	var fs s.JournalFoodStat
+	err := r.db.
+		QueryRowContext(ctx, _sqlJournalFoodStat, userID, foodkey).
+		Scan(&fs.FirstTimestamp, &fs.LastTimestamp, &fs.TotalWeight, &fs.AvgWeight, &fs.TotalCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, s.ErrEmptyResult
+		}
+		return nil, err
 	}
 
-	return foodAvgWeight, nil
+	return &fs, nil
 }
 
 //

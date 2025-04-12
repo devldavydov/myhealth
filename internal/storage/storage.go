@@ -37,7 +37,7 @@ type Storage interface {
 	DelJournalBundle(ctx context.Context, userID int64, timestamp Timestamp, meal Meal, bndlKey string) error
 	GetJournalReport(ctx context.Context, userID int64, from, to Timestamp) ([]JournalReport, error)
 	CopyJournal(ctx context.Context, userID int64, from Timestamp, mealFrom Meal, to Timestamp, mealTo Meal) (int, error)
-	GetJournalFoodAvgWeight(ctx context.Context, userID int64, from, to Timestamp, foodkey string) (float64, error)
+	GetJournalFoodStat(ctx context.Context, userID int64, foodkey string) (*JournalFoodStat, error)
 
 	// Sport
 	GetSport(ctx context.Context, userID int64, key string) (*Sport, error)

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
@@ -406,31 +407,55 @@ func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, me
 	return resp
 }
 
-func (r *CmdProcessor) journalFoodAvgWeightCommand(userID int64, foodKey string) []CmdResponse {
-	tsTo := time.Now().In(r.tz)
-	tsFrom := tsTo.AddDate(-1, 0, 0)
-
+func (r *CmdProcessor) journalFoodStatCommand(userID int64, foodKey string) []CmdResponse {
 	// Call DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	avgW, err := r.stg.GetJournalFoodAvgWeight(ctx,
-		userID,
-		storage.NewTimestamp(tsFrom),
-		storage.NewTimestamp(tsTo),
-		foodKey,
-	)
+	food, err := r.stg.GetFood(ctx, userID, foodKey)
 	if err != nil {
+		if errors.Is(err, storage.ErrFoodNotFound) {
+			return NewSingleCmdResponse(MsgErrFoodNotFound)
+		}
+
 		r.logger.Error(
-			"journal food avg command DB error",
+			"journal food stat command DB error",
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
-
 		return NewSingleCmdResponse(MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(fmt.Sprintf("Средний вес прима пищи за год: %.1fг.", avgW))
+	foodStat, err := r.stg.GetJournalFoodStat(ctx,
+		userID,
+		foodKey,
+	)
+	if err != nil {
+		if errors.Is(err, storage.ErrEmptyResult) {
+			return NewSingleCmdResponse(MsgErrEmptyResult)
+		}
+
+		r.logger.Error(
+			"journal food stat command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	var sb strings.Builder
+	foodName := food.Name
+	if food.Brand != "" {
+		foodName = fmt.Sprintf("%s [%s]", foodName, food.Brand)
+	}
+	sb.WriteString(fmt.Sprintf("<b>Наименование:</b> %s\n", foodName))
+	sb.WriteString(fmt.Sprintf("<b>Итого съедено:</b> %.1fг. (%.1fкг.)\n", foodStat.TotalWeight, foodStat.TotalWeight/1000))
+	sb.WriteString(fmt.Sprintf("<b>Средний вес за приём пищи:</b> %.1fг.\n", foodStat.AvgWeight))
+	sb.WriteString(fmt.Sprintf("<b>Количество раз:</b> %d\n", foodStat.TotalCount))
+	sb.WriteString(fmt.Sprintf("<b>Первый раз:</b> %s\n", formatTimestamp(foodStat.FirstTimestamp.ToTime(r.tz))))
+	sb.WriteString(fmt.Sprintf("<b>Последний раз:</b> %s\n", formatTimestamp(foodStat.LastTimestamp.ToTime(r.tz))))
+
+	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
 func pfcSnippet(val, totalVal float64) html.IELement {

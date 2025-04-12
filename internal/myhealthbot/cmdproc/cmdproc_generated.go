@@ -913,7 +913,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			val1,
 			)
 				
-	case "fa":
+	case "fs":
 		if len(cmdParts[1:]) != 1 {
 			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
 		}
@@ -925,7 +925,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			return argError("Ключ еды")
 		}
 		
-		resp = r.journalFoodAvgWeightCommand(
+		resp = r.journalFoodStatCommand(
 			userID,
 			val0,
 			)
@@ -988,8 +988,8 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				"Прием пищи [Прием пищи]",
 				).
 			addCmd(
-				"Средний вес еды",
-				"fa",
+				"Статистика по еде",
+				"fs",
 				"Ключ еды [Строка>0]",
 				).
 			build(),

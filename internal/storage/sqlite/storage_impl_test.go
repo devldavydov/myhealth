@@ -21,7 +21,7 @@ func (r *StorageSQLiteTestSuite) TestMigrations() {
 	r.Run("check last migration", func() {
 		migrationID, err := r.stg.getLastMigrationID(context.Background())
 		r.NoError(err)
-		r.Equal(int64(8), migrationID)
+		r.Equal(int64(9), migrationID)
 	})
 }
 
@@ -692,9 +692,15 @@ func (r *StorageSQLiteTestSuite) TestJournalCRUD() {
 				FoodWeight: 400, Cal: 4, Prot: 4, Fat: 4, Carb: 4},
 		}, rep)
 
-		foodAvgW, err := r.stg.GetJournalFoodAvgWeight(context.TODO(), 1, 1, 2, "food_b")
+		foodStat, err := r.stg.GetJournalFoodStat(context.TODO(), 1, "food_b")
 		r.NoError(err)
-		r.Equal(float64(200), foodAvgW)
+		r.Equal(&s.JournalFoodStat{
+			FirstTimestamp: 1,
+			LastTimestamp:  2,
+			TotalWeight:    400,
+			AvgWeight:      200,
+			TotalCount:     2,
+		}, foodStat)
 	})
 
 	r.Run("check that user 2 gets his data", func() {

@@ -101,6 +101,14 @@ type JournalReport struct {
 	Carb       float64
 }
 
+type JournalFoodStat struct {
+	FirstTimestamp Timestamp
+	LastTimestamp  Timestamp
+	TotalWeight    float64
+	AvgWeight      float64
+	TotalCount     int64
+}
+
 type Weight struct {
 	Timestamp Timestamp
 	Value     float64
