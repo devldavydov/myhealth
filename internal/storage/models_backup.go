@@ -28,7 +28,7 @@ type SportActivityBackup struct {
 	UserID    int64     `json:"user_id"`
 	SportKey  string    `json:"sport_key"`
 	Timestamp Timestamp `json:"timestamp"`
-	Sets      []int64   `json:"sets"`
+	Sets      []float64 `json:"sets"`
 }
 
 type UserSettingsBackup struct {

@@ -1103,7 +1103,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 			return argError("Ключ спорта")
 		}
 		
-		val2, err := parseIntArr(cmdParts[2])
+		val2, err := parseFloatArr(cmdParts[2])
 		if err != nil {
 			return argError("Подходы")
 		}
@@ -1190,7 +1190,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				"as",
 				"Дата [Дата]",
 				"Ключ спорта [Строка>0]",
-				"Подходы [Массив целых чисел]",
+				"Подходы [Массив дробных чисел]",
 				).
 			addCmd(
 				"Удаление активности",
@@ -1239,7 +1239,7 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 	sb.WriteString("<b>\u2022 Пол</b> - Пол - одно из значений m|f\n")
 	sb.WriteString("<b>\u2022 Прием пищи</b> - Прием пищи - одно из значений завтрак|до обеда|обед|полдник|до ужина|ужин\n")
 	sb.WriteString("<b>\u2022 Массив строк</b> - Массив строк (разделитель /, длина > 0)\n")
-	sb.WriteString("<b>\u2022 Массив целых чисел</b> - Массив целых чисел (разделитель /, длина > 0)\n")
+	sb.WriteString("<b>\u2022 Массив дробных чисел</b> - Массив дробных чисел (разделитель /, длина > 0)\n")
 	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
@@ -1323,11 +1323,11 @@ func parseStringArr(arg string) ([]string, error) {
 	return parts, nil
 }
 
-func parseIntArr(arg string) ([]int64, error) {
-	parts := []int64{}
+func parseFloatArr(arg string) ([]float64, error) {
+	parts := []float64{}
 	for _, part := range strings.Split(arg, "/") {
 		part = strings.Trim(part, " ")
-		val, err := strconv.ParseInt(part, 10, 64)
+		val, err := strconv.ParseFloat(part, 64)
 		if err != nil {
 			return nil, err
 		}

@@ -269,7 +269,7 @@ commands:
       - name: Ключ спорта
         type: stringG0
       - name: Подходы
-        type: intArr
+        type: intFloat
     - name: ad
       func: sportActivityDelCommand
       description: Удаление активности
@@ -311,6 +311,6 @@ types:
   - name: stringArr
     description: Массив строк (разделитель /, длина > 0)
     description_short: Массив строк
-  - name: intArr
-    description: Массив целых чисел (разделитель /, длина > 0)
-    description_short: Массив целых чисел
+  - name: intFloat
+    description: Массив дробных чисел (разделитель /, длина > 0)
+    description_short: Массив дробных чисел

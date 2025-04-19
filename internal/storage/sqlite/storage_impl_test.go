@@ -199,11 +199,11 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		r.ErrorIs(r.stg.SetSportActivity(context.Background(), 1, &s.SportActivity{SportKey: "sport1"}), s.ErrSportActivityInvalid)
 		r.ErrorIs(r.stg.SetSportActivity(context.Background(), 1, &s.SportActivity{
 			SportKey: "sport1",
-			Sets:     []int64{0},
+			Sets:     []float64{0},
 		}), s.ErrSportActivityInvalid)
 		r.ErrorIs(r.stg.SetSportActivity(context.Background(), 1, &s.SportActivity{
 			SportKey: "sport1",
-			Sets:     []int64{-1},
+			Sets:     []float64{-1},
 		}), s.ErrSportActivityInvalid)
 	})
 
@@ -211,7 +211,7 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		r.ErrorIs(r.stg.SetSportActivity(context.Background(), 1, &s.SportActivity{
 			SportKey:  "sport1",
 			Timestamp: 1,
-			Sets:      []int64{1, 2, 3},
+			Sets:      []float64{1, 2, 3},
 		}), s.ErrSportNotFound)
 	})
 
@@ -219,12 +219,12 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		r.NoError(r.stg.SetSportActivity(context.Background(), 1, &s.SportActivity{
 			SportKey:  "sport1 key",
 			Timestamp: 1,
-			Sets:      []int64{1, 2, 3},
+			Sets:      []float64{1, 2, 3},
 		}))
 		r.NoError(r.stg.SetSportActivity(context.Background(), 1, &s.SportActivity{
 			SportKey:  "sport2 key",
 			Timestamp: 2,
-			Sets:      []int64{4, 5, 6},
+			Sets:      []float64{4, 5, 6},
 		}))
 	})
 
@@ -232,8 +232,8 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.SportActivityReport{
-			{SportName: "sport1 name", Timestamp: 1, Sets: []int64{1, 2, 3}},
-			{SportName: "sport2 name", Timestamp: 2, Sets: []int64{4, 5, 6}},
+			{SportName: "sport1 name", Timestamp: 1, Sets: []float64{1, 2, 3}},
+			{SportName: "sport2 name", Timestamp: 2, Sets: []float64{4, 5, 6}},
 		}, res)
 	})
 
@@ -245,7 +245,7 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.SportActivityReport{
-			{SportName: "sport2 name", Timestamp: 2, Sets: []int64{4, 5, 6}},
+			{SportName: "sport2 name", Timestamp: 2, Sets: []float64{4, 5, 6}},
 		}, res)
 	})
 
@@ -253,7 +253,7 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		r.NoError(r.stg.SetSportActivity(context.Background(), 1, &s.SportActivity{
 			SportKey:  "sport2 key",
 			Timestamp: 2,
-			Sets:      []int64{4, 5, 6, 7, 8, 9},
+			Sets:      []float64{4, 5, 6, 7, 8, 9},
 		}))
 	})
 
@@ -261,7 +261,7 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.SportActivityReport{
-			{SportName: "sport2 name", Timestamp: 2, Sets: []int64{4, 5, 6, 7, 8, 9}},
+			{SportName: "sport2 name", Timestamp: 2, Sets: []float64{4, 5, 6, 7, 8, 9}},
 		}, res)
 	})
 
@@ -975,9 +975,9 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 2, Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
 		},
 		SportActivity: []s.SportActivityBackup{
-			{UserID: 1, SportKey: "sport1 key", Timestamp: 1, Sets: []int64{1, 2, 3}},
-			{UserID: 1, SportKey: "sport2 key", Timestamp: 2, Sets: []int64{4, 5, 6}},
-			{UserID: 2, SportKey: "sport1 key", Timestamp: 1, Sets: []int64{7, 8, 9}},
+			{UserID: 1, SportKey: "sport1 key", Timestamp: 1, Sets: []float64{1, 2, 3}},
+			{UserID: 1, SportKey: "sport2 key", Timestamp: 2, Sets: []float64{4, 5, 6}},
+			{UserID: 2, SportKey: "sport1 key", Timestamp: 1, Sets: []float64{7, 8, 9}},
 		},
 		UserSettings: []s.UserSettingsBackup{
 			{UserID: 1, CalLimit: 123.123},
@@ -1054,14 +1054,14 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 			r.NoError(err)
 			r.Equal([]s.SportActivityReport{
-				{SportName: "sport1 name", Timestamp: 1, Sets: []int64{1, 2, 3}},
-				{SportName: "sport2 name", Timestamp: 2, Sets: []int64{4, 5, 6}},
+				{SportName: "sport1 name", Timestamp: 1, Sets: []float64{1, 2, 3}},
+				{SportName: "sport2 name", Timestamp: 2, Sets: []float64{4, 5, 6}},
 			}, res)
 
 			res, err = r.stg.GetSportActivityReport(context.Background(), 2, 1, 3)
 			r.NoError(err)
 			r.Equal([]s.SportActivityReport{
-				{SportName: "sport1 name", Timestamp: 1, Sets: []int64{7, 8, 9}},
+				{SportName: "sport1 name", Timestamp: 1, Sets: []float64{7, 8, 9}},
 			}, res)
 		}
 

@@ -144,7 +144,7 @@ func (r *CmdProcessor) sportActivitySetCommand(
 	userID int64,
 	ts time.Time,
 	sportKey string,
-	sets []int64,
+	sets []float64,
 ) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
@@ -216,18 +216,18 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 	type grpItem struct {
 		sportName string
 		sets      string
-		total     int64
+		total     float64
 	}
 	grpData := make(map[storage.Timestamp][]grpItem, len(dbRes))
-	graphData := make(map[string]map[storage.Timestamp]int64, len(dbRes))
+	graphData := make(map[string]map[storage.Timestamp]float64, len(dbRes))
 
 	for _, d := range dbRes {
-		total := int64(0)
+		total := float64(0)
 		sets := make([]string, 0, len(d.Sets))
 
 		for _, item := range d.Sets {
 			total += item
-			sets = append(sets, strconv.FormatInt(item, 10))
+			sets = append(sets, strconv.FormatFloat(item, 'g', -1, 64))
 		}
 
 		grpData[d.Timestamp] = append(grpData[d.Timestamp], grpItem{
@@ -238,7 +238,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 
 		_, ok := graphData[d.SportName]
 		if !ok {
-			graphData[d.SportName] = make(map[storage.Timestamp]int64)
+			graphData[d.SportName] = make(map[storage.Timestamp]float64)
 		}
 		graphData[d.SportName][d.Timestamp] = total
 	}

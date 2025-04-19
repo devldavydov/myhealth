@@ -121,8 +121,8 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 		{{- if (eq $arg.Type "stringArr") }}
 		val{{ $index }}, err := parseStringArr(cmdParts[{{ $index }}])
 		{{ end -}}
-		{{- if (eq $arg.Type "intArr") }}
-		val{{ $index }}, err := parseIntArr(cmdParts[{{ $index }}])
+		{{- if (eq $arg.Type "intFloat") }}
+		val{{ $index }}, err := parseFloatArr(cmdParts[{{ $index }}])
 		{{ end -}}			 
 		if err != nil {
 			return argError("{{ $arg.Name }}")
@@ -270,11 +270,11 @@ func parseStringArr(arg string) ([]string, error) {
 	return parts, nil
 }
 
-func parseIntArr(arg string) ([]int64, error) {
-	parts := []int64{}
+func parseFloatArr(arg string) ([]float64, error) {
+	parts := []float64{}
 	for _, part := range strings.Split(arg, "/") {
 		part = strings.Trim(part, " ")
-		val, err := strconv.ParseInt(part, 10, 64)
+		val, err := strconv.ParseFloat(part, 64)
 		if err != nil {
 			return nil, err
 		}

@@ -163,7 +163,7 @@ func (r *Sport) Validate() bool {
 type SportActivity struct {
 	SportKey  string
 	Timestamp Timestamp
-	Sets      []int64
+	Sets      []float64
 }
 
 func (r *SportActivity) Validate() bool {
@@ -180,5 +180,5 @@ func (r *SportActivity) Validate() bool {
 type SportActivityReport struct {
 	SportName string
 	Timestamp Timestamp
-	Sets      []int64
+	Sets      []float64
 }
