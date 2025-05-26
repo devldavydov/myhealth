@@ -121,7 +121,7 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 		{{- if (eq $arg.Type "stringArr") }}
 		val{{ $index }}, err := parseStringArr(cmdParts[{{ $index }}])
 		{{ end -}}
-		{{- if (eq $arg.Type "intFloat") }}
+		{{- if (eq $arg.Type "floatArr") }}
 		val{{ $index }}, err := parseFloatArr(cmdParts[{{ $index }}])
 		{{ end -}}			 
 		if err != nil {

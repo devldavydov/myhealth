@@ -94,7 +94,7 @@ commands:
       args:
       - name: Ключ
         type: stringG0
-  - name: m
+  - name: x
     description: Управление служебными настройками
     description_short: Cлужебные настройки
     subcommands:
@@ -269,7 +269,7 @@ commands:
       - name: Ключ спорта
         type: stringG0
       - name: Подходы
-        type: intFloat
+        type: floatArr
     - name: ad
       func: sportActivityDelCommand
       description: Удаление активности
@@ -281,6 +281,61 @@ commands:
     - name: ar
       func: sportActivityReportCommand
       description: Отчет по активности
+      args:
+      - name: С
+        type: timestamp
+      - name: По
+        type: timestamp
+  - name: m
+    description: Управление медициной
+    description_short: Медицина
+    subcommands:
+    - name: set
+      func: medSetCommand
+      description: Установка
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Наименование
+        type: stringG0
+      - name: Комментарий
+        type: stringGE0
+    - name: st
+      func: medSetTemplateCommand
+      description: Шаблон команды установки
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: del
+      func: medDelCommand
+      description: Удаление
+      args:
+      - name: Ключ
+        type: stringG0
+    - name: list
+      func: medListCommand
+      description: Список
+    - name: is
+      func: medIndicatorSetCommand
+      description: Установка показателя
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Ключ медицины
+        type: stringG0
+      - name: Значениe
+        type: floatGE0
+    - name: id
+      func: medIndicatorDelCommand
+      description: Удаление показателя
+      args:
+      - name: Дата
+        type: timestamp
+      - name: Ключ спорта
+        type: stringG0
+    - name: ir
+      func: medIndicatorReportCommand
+      description: Отчет по показателям
       args:
       - name: С
         type: timestamp
@@ -311,6 +366,6 @@ types:
   - name: stringArr
     description: Массив строк (разделитель /, длина > 0)
     description_short: Массив строк
-  - name: intFloat
+  - name: floatArr
     description: Массив дробных чисел (разделитель /, длина > 0)
     description_short: Массив дробных чисел

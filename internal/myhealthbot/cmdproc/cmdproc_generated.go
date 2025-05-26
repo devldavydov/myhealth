@@ -38,8 +38,8 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_u("u", cmdParts[1:], userID)
 	case "f":
 		resp = r.process_f("f", cmdParts[1:], userID)
-	case "m":
-		resp = r.process_m("m", cmdParts[1:], userID)
+	case "x":
+		resp = r.process_x("x", cmdParts[1:], userID)
 	case "c":
 		resp = r.process_c("c", cmdParts[1:], userID)
 	case "b":
@@ -48,6 +48,8 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 		resp = r.process_j("j", cmdParts[1:], userID)
 	case "s":
 		resp = r.process_s("s", cmdParts[1:], userID)
+	case "m":
+		resp = r.process_m("m", cmdParts[1:], userID)
 	case "h":
 		resp = r.processHelp()
 	default:
@@ -456,7 +458,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 	return resp
 }
 
-func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+func (r *CmdProcessor) process_x(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
 	if len(cmdParts) == 0 {
 		r.logger.Error(
 			"invalid command",
@@ -1219,17 +1221,230 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 	return resp
 }
 
+func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64) []CmdResponse {
+	if len(cmdParts) == 0 {
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		return NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	var resp []CmdResponse
+
+	switch cmdParts[0] {
+	case "set":
+		if len(cmdParts[1:]) != 3 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Наименование")
+		}
+		
+		val2, err := parseStringGE0(cmdParts[2])
+		if err != nil {
+			return argError("Комментарий")
+		}
+		
+		resp = r.medSetCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			)
+				
+	case "st":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.medSetTemplateCommand(
+			userID,
+			val0,
+			)
+				
+	case "del":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		resp = r.medDelCommand(
+			userID,
+			val0,
+			)
+				
+	case "list":
+		resp = r.medListCommand(userID)
+				
+	case "is":
+		if len(cmdParts[1:]) != 3 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Ключ медицины")
+		}
+		
+		val2, err := parseFloatGE0(cmdParts[2])
+		if err != nil {
+			return argError("Значениe")
+		}
+		
+		resp = r.medIndicatorSetCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			)
+				
+	case "id":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Ключ спорта")
+		}
+		
+		resp = r.medIndicatorDelCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "ir":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("С")
+		}
+		
+		val1, err := parseTimestamp(r.tz, cmdParts[1])
+		if err != nil {
+			return argError("По")
+		}
+		
+		resp = r.medIndicatorReportCommand(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "h":
+		return NewSingleCmdResponse(
+			newCmdHelpBuilder(baseCmd, "Управление медициной").
+			addCmd(
+				"Установка",
+				"set",
+				"Ключ [Строка>0]",
+				"Наименование [Строка>0]",
+				"Комментарий [Строка>=0]",
+				).
+			addCmd(
+				"Шаблон команды установки",
+				"st",
+				"Ключ [Строка>0]",
+				).
+			addCmd(
+				"Удаление",
+				"del",
+				"Ключ [Строка>0]",
+				).
+			addCmd(
+				"Список",
+				"list",
+				).
+			addCmd(
+				"Установка показателя",
+				"is",
+				"Дата [Дата]",
+				"Ключ медицины [Строка>0]",
+				"Значениe [Дробное>=0]",
+				).
+			addCmd(
+				"Удаление показателя",
+				"id",
+				"Дата [Дата]",
+				"Ключ спорта [Строка>0]",
+				).
+			addCmd(
+				"Отчет по показателям",
+				"ir",
+				"С [Дата]",
+				"По [Дата]",
+				).
+			build(),
+		optsHTML)
+
+	default:
+		r.logger.Error(
+			"invalid command",
+			zap.Strings("cmdParts", cmdParts),
+			zap.Int64("userID", userID),
+		)
+		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+	}
+
+	return resp
+}
+
 func (r *CmdProcessor) processHelp() []CmdResponse {
 	var sb strings.Builder
 	sb.WriteString("<b>Команды помощи по разделам:</b>\n")
 	sb.WriteString("<b>\u2022 w,h</b> - Вес\n")
 	sb.WriteString("<b>\u2022 u,h</b> - Настройки пользователя\n")
 	sb.WriteString("<b>\u2022 f,h</b> - Еда\n")
-	sb.WriteString("<b>\u2022 m,h</b> - Cлужебные настройки\n")
+	sb.WriteString("<b>\u2022 x,h</b> - Cлужебные настройки\n")
 	sb.WriteString("<b>\u2022 c,h</b> - Расчет лимита калорий\n")
 	sb.WriteString("<b>\u2022 b,h</b> - Бандлы\n")
 	sb.WriteString("<b>\u2022 j,h</b> - Журнал приема пищи\n")
 	sb.WriteString("<b>\u2022 s,h</b> - Спорт\n")
+	sb.WriteString("<b>\u2022 m,h</b> - Медицина\n")
 	sb.WriteString("\n<b>Типы данных:</b>\n")
 	sb.WriteString("<b>\u2022 Дата</b> - Дата в формате DD.MM.YYYY или пустая строка для текущей даты\n")
 	sb.WriteString("<b>\u2022 Дробное>0</b> - Дробное число >0\n")
