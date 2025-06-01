@@ -114,6 +114,30 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 	}
 
+	// MedicineIndicator
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlMedicineIndicatorBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.MedicineIndicator = []s.MedicineIndicatorBackup{}
+		for rows.Next() {
+			var mi s.MedicineIndicatorBackup
+			err = rows.Scan(&mi.UserID, &mi.Timestamp, &mi.MedicineKey, &mi.Value)
+			if err != nil {
+				return nil, err
+			}
+
+			backup.MedicineIndicator = append(backup.MedicineIndicator, mi)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
 	// UserSettings
 	{
 		rows, err := r.db.QueryContext(ctx, _sqlUserSettingsBackup)
@@ -277,6 +301,20 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 			ctx,
 			m.UserID,
 			&s.Medicine{Key: m.Key, Name: m.Name, Comment: m.Comment},
+		); err != nil {
+			return err
+		}
+	}
+
+	for _, m := range backup.MedicineIndicator {
+		if err := r.SetMedicineIndicator(
+			ctx,
+			m.UserID,
+			&s.MedicineIndicator{
+				MedicineKey: m.MedicineKey,
+				Timestamp:   m.Timestamp,
+				Value:       m.Value,
+			},
 		); err != nil {
 			return err
 		}

@@ -1,15 +1,16 @@
 package storage
 
 type Backup struct {
-	Timestamp     Timestamp             `json:"timestamp"`
-	Weight        []WeightBackup        `json:"weight"`
-	Sport         []SportBackup         `json:"sport"`
-	SportActivity []SportActivityBackup `json:"sport_activity"`
-	UserSettings  []UserSettingsBackup  `json:"user_settings"`
-	Food          []FoodBackup          `json:"food"`
-	Bundle        []BundleBackup        `json:"bundle"`
-	Journal       []JournalBackup       `json:"journal"`
-	Medicine      []MedicineBackup      `json:"medicine"`
+	Timestamp         Timestamp                 `json:"timestamp"`
+	Weight            []WeightBackup            `json:"weight"`
+	Sport             []SportBackup             `json:"sport"`
+	SportActivity     []SportActivityBackup     `json:"sport_activity"`
+	UserSettings      []UserSettingsBackup      `json:"user_settings"`
+	Food              []FoodBackup              `json:"food"`
+	Bundle            []BundleBackup            `json:"bundle"`
+	Journal           []JournalBackup           `json:"journal"`
+	Medicine          []MedicineBackup          `json:"medicine"`
+	MedicineIndicator []MedicineIndicatorBackup `json:"medicine_indicator"`
 }
 
 type WeightBackup struct {
@@ -68,4 +69,11 @@ type MedicineBackup struct {
 	Key     string `json:"key"`
 	Name    string `json:"name"`
 	Comment string `json:"comment"`
+}
+
+type MedicineIndicatorBackup struct {
+	UserID      int64     `json:"user_id"`
+	MedicineKey string    `json:"sport_key"`
+	Timestamp   Timestamp `json:"timestamp"`
+	Value       float64   `json:"value"`
 }
