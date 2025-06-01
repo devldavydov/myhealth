@@ -182,3 +182,31 @@ type SportActivityReport struct {
 	Timestamp Timestamp
 	Sets      []float64
 }
+
+type Medicine struct {
+	Key     string
+	Name    string
+	Comment string
+}
+
+func (r *Medicine) Validate() bool {
+	return r.Key != "" &&
+		r.Name != ""
+}
+
+type MedicineIndicator struct {
+	MedicineKey string
+	Timestamp   Timestamp
+	Value       float64
+}
+
+func (r *MedicineIndicator) Validate() bool {
+	return r.MedicineKey != "" &&
+		r.Value >= 0
+}
+
+type MedicineIndicatorReport struct {
+	MedicineName string
+	Timestamp    Timestamp
+	Value        float64
+}

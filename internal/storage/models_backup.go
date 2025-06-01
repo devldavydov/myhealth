@@ -9,6 +9,7 @@ type Backup struct {
 	Food          []FoodBackup          `json:"food"`
 	Bundle        []BundleBackup        `json:"bundle"`
 	Journal       []JournalBackup       `json:"journal"`
+	Medicine      []MedicineBackup      `json:"medicine"`
 }
 
 type WeightBackup struct {
@@ -60,4 +61,11 @@ type JournalBackup struct {
 	Meal       Meal      `json:"meal"`
 	FoodKey    string    `json:"food_key"`
 	FoodWeight float64   `json:"food_weight"`
+}
+
+type MedicineBackup struct {
+	UserID  int64  `json:"user_id"`
+	Key     string `json:"key"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
 }

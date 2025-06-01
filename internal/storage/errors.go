@@ -33,6 +33,14 @@ var (
 	// SportActivity
 	ErrSportActivityInvalid = errors.New("invalid sport activity")
 
+	// Medicine
+	ErrMedicineInvalid  = errors.New("invalid medicine")
+	ErrMedicineNotFound = errors.New("medicine not found")
+	ErrMedicineIsUsed   = errors.New("medicine is used")
+
+	// MedicineIndicator
+	ErrMedicineIndicatorInvalid = errors.New("invalid medicine indicator")
+
 	// UserSettings
 	ErrUserSettingsNotFound = errors.New("user settings not found")
 	ErrUserSettingsInvalid  = errors.New("invalid user settings")

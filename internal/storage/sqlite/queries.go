@@ -166,6 +166,107 @@ const (
 	`
 
 	//
+	// Medicine.
+	//
+
+	_sqlCreateTableMedicine = `
+	CREATE TABLE medicine (
+	 	user_id  INTEGER NOT NULL,
+        key      TEXT NOT NULL,
+        name     TEXT NOT NULL,
+        comment  TEXT NULL,
+		PRIMARY KEY (user_id, key)
+    ) STRICT
+	`
+
+	_sqlGetMedicine = `
+	SELECT key, name, comment
+    FROM medicine
+    WHERE user_id = $1 AND key = $2
+	`
+
+	_sqlGetMedicineList = `
+	SELECT key, name, comment
+    FROM medicine
+    WHERE user_id = $1
+	ORDER BY name
+	`
+
+	_sqlSetMedicine = `
+	INSERT INTO medicine (user_id, key, name, comment)
+	VALUES ($1, $2, $3, $4)
+	ON CONFLICT (user_id, key) DO
+	UPDATE SET name = $3, comment = $4
+	`
+
+	_sqlDeleteMedicine = `
+	DELETE
+	FROM medicine
+    WHERE user_id = $1 AND key = $2
+	`
+
+	_sqlMedicineBackup = `
+	SELECT user_id, key, name, comment
+    FROM medicine
+	ORDER BY user_id, key
+	`
+
+	//
+	// MedicineIndicator.
+	//
+
+	_sqlCreateTableMedicineIndicator = `
+	CREATE TABLE medicine_indicator (
+        user_id      INTEGER NOT NULL,
+        timestamp    INTEGER NOT NULL,
+        medicine_key TEXT NOT NULL,
+        value        REAL NOT NULL,
+        PRIMARY KEY (user_id, timestamp, medicine_key),
+        FOREIGN KEY (user_id, medicine_key) REFERENCES medicine(user_id, key) ON DELETE RESTRICT
+    ) STRICT
+	`
+
+	_sqlSetMedicineIndicator = `
+    INSERT INTO medicine_indicator (
+        user_id, timestamp, medicine_key, value
+    )
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (user_id, timestamp, medicine_key) DO
+    UPDATE SET
+        value = $4	
+	`
+
+	_sqlDeleteMedicineIndicator = `
+	DELETE FROM medicine_indicator
+    WHERE
+        user_id = $1 AND
+        timestamp = $2 AND
+        medicine_key = $3
+	`
+
+	_sqlGetMedicineIndicatorReport = `
+    SELECT mi.timestamp, m.name as medicine_name, mi.value
+    FROM
+        medicine_indicator mi,
+        medicine m
+    WHERE
+        mi.medicine_key = m.key AND	
+        m.user_id = $1 AND
+		mi.user_id = $1 AND
+        mi.timestamp >= $2 AND
+        mi.timestamp <= $3
+    ORDER BY
+        mi.timestamp,
+        m.name	
+	`
+
+	_sqlMedicineIndicatorBackup = `
+	SELECT user_id, timestamp, medicine_key, value
+	FROM medicine_indicator
+	ORDER BY user_id, timestamp, medicine_key
+	`
+
+	//
 	// UserSettings.
 	//
 

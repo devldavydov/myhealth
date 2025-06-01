@@ -81,6 +81,8 @@ func getAllMigrations() []migration {
 		{7, createTableBundle},
 		{8, createTableJournal},
 		{9, createTableJournalIndexUserIDFoodKey},
+		{10, createTableMedicine},
+		{11, createTableMedicineIndicator},
 	}
 }
 
@@ -126,5 +128,15 @@ func createTableJournal(ctx context.Context, tx *sql.Tx) error {
 
 func createTableJournalIndexUserIDFoodKey(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, _sqlCreateTableJournalIndexUserIDFoodKey)
+	return err
+}
+
+func createTableMedicine(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, _sqlCreateTableMedicine)
+	return err
+}
+
+func createTableMedicineIndicator(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, _sqlCreateTableMedicineIndicator)
 	return err
 }

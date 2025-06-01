@@ -50,6 +50,17 @@ type Storage interface {
 	DeleteSportActivity(ctx context.Context, userID int64, timestamp Timestamp, sport_key string) error
 	GetSportActivityReport(ctx context.Context, userID int64, from, to Timestamp) ([]SportActivityReport, error)
 
+	// Medicine
+	GetMedicine(ctx context.Context, userID int64, key string) (*Medicine, error)
+	GetMedicineList(ctx context.Context, userID int64) ([]Medicine, error)
+	SetMedicine(ctx context.Context, userID int64, m *Medicine) error
+	DeleteMedicine(ctx context.Context, userID int64, key string) error
+
+	// MedicineIndicator
+	SetMedicineIndicator(ctx context.Context, userID int64, mi *MedicineIndicator) error
+	DeleteMedicineIndicator(ctx context.Context, userID int64, timestamp Timestamp, medicine_key string) error
+	GetMedicineIndicatorReport(ctx context.Context, userID int64, from, to Timestamp) ([]MedicineIndicatorReport, error)
+
 	// UserSettings
 	GetUserSettings(ctx context.Context, userID int64) (*UserSettings, error)
 	SetUserSettings(ctx context.Context, userID int64, us *UserSettings) error
