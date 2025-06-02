@@ -275,7 +275,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 			tr.
 				AddTd(html.NewTd(html.NewS(row.sportName), nil)).
 				AddTd(html.NewTd(html.NewS(row.sets), nil)).
-				AddTd(html.NewTd(html.NewS(strconv.Itoa(int(row.total))), nil))
+				AddTd(html.NewTd(html.NewS(fmt.Sprintf("%.2f", row.total)), nil))
 
 			tbl.AddRow(tr)
 		}
