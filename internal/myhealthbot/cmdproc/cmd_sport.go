@@ -220,6 +220,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 	}
 	grpData := make(map[storage.Timestamp][]grpItem, len(dbRes))
 	graphData := make(map[string]map[storage.Timestamp]float64, len(dbRes))
+	totalData := make(map[string]float64, len(dbRes))
 
 	for _, d := range dbRes {
 		total := float64(0)
@@ -241,6 +242,8 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 			graphData[d.SportName] = make(map[storage.Timestamp]float64)
 		}
 		graphData[d.SportName][d.Timestamp] = total
+
+		totalData[d.SportName] = totalData[d.SportName] + total
 	}
 
 	keys := make([]storage.Timestamp, 0, len(grpData))
@@ -286,13 +289,28 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 		tbl,
 	))
 
-	// Graph
+	// Sort sport names
 	sportNames := make([]string, 0, len(graphData))
 	for k := range graphData {
 		sportNames = append(sportNames, k)
 	}
 	slices.Sort(sportNames)
 
+	// Total table
+	tblTotal := html.NewTable([]string{"Спорт", "Итого"})
+	for _, sportName := range sportNames {
+		tblTotal.AddRow(html.
+			NewTr(nil).
+			AddTd(html.NewTd(html.NewS(sportName), nil)).
+			AddTd(html.NewTd(html.NewS(fmt.Sprintf("%.2f", totalData[sportName])), nil)))
+	}
+	accordion.AddItem(html.HewAccordionItem(
+		"tblTotal",
+		"Таблица ИТОГО",
+		tblTotal,
+	))
+
+	// Graph
 	var chartSnippets []html.IELement
 
 	for i, sportName := range sportNames {
