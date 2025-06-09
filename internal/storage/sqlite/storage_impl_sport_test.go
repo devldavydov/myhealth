@@ -165,8 +165,8 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.SportActivityReport{
-			{SportName: "sport1 name", Timestamp: 1, Sets: []float64{1, 2, 3}},
-			{SportName: "sport2 name", Timestamp: 2, Sets: []float64{4, 5, 6}},
+			{SportName: "sport1 name [sport1 unit]", Timestamp: 1, Sets: []float64{1, 2, 3}},
+			{SportName: "sport2 name [sport2 unit]", Timestamp: 2, Sets: []float64{4, 5, 6}},
 		}, res)
 	})
 
@@ -178,7 +178,7 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.SportActivityReport{
-			{SportName: "sport2 name", Timestamp: 2, Sets: []float64{4, 5, 6}},
+			{SportName: "sport2 name [sport2 unit]", Timestamp: 2, Sets: []float64{4, 5, 6}},
 		}, res)
 	})
 
@@ -194,7 +194,7 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		res, err := r.stg.GetSportActivityReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.SportActivityReport{
-			{SportName: "sport2 name", Timestamp: 2, Sets: []float64{4, 5, 6, 7, 8, 9}},
+			{SportName: "sport2 name [sport2 unit]", Timestamp: 2, Sets: []float64{4, 5, 6, 7, 8, 9}},
 		}, res)
 	})
 
