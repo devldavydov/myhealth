@@ -48,7 +48,7 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		backup.Sport = []s.SportBackup{}
 		for rows.Next() {
 			var sp s.SportBackup
-			err = rows.Scan(&sp.UserID, &sp.Key, &sp.Name, &sp.Comment)
+			err = rows.Scan(&sp.UserID, &sp.Key, &sp.Name, &sp.Comment, &sp.Unit)
 			if err != nil {
 				return nil, err
 			}
@@ -280,7 +280,7 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 		if err := r.SetSport(
 			ctx,
 			sp.UserID,
-			&s.Sport{Key: sp.Key, Name: sp.Name, Comment: sp.Comment},
+			&s.Sport{Key: sp.Key, Name: sp.Name, Unit: sp.Unit, Comment: sp.Comment},
 		); err != nil {
 			return err
 		}

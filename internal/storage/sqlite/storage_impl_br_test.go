@@ -15,9 +15,9 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 2, Timestamp: 1000, Value: 87.8},
 		},
 		Sport: []s.SportBackup{
-			{UserID: 1, Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
-			{UserID: 1, Key: "sport2 key", Name: "sport2 name", Comment: "sport2 comment"},
-			{UserID: 2, Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+			{UserID: 1, Key: "sport1 key", Name: "sport1 name", Unit: "sport1 unit", Comment: "sport1 comment"},
+			{UserID: 1, Key: "sport2 key", Name: "sport2 name", Unit: "sport2 unit", Comment: "sport2 comment"},
+			{UserID: 2, Key: "sport1 key", Name: "sport1 name", Unit: "sport1 unit", Comment: "sport1 comment"},
 		},
 		SportActivity: []s.SportActivityBackup{
 			{UserID: 1, SportKey: "sport1 key", Timestamp: 1, Sets: []float64{1, 2, 3}},
@@ -93,14 +93,14 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			res, err := r.stg.GetSportList(context.Background(), 1)
 			r.NoError(err)
 			r.Equal([]s.Sport{
-				{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
-				{Key: "sport2 key", Name: "sport2 name", Comment: "sport2 comment"},
+				{Key: "sport1 key", Name: "sport1 name", Unit: "sport1 unit", Comment: "sport1 comment"},
+				{Key: "sport2 key", Name: "sport2 name", Unit: "sport2 unit", Comment: "sport2 comment"},
 			}, res)
 
 			res, err = r.stg.GetSportList(context.Background(), 2)
 			r.NoError(err)
 			r.Equal([]s.Sport{
-				{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+				{Key: "sport1 key", Name: "sport1 name", Unit: "sport1 unit", Comment: "sport1 comment"},
 			}, res)
 		}
 

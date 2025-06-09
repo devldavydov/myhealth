@@ -243,6 +243,8 @@ commands:
         type: stringG0
       - name: Наименование
         type: stringG0
+      - name: Единица измерения
+        type: stringG0
       - name: Комментарий
         type: stringGE0
     - name: st

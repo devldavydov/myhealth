@@ -152,12 +152,14 @@ func (r *Bundle) Validate() bool {
 type Sport struct {
 	Key     string
 	Name    string
+	Unit    string
 	Comment string
 }
 
 func (r *Sport) Validate() bool {
 	return r.Key != "" &&
-		r.Name != ""
+		r.Name != "" &&
+		r.Unit != ""
 }
 
 type SportActivity struct {

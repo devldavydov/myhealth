@@ -15,22 +15,26 @@ func (r *StorageSQLiteTestSuite) TestSportCRUD() {
 	r.Run("set invalid sport", func() {
 		r.ErrorIs(r.stg.SetSport(context.Background(), 1, &s.Sport{}), s.ErrSportInvalid)
 		r.ErrorIs(r.stg.SetSport(context.Background(), 1, &s.Sport{Key: "key"}), s.ErrSportInvalid)
+		r.ErrorIs(r.stg.SetSport(context.Background(), 1, &s.Sport{Key: "key", Name: "name"}), s.ErrSportInvalid)
 	})
 
 	r.Run("set sport", func() {
 		r.NoError(r.stg.SetSport(context.Background(), 1, &s.Sport{
 			Key:     "sport1 key",
 			Name:    "sport1 name",
+			Unit:    "sport1 unit",
 			Comment: "sport1 comment",
 		}))
 		r.NoError(r.stg.SetSport(context.Background(), 1, &s.Sport{
 			Key:     "sport2 key",
 			Name:    "sport2 name",
+			Unit:    "sport2 unit",
 			Comment: "sport2 comment",
 		}))
 		r.NoError(r.stg.SetSport(context.Background(), 2, &s.Sport{
 			Key:     "sport1 key",
 			Name:    "sport1 name",
+			Unit:    "sport1 unit",
 			Comment: "sport1 comment",
 		}))
 	})
@@ -41,6 +45,7 @@ func (r *StorageSQLiteTestSuite) TestSportCRUD() {
 		r.Equal(&s.Sport{
 			Key:     "sport1 key",
 			Name:    "sport1 name",
+			Unit:    "sport1 unit",
 			Comment: "sport1 comment",
 		}, res)
 	})
@@ -54,8 +59,8 @@ func (r *StorageSQLiteTestSuite) TestSportCRUD() {
 		res, err := r.stg.GetSportList(context.Background(), 1)
 		r.NoError(err)
 		r.Equal([]s.Sport{
-			{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
-			{Key: "sport2 key", Name: "sport2 name", Comment: "sport2 comment"},
+			{Key: "sport1 key", Name: "sport1 name", Unit: "sport1 unit", Comment: "sport1 comment"},
+			{Key: "sport2 key", Name: "sport2 name", Unit: "sport2 unit", Comment: "sport2 comment"},
 		}, res)
 	})
 
@@ -63,7 +68,7 @@ func (r *StorageSQLiteTestSuite) TestSportCRUD() {
 		res, err := r.stg.GetSportList(context.Background(), 2)
 		r.NoError(err)
 		r.Equal([]s.Sport{
-			{Key: "sport1 key", Name: "sport1 name", Comment: "sport1 comment"},
+			{Key: "sport1 key", Name: "sport1 name", Unit: "sport1 unit", Comment: "sport1 comment"},
 		}, res)
 	})
 
@@ -71,6 +76,7 @@ func (r *StorageSQLiteTestSuite) TestSportCRUD() {
 		r.NoError(r.stg.SetSport(context.Background(), 1, &s.Sport{
 			Key:     "sport1 key",
 			Name:    "sport1 name new",
+			Unit:    "sport1 unit new",
 			Comment: "sport1 comment new",
 		}))
 	})
@@ -79,8 +85,8 @@ func (r *StorageSQLiteTestSuite) TestSportCRUD() {
 		res, err := r.stg.GetSportList(context.Background(), 1)
 		r.NoError(err)
 		r.Equal([]s.Sport{
-			{Key: "sport1 key", Name: "sport1 name new", Comment: "sport1 comment new"},
-			{Key: "sport2 key", Name: "sport2 name", Comment: "sport2 comment"},
+			{Key: "sport1 key", Name: "sport1 name new", Unit: "sport1 unit new", Comment: "sport1 comment new"},
+			{Key: "sport2 key", Name: "sport2 name", Unit: "sport2 unit", Comment: "sport2 comment"},
 		}, res)
 	})
 
@@ -104,16 +110,19 @@ func (r *StorageSQLiteTestSuite) TestSportActivityCRUD() {
 		r.NoError(r.stg.SetSport(context.Background(), 1, &s.Sport{
 			Key:     "sport1 key",
 			Name:    "sport1 name",
+			Unit:    "sport1 unit",
 			Comment: "sport1 comment",
 		}))
 		r.NoError(r.stg.SetSport(context.Background(), 1, &s.Sport{
 			Key:     "sport2 key",
 			Name:    "sport2 name",
+			Unit:    "sport2 unit",
 			Comment: "sport2 comment",
 		}))
 		r.NoError(r.stg.SetSport(context.Background(), 2, &s.Sport{
 			Key:     "sport2 key",
 			Name:    "sport2 name",
+			Unit:    "sport2 unit",
 			Comment: "sport2 comment",
 		}))
 	})

@@ -23,6 +23,7 @@ type SportBackup struct {
 	UserID  int64  `json:"user_id"`
 	Key     string `json:"key"`
 	Name    string `json:"name"`
+	Unit    string `json:"unit"`
 	Comment string `json:"comment"`
 }
 

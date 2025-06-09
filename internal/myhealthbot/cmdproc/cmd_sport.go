@@ -16,7 +16,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (r *CmdProcessor) sportSetCommand(userID int64, key, name, comment string) []CmdResponse {
+func (r *CmdProcessor) sportSetCommand(userID int64, key, name, unit, comment string) []CmdResponse {
 	// Save in DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
@@ -24,6 +24,7 @@ func (r *CmdProcessor) sportSetCommand(userID int64, key, name, comment string) 
 	if err := r.stg.SetSport(ctx, userID, &storage.Sport{
 		Key:     key,
 		Name:    name,
+		Unit:    unit,
 		Comment: comment,
 	}); err != nil {
 		if errors.Is(err, storage.ErrSportInvalid) {
@@ -62,7 +63,7 @@ func (r *CmdProcessor) sportSetTemplateCommand(userID int64, key string) []CmdRe
 		return NewSingleCmdResponse(MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(fmt.Sprintf("s,set,%s,%s,%s", sport.Key, sport.Name, sport.Comment))
+	return NewSingleCmdResponse(fmt.Sprintf("s,set,%s,%s,%s,%s", sport.Key, sport.Name, sport.Unit, sport.Comment))
 }
 
 func (r *CmdProcessor) sportDelCommand(userID int64, key string) []CmdResponse {
@@ -111,13 +112,14 @@ func (r *CmdProcessor) sportListCommand(userID int64) []CmdResponse {
 	htmlBuilder := html.NewBuilder("Список спорта")
 
 	// Table
-	tbl := html.NewTable([]string{"Ключ", "Наименование", "Комментарий"})
+	tbl := html.NewTable([]string{"Ключ", "Наименование", "Единица измерения", "Комментарий"})
 
 	for _, item := range sportList {
 		tr := html.NewTr(nil)
 		tr.
 			AddTd(html.NewTd(html.NewS(item.Key), nil)).
 			AddTd(html.NewTd(html.NewS(item.Name), nil)).
+			AddTd(html.NewTd(html.NewS(item.Unit), nil)).
 			AddTd(html.NewTd(html.NewS(item.Comment), nil))
 		tbl.AddRow(tr)
 	}

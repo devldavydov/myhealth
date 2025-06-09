@@ -78,24 +78,28 @@ const (
     ) STRICT
 	`
 
+	_sqlAlterTableSportAddUnit = `
+	ALTER TABLE sport ADD unit TEXT NOT NULL DEFAULT('шт')
+	`
+
 	_sqlGetSport = `
-	SELECT key, name, comment
+	SELECT key, name, comment, unit
     FROM sport
     WHERE user_id = $1 AND key = $2
 	`
 
 	_sqlGetSportList = `
-	SELECT key, name, comment
+	SELECT key, name, comment, unit
     FROM sport
     WHERE user_id = $1
 	ORDER BY name
 	`
 
 	_sqlSetSport = `
-	INSERT INTO sport (user_id, key, name, comment)
-	VALUES ($1, $2, $3, $4)
+	INSERT INTO sport (user_id, key, name, comment, unit)
+	VALUES ($1, $2, $3, $4, $5)
 	ON CONFLICT (user_id, key) DO
-	UPDATE SET name = $3, comment = $4
+	UPDATE SET name = $3, comment = $4, unit = $5
 	`
 
 	_sqlDeleteSport = `
@@ -105,7 +109,7 @@ const (
 	`
 
 	_sqlSportBackup = `
-	SELECT user_id, key, name, comment
+	SELECT user_id, key, name, comment, unit
     FROM sport
 	ORDER BY user_id, key
 	`
@@ -144,7 +148,7 @@ const (
 	`
 
 	_sqlGetSportActivityReport = `
-    SELECT sa.timestamp, s.name as sport_name, sa.sets
+    SELECT sa.timestamp, concat(s.name, ' [', s.unit, ']') as sport_name, sa.sets
     FROM
         sport_activity sa,
         sport s
@@ -156,7 +160,7 @@ const (
         sa.timestamp <= $3
     ORDER BY
         sa.timestamp,
-        s.name	
+        sport_name	
 	`
 
 	_sqlSportActivityBackup = `

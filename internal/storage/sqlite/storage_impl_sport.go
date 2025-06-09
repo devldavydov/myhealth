@@ -18,7 +18,7 @@ func (r *StorageSQLite) GetSport(ctx context.Context, userID int64, key string) 
 	var sp s.Sport
 	err := r.db.
 		QueryRowContext(ctx, _sqlGetSport, userID, key).
-		Scan(&sp.Key, &sp.Name, &sp.Comment)
+		Scan(&sp.Key, &sp.Name, &sp.Comment, &sp.Unit)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, s.ErrSportNotFound
@@ -39,7 +39,7 @@ func (r *StorageSQLite) GetSportList(ctx context.Context, userID int64) ([]s.Spo
 	list := []s.Sport{}
 	for rows.Next() {
 		var sp s.Sport
-		err = rows.Scan(&sp.Key, &sp.Name, &sp.Comment)
+		err = rows.Scan(&sp.Key, &sp.Name, &sp.Comment, &sp.Unit)
 		if err != nil {
 			return nil, err
 		}
@@ -63,7 +63,7 @@ func (r *StorageSQLite) SetSport(ctx context.Context, userID int64, sp *s.Sport)
 		return s.ErrSportInvalid
 	}
 
-	_, err := r.db.ExecContext(ctx, _sqlSetSport, userID, sp.Key, sp.Name, sp.Comment)
+	_, err := r.db.ExecContext(ctx, _sqlSetSport, userID, sp.Key, sp.Name, sp.Comment, sp.Unit)
 	return err
 }
 

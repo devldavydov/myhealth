@@ -83,6 +83,7 @@ func getAllMigrations() []migration {
 		{9, createTableJournalIndexUserIDFoodKey},
 		{10, createTableMedicine},
 		{11, createTableMedicineIndicator},
+		{12, alterTableSportAddUnit},
 	}
 }
 
@@ -138,5 +139,10 @@ func createTableMedicine(ctx context.Context, tx *sql.Tx) error {
 
 func createTableMedicineIndicator(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, _sqlCreateTableMedicineIndicator)
+	return err
+}
+
+func alterTableSportAddUnit(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, _sqlAlterTableSportAddUnit)
 	return err
 }
