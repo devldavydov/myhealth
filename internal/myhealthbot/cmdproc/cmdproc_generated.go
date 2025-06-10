@@ -1242,7 +1242,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 
 	switch cmdParts[0] {
 	case "set":
-		if len(cmdParts[1:]) != 3 {
+		if len(cmdParts[1:]) != 4 {
 			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
 		}
 		
@@ -1258,7 +1258,12 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 			return argError("Наименование")
 		}
 		
-		val2, err := parseStringGE0(cmdParts[2])
+		val2, err := parseStringG0(cmdParts[2])
+		if err != nil {
+			return argError("Единица измерения")
+		}
+		
+		val3, err := parseStringGE0(cmdParts[3])
 		if err != nil {
 			return argError("Комментарий")
 		}
@@ -1268,6 +1273,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 			val0,
 			val1,
 			val2,
+			val3,
 			)
 				
 	case "st":
@@ -1390,6 +1396,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 				"set",
 				"Ключ [Строка>0]",
 				"Наименование [Строка>0]",
+				"Единица измерения [Строка>0]",
 				"Комментарий [Строка>=0]",
 				).
 			addCmd(

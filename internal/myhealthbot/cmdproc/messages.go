@@ -11,6 +11,9 @@ const (
 	MsgErrSportNotFound = "Спорт не найден"
 	MsgErrSportIsUsed   = "Спорт используется в активностях"
 
+	MsgErrMedicineNotFound = "Медицина не найдена"
+	MsgErrMedicineIsUsed   = "Медицина используется в показателях"
+
 	MsgErrFoodNotFound = "Еда не найдена"
 	MsgErrFoodIsUsed   = "Еда уже используется в журнале приема пищи или бандле"
 
