@@ -183,24 +183,28 @@ const (
     ) STRICT
 	`
 
+	_sqlAlterTableMedicineAddUnit = `
+	ALTER TABLE medicine ADD unit TEXT NOT NULL DEFAULT('г')
+	`
+
 	_sqlGetMedicine = `
-	SELECT key, name, comment
+	SELECT key, name, comment, unit
     FROM medicine
     WHERE user_id = $1 AND key = $2
 	`
 
 	_sqlGetMedicineList = `
-	SELECT key, name, comment
+	SELECT key, name, comment, unit
     FROM medicine
     WHERE user_id = $1
 	ORDER BY name
 	`
 
 	_sqlSetMedicine = `
-	INSERT INTO medicine (user_id, key, name, comment)
-	VALUES ($1, $2, $3, $4)
+	INSERT INTO medicine (user_id, key, name, comment, unit)
+	VALUES ($1, $2, $3, $4, $5)
 	ON CONFLICT (user_id, key) DO
-	UPDATE SET name = $3, comment = $4
+	UPDATE SET name = $3, comment = $4, unit = $5
 	`
 
 	_sqlDeleteMedicine = `
@@ -210,7 +214,7 @@ const (
 	`
 
 	_sqlMedicineBackup = `
-	SELECT user_id, key, name, comment
+	SELECT user_id, key, name, comment, unit
     FROM medicine
 	ORDER BY user_id, key
 	`
@@ -249,7 +253,7 @@ const (
 	`
 
 	_sqlGetMedicineIndicatorReport = `
-    SELECT mi.timestamp, m.name as medicine_name, mi.value
+    SELECT mi.timestamp, concat(m.name, ' [', m.unit, ']') as medicine_name, mi.value
     FROM
         medicine_indicator mi,
         medicine m
@@ -261,7 +265,7 @@ const (
         mi.timestamp <= $3
     ORDER BY
         mi.timestamp,
-        m.name	
+        medicine_name	
 	`
 
 	_sqlMedicineIndicatorBackup = `

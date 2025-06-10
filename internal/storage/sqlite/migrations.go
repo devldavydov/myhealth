@@ -84,6 +84,7 @@ func getAllMigrations() []migration {
 		{10, createTableMedicine},
 		{11, createTableMedicineIndicator},
 		{12, alterTableSportAddUnit},
+		{13, alterTableMedicineAddUnit},
 	}
 }
 
@@ -144,5 +145,10 @@ func createTableMedicineIndicator(ctx context.Context, tx *sql.Tx) error {
 
 func alterTableSportAddUnit(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, _sqlAlterTableSportAddUnit)
+	return err
+}
+
+func alterTableMedicineAddUnit(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, _sqlAlterTableMedicineAddUnit)
 	return err
 }

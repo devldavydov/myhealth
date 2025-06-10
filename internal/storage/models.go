@@ -188,12 +188,14 @@ type SportActivityReport struct {
 type Medicine struct {
 	Key     string
 	Name    string
+	Unit    string
 	Comment string
 }
 
 func (r *Medicine) Validate() bool {
 	return r.Key != "" &&
-		r.Name != ""
+		r.Name != "" &&
+		r.Unit != ""
 }
 
 type MedicineIndicator struct {

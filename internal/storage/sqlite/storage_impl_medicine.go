@@ -17,7 +17,7 @@ func (r *StorageSQLite) GetMedicine(ctx context.Context, userID int64, key strin
 	var m s.Medicine
 	err := r.db.
 		QueryRowContext(ctx, _sqlGetMedicine, userID, key).
-		Scan(&m.Key, &m.Name, &m.Comment)
+		Scan(&m.Key, &m.Name, &m.Comment, &m.Unit)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, s.ErrMedicineNotFound
@@ -38,7 +38,7 @@ func (r *StorageSQLite) GetMedicineList(ctx context.Context, userID int64) ([]s.
 	list := []s.Medicine{}
 	for rows.Next() {
 		var m s.Medicine
-		err = rows.Scan(&m.Key, &m.Name, &m.Comment)
+		err = rows.Scan(&m.Key, &m.Name, &m.Comment, &m.Unit)
 		if err != nil {
 			return nil, err
 		}
@@ -62,7 +62,7 @@ func (r *StorageSQLite) SetMedicine(ctx context.Context, userID int64, m *s.Medi
 		return s.ErrMedicineInvalid
 	}
 
-	_, err := r.db.ExecContext(ctx, _sqlSetMedicine, userID, m.Key, m.Name, m.Comment)
+	_, err := r.db.ExecContext(ctx, _sqlSetMedicine, userID, m.Key, m.Name, m.Comment, m.Unit)
 	return err
 }
 

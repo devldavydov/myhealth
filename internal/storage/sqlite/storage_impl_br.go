@@ -101,7 +101,7 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		backup.Medicine = []s.MedicineBackup{}
 		for rows.Next() {
 			var m s.MedicineBackup
-			err = rows.Scan(&m.UserID, &m.Key, &m.Name, &m.Comment)
+			err = rows.Scan(&m.UserID, &m.Key, &m.Name, &m.Comment, &m.Unit)
 			if err != nil {
 				return nil, err
 			}
@@ -300,7 +300,7 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 		if err := r.SetMedicine(
 			ctx,
 			m.UserID,
-			&s.Medicine{Key: m.Key, Name: m.Name, Comment: m.Comment},
+			&s.Medicine{Key: m.Key, Name: m.Name, Unit: m.Unit, Comment: m.Comment},
 		); err != nil {
 			return err
 		}

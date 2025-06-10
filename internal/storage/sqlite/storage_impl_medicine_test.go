@@ -15,22 +15,26 @@ func (r *StorageSQLiteTestSuite) TestMedicineCRUD() {
 	r.Run("set invalid medicine", func() {
 		r.ErrorIs(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{}), s.ErrMedicineInvalid)
 		r.ErrorIs(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{Key: "key"}), s.ErrMedicineInvalid)
+		r.ErrorIs(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{Key: "key", Name: "name"}), s.ErrMedicineInvalid)
 	})
 
 	r.Run("set medicine", func() {
 		r.NoError(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{
 			Key:     "med1 key",
 			Name:    "med1 name",
+			Unit:    "med1 unit",
 			Comment: "med1 comment",
 		}))
 		r.NoError(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{
 			Key:     "med2 key",
 			Name:    "med2 name",
+			Unit:    "med2 unit",
 			Comment: "med2 comment",
 		}))
 		r.NoError(r.stg.SetMedicine(context.Background(), 2, &s.Medicine{
 			Key:     "med1 key",
 			Name:    "med1 name",
+			Unit:    "med1 unit",
 			Comment: "med1 comment",
 		}))
 	})
@@ -41,6 +45,7 @@ func (r *StorageSQLiteTestSuite) TestMedicineCRUD() {
 		r.Equal(&s.Medicine{
 			Key:     "med1 key",
 			Name:    "med1 name",
+			Unit:    "med1 unit",
 			Comment: "med1 comment",
 		}, res)
 	})
@@ -54,8 +59,8 @@ func (r *StorageSQLiteTestSuite) TestMedicineCRUD() {
 		res, err := r.stg.GetMedicineList(context.Background(), 1)
 		r.NoError(err)
 		r.Equal([]s.Medicine{
-			{Key: "med1 key", Name: "med1 name", Comment: "med1 comment"},
-			{Key: "med2 key", Name: "med2 name", Comment: "med2 comment"},
+			{Key: "med1 key", Name: "med1 name", Unit: "med1 unit", Comment: "med1 comment"},
+			{Key: "med2 key", Name: "med2 name", Unit: "med2 unit", Comment: "med2 comment"},
 		}, res)
 	})
 
@@ -63,7 +68,7 @@ func (r *StorageSQLiteTestSuite) TestMedicineCRUD() {
 		res, err := r.stg.GetMedicineList(context.Background(), 2)
 		r.NoError(err)
 		r.Equal([]s.Medicine{
-			{Key: "med1 key", Name: "med1 name", Comment: "med1 comment"},
+			{Key: "med1 key", Name: "med1 name", Unit: "med1 unit", Comment: "med1 comment"},
 		}, res)
 	})
 
@@ -71,6 +76,7 @@ func (r *StorageSQLiteTestSuite) TestMedicineCRUD() {
 		r.NoError(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{
 			Key:     "med1 key",
 			Name:    "med1 name new",
+			Unit:    "med1 unit new",
 			Comment: "med1 comment new",
 		}))
 	})
@@ -79,8 +85,8 @@ func (r *StorageSQLiteTestSuite) TestMedicineCRUD() {
 		res, err := r.stg.GetMedicineList(context.Background(), 1)
 		r.NoError(err)
 		r.Equal([]s.Medicine{
-			{Key: "med1 key", Name: "med1 name new", Comment: "med1 comment new"},
-			{Key: "med2 key", Name: "med2 name", Comment: "med2 comment"},
+			{Key: "med1 key", Name: "med1 name new", Unit: "med1 unit new", Comment: "med1 comment new"},
+			{Key: "med2 key", Name: "med2 name", Unit: "med2 unit", Comment: "med2 comment"},
 		}, res)
 	})
 
@@ -104,16 +110,19 @@ func (r *StorageSQLiteTestSuite) TestMedicineIndicatorCRUD() {
 		r.NoError(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{
 			Key:     "med1 key",
 			Name:    "med1 name",
+			Unit:    "med1 unit",
 			Comment: "med1 comment",
 		}))
 		r.NoError(r.stg.SetMedicine(context.Background(), 1, &s.Medicine{
 			Key:     "med2 key",
 			Name:    "med2 name",
+			Unit:    "med2 unit",
 			Comment: "med2 comment",
 		}))
 		r.NoError(r.stg.SetMedicine(context.Background(), 2, &s.Medicine{
 			Key:     "med2 key",
 			Name:    "med2 name",
+			Unit:    "med2 unit",
 			Comment: "med2 comment",
 		}))
 	})
@@ -151,8 +160,8 @@ func (r *StorageSQLiteTestSuite) TestMedicineIndicatorCRUD() {
 		res, err := r.stg.GetMedicineIndicatorReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.MedicineIndicatorReport{
-			{MedicineName: "med1 name", Timestamp: 1, Value: 1.1},
-			{MedicineName: "med2 name", Timestamp: 2, Value: 2.2},
+			{MedicineName: "med1 name [med1 unit]", Timestamp: 1, Value: 1.1},
+			{MedicineName: "med2 name [med2 unit]", Timestamp: 2, Value: 2.2},
 		}, res)
 	})
 
@@ -164,7 +173,7 @@ func (r *StorageSQLiteTestSuite) TestMedicineIndicatorCRUD() {
 		res, err := r.stg.GetMedicineIndicatorReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.MedicineIndicatorReport{
-			{MedicineName: "med2 name", Timestamp: 2, Value: 2.2},
+			{MedicineName: "med2 name [med2 unit]", Timestamp: 2, Value: 2.2},
 		}, res)
 	})
 
@@ -180,7 +189,7 @@ func (r *StorageSQLiteTestSuite) TestMedicineIndicatorCRUD() {
 		res, err := r.stg.GetMedicineIndicatorReport(context.Background(), 1, 1, 3)
 		r.NoError(err)
 		r.Equal([]s.MedicineIndicatorReport{
-			{MedicineName: "med2 name", Timestamp: 2, Value: 3.3},
+			{MedicineName: "med2 name [med2 unit]", Timestamp: 2, Value: 3.3},
 		}, res)
 	})
 

@@ -25,9 +25,9 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 2, SportKey: "sport1 key", Timestamp: 1, Sets: []float64{7, 8, 9}},
 		},
 		Medicine: []s.MedicineBackup{
-			{UserID: 1, Key: "med1 key", Name: "med1 name", Comment: "med1 comment"},
-			{UserID: 1, Key: "med2 key", Name: "med2 name", Comment: "med2 comment"},
-			{UserID: 2, Key: "med1 key", Name: "med1 name", Comment: "med1 comment"},
+			{UserID: 1, Key: "med1 key", Name: "med1 name", Unit: "med1 unit", Comment: "med1 comment"},
+			{UserID: 1, Key: "med2 key", Name: "med2 name", Unit: "med2 unit", Comment: "med2 comment"},
+			{UserID: 2, Key: "med1 key", Name: "med1 name", Unit: "med1 unit", Comment: "med1 comment"},
 		},
 		MedicineIndicator: []s.MedicineIndicatorBackup{
 			{UserID: 1, MedicineKey: "med1 key", Timestamp: 1, Value: 1.23},
@@ -125,14 +125,14 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			res, err := r.stg.GetMedicineList(context.Background(), 1)
 			r.NoError(err)
 			r.Equal([]s.Medicine{
-				{Key: "med1 key", Name: "med1 name", Comment: "med1 comment"},
-				{Key: "med2 key", Name: "med2 name", Comment: "med2 comment"},
+				{Key: "med1 key", Name: "med1 name", Unit: "med1 unit", Comment: "med1 comment"},
+				{Key: "med2 key", Name: "med2 name", Unit: "med2 unit", Comment: "med2 comment"},
 			}, res)
 
 			res, err = r.stg.GetMedicineList(context.Background(), 2)
 			r.NoError(err)
 			r.Equal([]s.Medicine{
-				{Key: "med1 key", Name: "med1 name", Comment: "med1 comment"},
+				{Key: "med1 key", Name: "med1 name", Unit: "med1 unit", Comment: "med1 comment"},
 			}, res)
 		}
 
@@ -141,14 +141,14 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			res, err := r.stg.GetMedicineIndicatorReport(context.Background(), 1, 1, 3)
 			r.NoError(err)
 			r.Equal([]s.MedicineIndicatorReport{
-				{MedicineName: "med1 name", Timestamp: 1, Value: 1.23},
-				{MedicineName: "med2 name", Timestamp: 2, Value: 4.56},
+				{MedicineName: "med1 name [med1 unit]", Timestamp: 1, Value: 1.23},
+				{MedicineName: "med2 name [med2 unit]", Timestamp: 2, Value: 4.56},
 			}, res)
 
 			res, err = r.stg.GetMedicineIndicatorReport(context.Background(), 2, 1, 3)
 			r.NoError(err)
 			r.Equal([]s.MedicineIndicatorReport{
-				{MedicineName: "med1 name", Timestamp: 1, Value: 7.89},
+				{MedicineName: "med1 name [med1 unit]", Timestamp: 1, Value: 7.89},
 			}, res)
 		}
 
