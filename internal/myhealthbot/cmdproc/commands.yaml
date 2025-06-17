@@ -347,7 +347,7 @@ commands:
         type: timestamp
 types:
   - name: timestamp
-    description: Дата в формате DD.MM.YYYY или пустая строка для текущей даты
+    description: Дата в формате DD.MM.YYYY|пустая строка для текущей даты|целая дельта дней ± относительно текущей даты
     description_short: Дата
   - name: floatG0
     description: Дробное число >0
