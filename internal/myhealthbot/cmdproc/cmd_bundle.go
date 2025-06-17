@@ -89,15 +89,17 @@ func (r *CmdProcessor) bundleSetTemplateCommand(userID int64, key string) []CmdR
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("b,set,%s", bndl.Key))
+	sb.WriteString(fmt.Sprintf("b,set,%s,", bndl.Key))
+
+	items := make([]string, 0, len(bndl.Data))
 	for k, v := range bndl.Data {
-		sb.WriteString(",")
 		if v > 0 {
-			sb.WriteString(fmt.Sprintf("%s:%1.f", k, v))
+			items = append(items, fmt.Sprintf("%s:%1.f", k, v))
 		} else {
-			sb.WriteString(k)
+			items = append(items, k)
 		}
 	}
+	sb.WriteString(strings.Join(items, "/"))
 
 	return NewSingleCmdResponse(sb.String())
 }

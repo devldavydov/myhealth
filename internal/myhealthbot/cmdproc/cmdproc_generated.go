@@ -1460,7 +1460,7 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 	sb.WriteString("<b>\u2022 s,h</b> - Спорт\n")
 	sb.WriteString("<b>\u2022 m,h</b> - Медицина\n")
 	sb.WriteString("\n<b>Типы данных:</b>\n")
-	sb.WriteString("<b>\u2022 Дата</b> - Дата в формате DD.MM.YYYY или пустая строка для текущей даты\n")
+	sb.WriteString("<b>\u2022 Дата</b> - Дата в формате DD.MM.YYYY|пустая строка для текущей даты|целая дельта дней ± относительно текущей даты\n")
 	sb.WriteString("<b>\u2022 Дробное>0</b> - Дробное число >0\n")
 	sb.WriteString("<b>\u2022 Дробное>=0</b> - Дробное число >=0\n")
 	sb.WriteString("<b>\u2022 Строка>0</b> - Строка длиной >0\n")
@@ -1474,14 +1474,24 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 
 func parseTimestamp(tz *time.Location, arg string) (time.Time, error) {
 	var t time.Time
-	var err error
+
+	// Arg empty string - now
+	// Arg integer - add delta to now
+	// Arg in date format
 
 	if arg == "" {
 		t = time.Now().In(tz)
 	} else {
-		t, err = time.Parse("02.01.2006", arg)
-		if err != nil {
-			return time.Time{}, err
+        delta, err := strconv.Atoi(arg)
+
+		if err == nil {
+			t = time.Now().In(tz)
+			t = t.Add(time.Duration(delta) * 24 * time.Hour)
+		} else {
+			t, err = time.Parse("02.01.2006", arg)
+			if err != nil {
+				return time.Time{}, err
+			}
 		}
 	}
 
