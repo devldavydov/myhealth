@@ -458,6 +458,46 @@ func (r *CmdProcessor) journalFoodStatCommand(userID int64, foodKey string) []Cm
 	return NewSingleCmdResponse(sb.String(), optsHTML)
 }
 
+func (r *CmdProcessor) journalSetDayTotalCal(userID int64, ts time.Time, totalCal float64) []CmdResponse {
+	// Save in DB
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.SetDayTotalCal(ctx, userID, storage.NewTimestamp(ts), totalCal); err != nil {
+		if errors.Is(err, storage.ErrDayTotalCalInvalid) {
+			return NewSingleCmdResponse(MsgErrInvalidCommand)
+		}
+
+		r.logger.Error(
+			"journal set day total cal command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	return NewSingleCmdResponse(MsgOK)
+}
+
+func (r *CmdProcessor) journalDeleteDayTotalCal(userID int64, ts time.Time) []CmdResponse {
+	// Call DB
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.DeleteDayTotalCal(ctx, userID, storage.NewTimestamp(ts)); err != nil {
+		r.logger.Error(
+			"journal del day total cal command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	return NewSingleCmdResponse(MsgOK)
+}
+
 func pfcSnippet(val, totalVal float64) html.IELement {
 	var s string
 

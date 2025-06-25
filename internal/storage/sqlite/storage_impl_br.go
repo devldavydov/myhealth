@@ -261,6 +261,35 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 	}
 
+	// DayTotalCal
+	{
+		rows, err := r.db.QueryContext(ctx, _sqlDayTotalBackup)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		backup.DayTotalCal = []s.DayTotalCalBackup{}
+		for rows.Next() {
+			var t s.DayTotalCalBackup
+
+			err = rows.Scan(
+				&t.UserID,
+				&t.Timestamp,
+				&t.TotalCal,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			backup.DayTotalCal = append(backup.DayTotalCal, t)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+	}
+
 	// Result
 	return backup, nil
 }
@@ -365,6 +394,12 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 			FoodKey:    j.FoodKey,
 			FoodWeight: j.FoodWeight,
 		}); err != nil {
+			return err
+		}
+	}
+
+	for _, t := range backup.DayTotalCal {
+		if err := r.SetDayTotalCal(ctx, t.UserID, t.Timestamp, t.TotalCal); err != nil {
 			return err
 		}
 	}

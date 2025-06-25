@@ -932,6 +932,46 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			val0,
 			)
 				
+	case "sc":
+		if len(cmdParts[1:]) != 2 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		val1, err := parseFloatG0(cmdParts[1])
+		if err != nil {
+			return argError("ККал")
+		}
+		
+		resp = r.journalSetDayTotalCal(
+			userID,
+			val0,
+			val1,
+			)
+				
+	case "dc":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		resp = r.journalDeleteDayTotalCal(
+			userID,
+			val0,
+			)
+				
 	case "h":
 		return NewSingleCmdResponse(
 			newCmdHelpBuilder(baseCmd, "Управление журналом приема пищи").
@@ -993,6 +1033,17 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				"Статистика по еде",
 				"fs",
 				"Ключ еды [Строка>0]",
+				).
+			addCmd(
+				"Установка дневного значения ккал",
+				"sc",
+				"Дата [Дата]",
+				"ККал [Дробное>0]",
+				).
+			addCmd(
+				"Удаление дневного значения ккал",
+				"dc",
+				"Дата [Дата]",
 				).
 			build(),
 		optsHTML)

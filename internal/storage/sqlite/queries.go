@@ -528,4 +528,46 @@ const (
 	FROM journal
 	ORDER BY user_id, timestamp, meal, foodkey
 	`
+
+	//
+	// DayTotalCal.
+	//
+
+	_sqlCreateTableDayTotalCal = `
+	CREATE TABLE day_total_cal (
+        user_id    INTEGER NOT NULL,
+        timestamp  INTEGER NOT NULL,
+        total_cal  REAL NOT NULL,
+        PRIMARY KEY (user_id, timestamp)
+    ) STRICT
+	`
+
+	_sqlGetDayTotalCal = `
+	SELECT total_cal
+	FROM day_total_cal
+	WHERE user_id = $1 AND
+		timestamp = $2
+	`
+
+	_sqlSetDayTotalCal = `
+	INSERT INTO day_total_cal (
+        user_id, timestamp, total_cal
+    )
+    VALUES ($1, $2, $3)
+    ON CONFLICT (user_id, timestamp) DO
+    UPDATE SET
+        total_cal = $3
+	`
+
+	_sqlDeleteDayTotalCal = `
+    DELETE FROM day_total_cal
+    WHERE user_id = $1 AND
+		timestamp = $2
+	`
+
+	_sqlDayTotalBackup = `
+	SELECT user_id, timestamp, total_cal
+	FROM day_total_cal
+	ORDER BY user_id, timestamp
+	`
 )

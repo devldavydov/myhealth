@@ -45,6 +45,10 @@ var (
 	ErrUserSettingsNotFound = errors.New("user settings not found")
 	ErrUserSettingsInvalid  = errors.New("invalid user settings")
 
+	// DayTotalCal
+	ErrDayTotalCalInvalid  = errors.New("invalid day total cal")
+	ErrDayTotalCalNotFound = errors.New("day total cal not found")
+
 	// Common
 	ErrEmptyResult = errors.New("empty result")
 )
