@@ -46,8 +46,8 @@ var (
 	ErrUserSettingsInvalid  = errors.New("invalid user settings")
 
 	// DayTotalCal
-	ErrDayTotalCalInvalid  = errors.New("invalid day total cal")
-	ErrDayTotalCalNotFound = errors.New("day total cal not found")
+	ErrDayTotalCalInvalid     = errors.New("invalid day total cal")
+	ErrTotalBurnedCalNotFound = errors.New("day total cal not found")
 
 	// Common
 	ErrEmptyResult = errors.New("empty result")

@@ -65,10 +65,10 @@ type Storage interface {
 	GetUserSettings(ctx context.Context, userID int64) (*UserSettings, error)
 	SetUserSettings(ctx context.Context, userID int64, us *UserSettings) error
 
-	// DayTotalCal
-	GetDayTotalCal(ctx context.Context, userID int64, timestamp Timestamp) (float64, error)
-	SetDayTotalCal(ctx context.Context, userID int64, timestamp Timestamp, totalCal float64) error
-	DeleteDayTotalCal(ctx context.Context, userID int64, timestamp Timestamp) error
+	// TotalBurnedCal
+	GetTotalBurnedCal(ctx context.Context, userID int64, timestamp Timestamp) (float64, error)
+	SetTotalBurnedCal(ctx context.Context, userID int64, timestamp Timestamp, totalCal float64) error
+	DeleteTotalBurnedCal(ctx context.Context, userID int64, timestamp Timestamp) error
 
 	// Backup/restore
 	Backup(ctx context.Context) (*Backup, error)

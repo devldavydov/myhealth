@@ -65,7 +65,7 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			{UserID: 1, Timestamp: 1, Meal: s.Meal(1), FoodKey: "food2_key", FoodWeight: 200},
 			{UserID: 2, Timestamp: 2, Meal: s.Meal(2), FoodKey: "food1_key", FoodWeight: 100},
 		},
-		DayTotalCal: []s.DayTotalCalBackup{
+		TotalBurnedCal: []s.TotalBurnedCalBackup{
 			{UserID: 1, Timestamp: 1, TotalCal: 100},
 			{UserID: 1, Timestamp: 2, TotalCal: 200},
 			{UserID: 2, Timestamp: 1, TotalCal: 300},
@@ -253,14 +253,14 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 			}, rep)
 		}
 
-		// DayTotalCal
+		// TotalBurnedCal
 		{
 			for _, t := range []struct {
 				userID    int64
 				timestamp s.Timestamp
 				totalCal  float64
 			}{} {
-				val, err := r.stg.GetDayTotalCal(context.Background(), t.userID, t.timestamp)
+				val, err := r.stg.GetTotalBurnedCal(context.Background(), t.userID, t.timestamp)
 				r.NoError(err)
 				r.Equal(t.totalCal, val)
 			}
@@ -280,6 +280,6 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 		r.Equal(backup.Food, backup2.Food)
 		r.Equal(backup.Bundle, backup2.Bundle)
 		r.Equal(backup.Journal, backup2.Journal)
-		r.Equal(backup.DayTotalCal, backup2.DayTotalCal)
+		r.Equal(backup.TotalBurnedCal, backup2.TotalBurnedCal)
 	})
 }

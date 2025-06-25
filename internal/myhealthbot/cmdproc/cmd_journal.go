@@ -192,6 +192,7 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
+	// Get total burned calories
 	var us *storage.UserSettings
 	us, err := r.stg.GetUserSettings(ctx, userID)
 	if err != nil && !errors.Is(err, storage.ErrUserSettingsNotFound) {
@@ -204,6 +205,25 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 		return NewSingleCmdResponse(MsgErrInternal)
 	}
 
+	burnedCal, err := r.stg.GetTotalBurnedCal(ctx, userID, storage.NewTimestamp(ts))
+	if err != nil && !errors.Is(err, storage.ErrTotalBurnedCalNotFound) {
+		r.logger.Error(
+			"total burned cal get command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	var totalBurnedCal float64
+	if burnedCal != 0 {
+		totalBurnedCal = burnedCal
+	} else if us != nil {
+		totalBurnedCal = us.CalLimit
+	}
+
+	// Generate report
 	lst, err := r.stg.GetJournalReport(ctx, userID, storage.NewTimestamp(ts), storage.NewTimestamp(ts))
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
@@ -296,20 +316,20 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 					),
 					html.Attrs{"colspan": "6"})))
 
-	if us != nil {
+	if totalBurnedCal != 0 {
 		tbl.
 			AddFooterElement(html.NewTr(nil).
 				AddTd(html.NewTd(
 					html.NewSpan(
-						html.NewB("Лимит, ккал: ", nil),
-						html.NewS(fmt.Sprintf("%.2f", us.CalLimit)),
+						html.NewB("Потрачено, ккал: ", nil),
+						html.NewS(fmt.Sprintf("%.2f", totalBurnedCal)),
 					),
 					html.Attrs{"colspan": "6"}))).
 			AddFooterElement(html.NewTr(nil).
 				AddTd(html.NewTd(
 					html.NewSpan(
 						html.NewB("Разница, ккал: ", nil),
-						calDiffSnippet(us.CalLimit-totalCal),
+						calDiffSnippet(totalBurnedCal-totalCal),
 					),
 					html.Attrs{"colspan": "6"})))
 	}
@@ -463,13 +483,13 @@ func (r *CmdProcessor) journalSetDayTotalCal(userID int64, ts time.Time, totalCa
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	if err := r.stg.SetDayTotalCal(ctx, userID, storage.NewTimestamp(ts), totalCal); err != nil {
+	if err := r.stg.SetTotalBurnedCal(ctx, userID, storage.NewTimestamp(ts), totalCal); err != nil {
 		if errors.Is(err, storage.ErrDayTotalCalInvalid) {
 			return NewSingleCmdResponse(MsgErrInvalidCommand)
 		}
 
 		r.logger.Error(
-			"journal set day total cal command DB error",
+			"journal set total burned cal command DB error",
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
@@ -485,9 +505,9 @@ func (r *CmdProcessor) journalDeleteDayTotalCal(userID int64, ts time.Time) []Cm
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	if err := r.stg.DeleteDayTotalCal(ctx, userID, storage.NewTimestamp(ts)); err != nil {
+	if err := r.stg.DeleteTotalBurnedCal(ctx, userID, storage.NewTimestamp(ts)); err != nil {
 		r.logger.Error(
-			"journal del day total cal command DB error",
+			"journal del total burned cal command DB error",
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)

@@ -233,7 +233,7 @@ commands:
         type: stringG0
     - name: sc
       func: journalSetDayTotalCal
-      description: Установка дневного значения ккал
+      description: Установка значения потраченных ккал
       args:
       - name: Дата
         type: timestamp
@@ -241,7 +241,7 @@ commands:
         type: floatG0
     - name: dc
       func: journalDeleteDayTotalCal
-      description: Удаление дневного значения ккал
+      description: Удаление значения потраченных ккал
       args:
       - name: Дата
         type: timestamp

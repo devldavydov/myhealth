@@ -85,7 +85,7 @@ func getAllMigrations() []migration {
 		{11, createTableMedicineIndicator},
 		{12, alterTableSportAddUnit},
 		{13, alterTableMedicineAddUnit},
-		{14, createTableDayTotalCal},
+		{14, createTableTotalBurnedCal},
 	}
 }
 
@@ -154,7 +154,7 @@ func alterTableMedicineAddUnit(ctx context.Context, tx *sql.Tx) error {
 	return err
 }
 
-func createTableDayTotalCal(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, _sqlCreateTableDayTotalCal)
+func createTableTotalBurnedCal(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, _sqlCreateTableTotalBurnedCal)
 	return err
 }

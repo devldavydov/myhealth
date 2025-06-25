@@ -11,7 +11,7 @@ type Backup struct {
 	Journal           []JournalBackup           `json:"journal"`
 	Medicine          []MedicineBackup          `json:"medicine"`
 	MedicineIndicator []MedicineIndicatorBackup `json:"medicine_indicator"`
-	DayTotalCal       []DayTotalCalBackup       `json:"day_total_cal"`
+	TotalBurnedCal    []TotalBurnedCalBackup    `json:"total_burned_cal"`
 }
 
 type WeightBackup struct {
@@ -81,8 +81,8 @@ type MedicineIndicatorBackup struct {
 	Value       float64   `json:"value"`
 }
 
-type DayTotalCalBackup struct {
+type TotalBurnedCalBackup struct {
 	UserID    int64     `json:"user_id"`
 	Timestamp Timestamp `json:"timestamp"`
-	TotalCal  float64   `json:"value"`
+	TotalCal  float64   `json:"totalCal"`
 }

@@ -269,9 +269,9 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 		}
 		defer rows.Close()
 
-		backup.DayTotalCal = []s.DayTotalCalBackup{}
+		backup.TotalBurnedCal = []s.TotalBurnedCalBackup{}
 		for rows.Next() {
-			var t s.DayTotalCalBackup
+			var t s.TotalBurnedCalBackup
 
 			err = rows.Scan(
 				&t.UserID,
@@ -282,7 +282,7 @@ func (r *StorageSQLite) Backup(ctx context.Context) (*s.Backup, error) {
 				return nil, err
 			}
 
-			backup.DayTotalCal = append(backup.DayTotalCal, t)
+			backup.TotalBurnedCal = append(backup.TotalBurnedCal, t)
 		}
 
 		if err = rows.Err(); err != nil {
@@ -398,8 +398,8 @@ func (r *StorageSQLite) Restore(ctx context.Context, backup *s.Backup) error {
 		}
 	}
 
-	for _, t := range backup.DayTotalCal {
-		if err := r.SetDayTotalCal(ctx, t.UserID, t.Timestamp, t.TotalCal); err != nil {
+	for _, t := range backup.TotalBurnedCal {
+		if err := r.SetTotalBurnedCal(ctx, t.UserID, t.Timestamp, t.TotalCal); err != nil {
 			return err
 		}
 	}

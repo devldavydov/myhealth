@@ -533,8 +533,8 @@ const (
 	// DayTotalCal.
 	//
 
-	_sqlCreateTableDayTotalCal = `
-	CREATE TABLE day_total_cal (
+	_sqlCreateTableTotalBurnedCal = `
+	CREATE TABLE total_burned_cal (
         user_id    INTEGER NOT NULL,
         timestamp  INTEGER NOT NULL,
         total_cal  REAL NOT NULL,
@@ -542,15 +542,15 @@ const (
     ) STRICT
 	`
 
-	_sqlGetDayTotalCal = `
+	_sqlGetTotalBurnedCal = `
 	SELECT total_cal
-	FROM day_total_cal
+	FROM total_burned_cal
 	WHERE user_id = $1 AND
 		timestamp = $2
 	`
 
-	_sqlSetDayTotalCal = `
-	INSERT INTO day_total_cal (
+	_sqlSetTotalBurnedCal = `
+	INSERT INTO total_burned_cal (
         user_id, timestamp, total_cal
     )
     VALUES ($1, $2, $3)
@@ -559,15 +559,15 @@ const (
         total_cal = $3
 	`
 
-	_sqlDeleteDayTotalCal = `
-    DELETE FROM day_total_cal
+	_sqlDeleteTotalBurnedCal = `
+    DELETE FROM total_burned_cal
     WHERE user_id = $1 AND
 		timestamp = $2
 	`
 
 	_sqlDayTotalBackup = `
 	SELECT user_id, timestamp, total_cal
-	FROM day_total_cal
+	FROM total_burned_cal
 	ORDER BY user_id, timestamp
 	`
 )
