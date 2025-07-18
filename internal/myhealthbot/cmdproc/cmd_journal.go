@@ -380,6 +380,88 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 	})
 }
 
+func (r *CmdProcessor) journalReportDayCalloriesCommand(userID int64, ts time.Time) []CmdResponse {
+	// Get list from DB, user settings
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	// Get total burned calories
+	var us *storage.UserSettings
+	us, err := r.stg.GetUserSettings(ctx, userID)
+	if err != nil && !errors.Is(err, storage.ErrUserSettingsNotFound) {
+		r.logger.Error(
+			"user settings get command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	burnedCal, err := r.stg.GetTotalBurnedCal(ctx, userID, storage.NewTimestamp(ts))
+	if err != nil && !errors.Is(err, storage.ErrTotalBurnedCalNotFound) {
+		r.logger.Error(
+			"total burned cal get command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	var totalBurnedCal float64
+	if burnedCal != 0 {
+		totalBurnedCal = burnedCal
+	} else if us != nil {
+		totalBurnedCal = us.CalLimit
+	}
+
+	// Generate report
+	lst, err := r.stg.GetJournalReport(ctx, userID, storage.NewTimestamp(ts), storage.NewTimestamp(ts))
+	if err != nil {
+		if errors.Is(err, storage.ErrEmptyResult) {
+			return NewSingleCmdResponse(MsgErrEmptyResult)
+		}
+
+		r.logger.Error(
+			"journal report day calories command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(MsgErrInternal)
+	}
+
+	var sb strings.Builder
+	sb.WriteString("<b>Отчет по ккал за день:</b>\n\n")
+
+	mealCal := map[string]float64{}
+	var mealOrder []string
+	var totalCal float64
+	for _, j := range lst {
+		mealStr := j.Meal.MustToString()
+		_, ok := mealCal[mealStr]
+		if !ok {
+			mealOrder = append(mealOrder, mealStr)
+		}
+		mealCal[mealStr] += j.Cal
+		totalCal += j.Cal
+	}
+
+	for _, mealStr := range mealOrder {
+		sb.WriteString(fmt.Sprintf("%s, ккал: %.2f\n", mealStr, mealCal[mealStr]))
+	}
+
+	sb.WriteString("\n")
+	sb.WriteString(fmt.Sprintf("Всего потреблено, ккал: %.2f\n", totalCal))
+	if totalBurnedCal != 0 {
+		sb.WriteString(fmt.Sprintf("Потрачено, ккал: %.2f\n", totalBurnedCal))
+		sb.WriteString(fmt.Sprintf("Разница, ккал: <b>%+.2f</b>\n", totalBurnedCal-totalCal))
+	}
+
+	return NewSingleCmdResponse(sb.String(), optsHTML)
+}
+
 func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, meal storage.Meal) []CmdResponse {
 	// Call DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)

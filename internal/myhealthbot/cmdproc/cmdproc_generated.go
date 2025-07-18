@@ -892,6 +892,23 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			val0,
 			)
 				
+	case "rdc":
+		if len(cmdParts[1:]) != 1 {
+			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseTimestamp(r.tz, cmdParts[0])
+		if err != nil {
+			return argError("Дата")
+		}
+		
+		resp = r.journalReportDayCalloriesCommand(
+			userID,
+			val0,
+			)
+				
 	case "tm":
 		if len(cmdParts[1:]) != 2 {
 			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
@@ -1021,6 +1038,11 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			addCmd(
 				"Отчет за день",
 				"rd",
+				"Дата [Дата]",
+				).
+			addCmd(
+				"Отчет за день по ккал",
+				"rdc",
 				"Дата [Дата]",
 				).
 			addCmd(

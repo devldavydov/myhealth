@@ -217,6 +217,12 @@ commands:
       args:
       - name: Дата
         type: timestamp
+    - name: rdc
+      func: journalReportDayCalloriesCommand
+      description: Отчет за день по ккал
+      args:
+      - name: Дата
+        type: timestamp
     - name: tm
       func: journalTemplateMealCommand
       description: Шаблоны команд приема пищи
