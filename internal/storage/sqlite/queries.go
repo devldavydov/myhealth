@@ -131,12 +131,13 @@ const (
 
 	_sqlSetSportActivity = `
     INSERT INTO sport_activity (
-        user_id, timestamp, sport_key, sets
+        user_id, timestamp, sport_key, sets, comment
     )
-    VALUES ($1, $2, $3, $4)
+    VALUES ($1, $2, $3, $4, $5)
     ON CONFLICT (user_id, timestamp, sport_key) DO
     UPDATE SET
-        sets = $4	
+        sets = $4,
+		comment = $5
 	`
 
 	_sqlDeleteSportActivity = `
@@ -148,7 +149,7 @@ const (
 	`
 
 	_sqlGetSportActivityReport = `
-    SELECT sa.timestamp, concat(s.name, ' [', s.unit, ']') as sport_name, sa.sets
+    SELECT sa.timestamp, concat(s.name, ' [', s.unit, ']') as sport_name, sa.sets, sa.comment
     FROM
         sport_activity sa,
         sport s
@@ -167,6 +168,10 @@ const (
 	SELECT user_id, timestamp, sport_key, sets
 	FROM sport_activity
 	ORDER BY user_id, timestamp, sport_key
+	`
+
+	_sqlAlterTablSportActivityAddComment = `
+	ALTER TABLE sport_activity ADD comment TEXT NOT NULL DEFAULT('')
 	`
 
 	//

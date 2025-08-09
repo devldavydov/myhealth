@@ -147,6 +147,7 @@ func (r *CmdProcessor) sportActivitySetCommand(
 	ts time.Time,
 	sportKey string,
 	sets []float64,
+	comment string,
 ) []CmdResponse {
 	// Call storage
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
@@ -156,6 +157,7 @@ func (r *CmdProcessor) sportActivitySetCommand(
 		SportKey:  sportKey,
 		Timestamp: storage.NewTimestamp(ts),
 		Sets:      sets,
+		Comment:   comment,
 	}); err != nil {
 		if errors.Is(err, storage.ErrSportActivityInvalid) {
 			return NewSingleCmdResponse(MsgErrInvalidCommand)
@@ -219,6 +221,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 		sportName string
 		sets      string
 		total     float64
+		comment   string
 	}
 	grpData := make(map[storage.Timestamp][]grpItem, len(dbRes))
 	graphData := make(map[string]map[storage.Timestamp]float64, len(dbRes))
@@ -237,6 +240,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 			sportName: d.SportName,
 			sets:      strings.Join(sets, ","),
 			total:     total,
+			comment:   d.Comment,
 		})
 
 		_, ok := graphData[d.SportName]
@@ -260,7 +264,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 	accordion := html.NewAccordion("accordionSA")
 
 	// Table
-	tbl := html.NewTable([]string{"Дата", "Спорт", "Подходы", "Итого"})
+	tbl := html.NewTable([]string{"Дата", "Спорт", "Подходы", "Итого", "Комментарий"})
 
 	for _, key := range keys {
 		first := true
@@ -280,7 +284,8 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 			tr.
 				AddTd(html.NewTd(html.NewS(row.sportName), nil)).
 				AddTd(html.NewTd(html.NewS(row.sets), nil)).
-				AddTd(html.NewTd(html.NewS(fmt.Sprintf("%.2f", row.total)), nil))
+				AddTd(html.NewTd(html.NewS(fmt.Sprintf("%.2f", row.total)), nil)).
+				AddTd(html.NewTd(html.NewS(row.comment), nil))
 
 			tbl.AddRow(tr)
 		}

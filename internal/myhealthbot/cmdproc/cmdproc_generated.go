@@ -1168,7 +1168,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 		resp = r.sportListCommand(userID)
 				
 	case "as":
-		if len(cmdParts[1:]) != 3 {
+		if len(cmdParts[1:]) != 4 {
 			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
 		}
 		
@@ -1189,11 +1189,17 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 			return argError("Подходы")
 		}
 		
+		val3, err := parseStringGE0(cmdParts[3])
+		if err != nil {
+			return argError("Комментарий")
+		}
+		
 		resp = r.sportActivitySetCommand(
 			userID,
 			val0,
 			val1,
 			val2,
+			val3,
 			)
 				
 	case "ad":
@@ -1273,6 +1279,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				"Дата [Дата]",
 				"Ключ спорта [Строка>0]",
 				"Подходы [Массив дробных чисел]",
+				"Комментарий [Строка>=0]",
 				).
 			addCmd(
 				"Удаление активности",

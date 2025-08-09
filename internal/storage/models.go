@@ -166,6 +166,7 @@ type SportActivity struct {
 	SportKey  string
 	Timestamp Timestamp
 	Sets      []float64
+	Comment   string
 }
 
 func (r *SportActivity) Validate() bool {
@@ -183,6 +184,7 @@ type SportActivityReport struct {
 	SportName string
 	Timestamp Timestamp
 	Sets      []float64
+	Comment   string
 }
 
 type Medicine struct {

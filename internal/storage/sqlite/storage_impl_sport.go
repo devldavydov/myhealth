@@ -94,7 +94,7 @@ func (r *StorageSQLite) SetSportActivity(ctx context.Context, userID int64, sa *
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, _sqlSetSportActivity, userID, sa.Timestamp, sa.SportKey, string(bSets))
+	_, err = r.db.ExecContext(ctx, _sqlSetSportActivity, userID, sa.Timestamp, sa.SportKey, string(bSets), sa.Comment)
 	if err != nil {
 		var errSql gsql.Error
 		if errors.As(err, &errSql) && errSql.Error() == _errForeignKey {
@@ -123,7 +123,7 @@ func (r *StorageSQLite) GetSportActivityReport(ctx context.Context, userID int64
 		var sr s.SportActivityReport
 		var sSets string
 
-		err = rows.Scan(&sr.Timestamp, &sr.SportName, &sSets)
+		err = rows.Scan(&sr.Timestamp, &sr.SportName, &sSets, &sr.Comment)
 		if err != nil {
 			return nil, err
 		}

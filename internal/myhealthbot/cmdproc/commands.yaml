@@ -292,6 +292,8 @@ commands:
         type: stringG0
       - name: Подходы
         type: floatArr
+      - name: Комментарий
+        type: stringGE0
     - name: ad
       func: sportActivityDelCommand
       description: Удаление активности
