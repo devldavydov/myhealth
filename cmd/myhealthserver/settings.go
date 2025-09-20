@@ -14,6 +14,7 @@ const (
 	_defaultShutdownTimeout = 15 * time.Second
 	_defaultLogLevel        = "INFO"
 	_defaultDBFilePath      = ""
+	_defaultUserID          = -1
 )
 
 type Config struct {
@@ -21,6 +22,7 @@ type Config struct {
 	ShutdownTimeout time.Duration
 	DBFilePath      string
 	LogLevel        string
+	UserID          int64
 }
 
 func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
@@ -29,6 +31,7 @@ func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
 	flagSet.StringVar(&config.RunAddress, "a", _defaultRunAddress, "Server run address")
 	flagSet.StringVar(&config.DBFilePath, "d", _defaultDBFilePath, "DB file path")
 	flagSet.StringVar(&config.LogLevel, "l", _defaultLogLevel, "Log level")
+	flagSet.Int64Var(&config.UserID, "u", _defaultUserID, "User ID")
 	flagSet.DurationVar(&config.ShutdownTimeout, "t", _defaultShutdownTimeout, "Server shutdown timeout")
 
 	flagSet.Usage = func() {
@@ -45,6 +48,10 @@ func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
 		return nil, fmt.Errorf("invalid DB file path")
 	}
 
+	if config.UserID == _defaultUserID {
+		return nil, fmt.Errorf("invalid user ID")
+	}
+
 	return config, nil
 }
 
@@ -52,5 +59,6 @@ func ServiceSettingsAdapt(config *Config) (*srv.ServerSettings, error) {
 	return srv.NewServerSettings(
 		config.RunAddress,
 		config.DBFilePath,
-		config.ShutdownTimeout)
+		config.ShutdownTimeout,
+		config.UserID)
 }

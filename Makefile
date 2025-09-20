@@ -10,7 +10,7 @@ generate:
 	go generate ./...
 
 .PHONY: build
-build: build_bot
+build: build_bot build_server
 
 .PHONY: build_bot
 build_bot:
@@ -20,6 +20,15 @@ build_bot:
 	go build \
 	-ldflags "-X 'main.buildDate=$(BUILD_DATE)' -X main.buildCommit=$(BUILD_COMMIT)" \
 	-o ../../bin/myhealthbot .	 
+
+.PHONY: build_server
+build_server:
+	@echo "\n### $@"
+	@mkdir -p ./bin
+	@cd cmd/myhealthserver && \
+	go build \
+	-ldflags "-X 'main.buildDate=$(BUILD_DATE)' -X main.buildCommit=$(BUILD_COMMIT)" \
+	-o ../../bin/myhealthserver .
 
 .PHONY: test
 test:
