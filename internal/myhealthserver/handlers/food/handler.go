@@ -56,6 +56,9 @@ func (r *FoodHandler) ListAPI(c *gin.Context) {
 			Name:    f.Name,
 			Brand:   f.Brand,
 			Cal100:  f.Cal100,
+			Prot100: f.Prot100,
+			Fat100:  f.Fat100,
+			Carb100: f.Carb100,
 			Comment: f.Comment,
 		})
 	}
