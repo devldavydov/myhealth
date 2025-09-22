@@ -1,3 +1,6 @@
 import streamlit as st
 
-st.markdown("### Статистика приема пищи")
+def handler():
+    st.markdown("### Статистика приема пищи")
+
+handler()

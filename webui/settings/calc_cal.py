@@ -57,5 +57,5 @@ def calc(weight, height, age):
         hide_index=True
     )
 
-if st.button("Рассчитать"):
+if st.button("Рассчитать", type="primary"):
     calc(weight, height, age)
