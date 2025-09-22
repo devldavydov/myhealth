@@ -16,6 +16,7 @@ const (
 
 	MsgErrFoodNotFound = "Еда не найдена"
 	MsgErrFoodIsUsed   = "Еда уже используется в журнале приема пищи или бандле"
+	MsgErrFoodInvalid  = "Еда задана не правильно"
 
 	MsgErrBundleDepBundleNotFound  = "Зависимый бандл не найден в базе данных"
 	MsgErrBundleDepFoodNotFound    = "Зависимая еда не найдена в базе данных"

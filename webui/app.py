@@ -163,7 +163,8 @@ def create_navigation():
 
 def main():
     # Global settings
-    st.set_page_config(layout="wide") 
+    st.set_page_config(layout="wide")
+    st.session_state["api_url"] = "http://127.0.0.1:8080/api"
 
     # Run
     pg = create_navigation()

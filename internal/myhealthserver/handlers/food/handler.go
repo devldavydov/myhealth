@@ -66,6 +66,74 @@ func (r *FoodHandler) ListAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, model.NewDataResponse(data))
 }
 
-func (r *FoodHandler) GetAPI(c *gin.Context)    {}
+func (r *FoodHandler) GetAPI(c *gin.Context) {
+	// Get from DB
+	ctx, cancel := context.WithTimeout(c.Request.Context(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	f, err := r.stg.GetFood(ctx, r.userID, c.Param("key"))
+	if err != nil {
+		if errors.Is(err, storage.ErrFoodNotFound) {
+			c.JSON(http.StatusOK, model.NewErrorResponse(messages.MsgErrFoodNotFound))
+			return
+		}
+
+		r.logger.Error(
+			"food get api DB error",
+			zap.Error(err),
+		)
+
+		c.JSON(http.StatusOK, model.NewErrorResponse(messages.MsgErrInternal))
+		return
+	}
+
+	c.JSON(http.StatusOK, model.NewDataResponse(FoodItem{
+		Key:     f.Key,
+		Name:    f.Name,
+		Brand:   f.Brand,
+		Cal100:  f.Cal100,
+		Prot100: f.Prot100,
+		Fat100:  f.Fat100,
+		Carb100: f.Carb100,
+		Comment: f.Comment,
+	}))
+}
 func (r *FoodHandler) DeleteAPI(c *gin.Context) {}
-func (r *FoodHandler) SetAPI(c *gin.Context)    {}
+
+func (r *FoodHandler) SetAPI(c *gin.Context) {
+	req := FoodItem{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, model.NewErrorResponse(messages.MsgErrInternal))
+		return
+	}
+
+	// Set in DB
+	ctx, cancel := context.WithTimeout(c.Request.Context(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.SetFood(ctx, r.userID, &storage.Food{
+		Key:     req.Key,
+		Name:    req.Name,
+		Brand:   req.Brand,
+		Cal100:  req.Cal100,
+		Prot100: req.Prot100,
+		Fat100:  req.Fat100,
+		Carb100: req.Carb100,
+		Comment: req.Comment,
+	}); err != nil {
+		if errors.Is(err, storage.ErrFoodInvalid) {
+			c.JSON(http.StatusOK, model.NewErrorResponse(messages.MsgErrFoodInvalid))
+			return
+		}
+
+		r.logger.Error(
+			"food set api DB error",
+			zap.Error(err),
+		)
+
+		c.JSON(http.StatusOK, model.NewErrorResponse(messages.MsgErrInternal))
+		return
+	}
+
+	c.JSON(http.StatusOK, model.NewOKResponse())
+}
