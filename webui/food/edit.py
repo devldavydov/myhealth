@@ -71,14 +71,14 @@ def handler():
         try:
             resp = requests.post(f"{st.session_state["api_url"]}/food/set", json=req).json()
         except Exception as ex:
-            st.error(ex)
+            st.toast(f":red[{ex}]", duration="long", icon=":material/error:")
             return
 
         if resp["error"] != "":
-            st.error(resp["error"])
+            st.toast(f":red[{resp["error"]}]", duration="long", icon=":material/error:")
             return
 
         del(st.session_state[DATA_KEY])
-        st.success("Изменения сохранены")
+        st.toast("Изменения сохранены", icon=":material/check:")
 
 handler()
