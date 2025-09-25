@@ -25,6 +25,12 @@ def create_food_pages():
             url_path="food-edit",
             title="Редактирование еды",
             icon=":material/edit:"
+        ),
+        st.Page(
+            "food/create.py",
+            url_path="food-create",
+            title="Создание еды",
+            icon=":material/add:"
         )
     ]
 

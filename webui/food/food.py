@@ -52,6 +52,6 @@ def handler():
         )
 
     if st.button("Добавить", icon=":material/add:", type="primary"):
-        pass
+        st.switch_page("food/create.py")
 
 handler()

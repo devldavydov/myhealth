@@ -98,7 +98,28 @@ func (r *FoodHandler) GetAPI(c *gin.Context) {
 		Comment: f.Comment,
 	}))
 }
-func (r *FoodHandler) DeleteAPI(c *gin.Context) {}
+func (r *FoodHandler) DeleteAPI(c *gin.Context) {
+	// Delete from DB
+	ctx, cancel := context.WithTimeout(c.Request.Context(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.DeleteFood(ctx, r.userID, c.Param("key")); err != nil {
+		if errors.Is(err, storage.ErrFoodIsUsed) {
+			c.JSON(http.StatusOK, model.NewErrorResponse(messages.MsgErrFoodIsUsed))
+			return
+		}
+
+		r.logger.Error(
+			"food del command DB error",
+			zap.Error(err),
+		)
+
+		c.JSON(http.StatusOK, model.NewErrorResponse(messages.MsgErrInternal))
+		return
+	}
+
+	c.JSON(http.StatusOK, model.NewOKResponse())
+}
 
 func (r *FoodHandler) SetAPI(c *gin.Context) {
 	req := FoodItem{}

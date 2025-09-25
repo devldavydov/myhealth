@@ -80,5 +80,19 @@ def handler():
 
         del(st.session_state[DATA_KEY])
         st.toast("Изменения сохранены", icon=":material/check:")
+    
+    if st.button("Удалить", icon=":material/delete:", type="primary"):
+        try:
+            resp = requests.delete(f"{st.session_state["api_url"]}/food/{key}").json()
+        except Exception as ex:
+            st.toast(f":red[{ex}]", duration="long", icon=":material/error:")
+            return
+
+        if resp["error"] != "":
+            st.toast(f":red[{resp["error"]}]", duration="long", icon=":material/error:")
+            return
+
+        del(st.session_state[DATA_KEY])
+        st.switch_page("food/food.py")
 
 handler()
