@@ -28,7 +28,7 @@ def handler():
             us = get_default_user_settings()
             st.toast(resp_obj["error"])
         else:
-            us = resp["data"]
+            us = resp_obj["data"]
         
         st.session_state[DATA_KEY] = us
 
