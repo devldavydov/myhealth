@@ -34,7 +34,6 @@ type FoodItem struct {
 }
 
 func (r *FoodHandler) ListAPI(c *gin.Context) {
-	// Get from DB
 	ctx, cancel := context.WithTimeout(c.Request.Context(), storage.StorageOperationTimeout)
 	defer cancel()
 
@@ -67,7 +66,6 @@ func (r *FoodHandler) ListAPI(c *gin.Context) {
 }
 
 func (r *FoodHandler) GetAPI(c *gin.Context) {
-	// Get from DB
 	ctx, cancel := context.WithTimeout(c.Request.Context(), storage.StorageOperationTimeout)
 	defer cancel()
 
@@ -99,7 +97,6 @@ func (r *FoodHandler) GetAPI(c *gin.Context) {
 	}))
 }
 func (r *FoodHandler) DeleteAPI(c *gin.Context) {
-	// Delete from DB
 	ctx, cancel := context.WithTimeout(c.Request.Context(), storage.StorageOperationTimeout)
 	defer cancel()
 
@@ -128,7 +125,6 @@ func (r *FoodHandler) SetAPI(c *gin.Context) {
 		return
 	}
 
-	// Set in DB
 	ctx, cancel := context.WithTimeout(c.Request.Context(), storage.StorageOperationTimeout)
 	defer cancel()
 

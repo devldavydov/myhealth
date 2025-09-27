@@ -46,7 +46,7 @@ def handler():
                     "",
                     width="small",
                     pinned=True,
-                    display_text=":material/edit:"
+                    display_text="Ред."
                 )
             }
         )
