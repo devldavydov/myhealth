@@ -11,6 +11,8 @@ import SportListView from '@/views/activity/SportListView.vue'
 import CalcCalView from '@/views/settings/CalcCalView.vue'
 import UserView from '@/views/settings/UserView.vue'
 
+import { StringConstants } from '@/constants'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -18,71 +20,71 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { title: 'Главная' }
+      meta: { title: StringConstants.MainPage }
     },
     // food
     {
       path: '/food',
       name: 'foodList',
       component: FoodListView,
-      meta: { title: 'Управление едой' }
+      meta: { title: StringConstants.FoodList }
     },
     {
       path: '/food/journal',
       name: 'foodJournal',
       component: FoodJournalView,
-      meta: { title: 'Журнал приема пищи' }
+      meta: { title: StringConstants.FoodJournal }
     },
     {
       path: '/food/stats',
       name: 'foodStats',
       component: FoodStatsView,
-      meta: { title: 'Статистика' }
+      meta: { title: StringConstants.Statistics }
     },
     // weight
     {
       path: '/weight',
       name: 'weightList',
       component: WeightListView,
-      meta: { title: 'Вес тела' }
+      meta: { title: StringConstants.WeightList }
     },
     {
       path: '/weight/stats',
       name: 'weightStats',
       component: WeightStatsView,
-      meta: { title: 'Статистика' }
+      meta: { title: StringConstants.Statistics }
     },
     // activity
     {
       path: '/activity',
       name: 'sportList',
       component: SportListView,
-      meta: { title: 'Управление спортом' }
+      meta: { title: StringConstants.SportList }
     },
     {
       path: '/activity/journal',
       name: 'activityJournal',
       component: ActivityJournalView,
-      meta: { title: 'Журнал активности' }
+      meta: { title: StringConstants.ActivityJournal }
     },
     {
       path: '/activity/stats',
       name: 'activityStats',
       component: ActivityStatsView,
-      meta: { title: 'Статистика' }
+      meta: { title: StringConstants.Statistics }
     },
     // settings
     {
       path: '/settings/calccal',
       name: 'settingsCalcCal',
       component: CalcCalView,
-      meta: { title: 'Расчет лимита ккал' }
+      meta: { title: StringConstants.SettingsCalcCal }
     },
     {
       path: '/settings/user',
       name: 'settingsUser',
       component: UserView,
-      meta: { title: 'Пользователь' }
+      meta: { title: StringConstants.SettingsUser }
     },
   ],
 })

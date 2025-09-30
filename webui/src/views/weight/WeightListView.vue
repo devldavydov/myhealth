@@ -1,8 +1,9 @@
 <script setup lang="ts">
   import Todo from '@/components/Todo.vue';
+  import { StringConstants } from '@/constants';
 </script>
 
 <template>
-  <h1>Вес тела</h1>
+  <h1>{{ StringConstants.WeightList }}</h1>
   <Todo/>
 </template>

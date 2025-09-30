@@ -1,8 +1,9 @@
 <script setup lang="ts">
   import Todo from '@/components/Todo.vue';
+  import { StringConstants } from '@/constants';
 </script>
 
 <template>
-  <h1>Журнал приема пищи</h1>
+  <h1>{{ StringConstants.FoodJournal }}</h1>
   <Todo/>
 </template>
