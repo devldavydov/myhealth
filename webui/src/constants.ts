@@ -1,4 +1,5 @@
 export const StringConstants = {
+    // Pages
     MainPage: "Главная страница",
     FoodList: "Управление едой",
     FoodJournal: "Журнал приема пищи",
@@ -7,5 +8,10 @@ export const StringConstants = {
     SportList: "Управление спортом",
     SettingsCalcCal: "Расчет лимита ккал.",
     SettingsUser: "Пользователь",
-    Statistics: "Статистика"
+    Statistics: "Статистика",
+    // Labels
+    Gender: "Пол",
+    GenderMale: "Мужчина",
+    GenderFemale: "Женщина",
+    Weight: "Вес, кг."
 };
