@@ -8,7 +8,7 @@ import router from './router'
 const app = createApp(App)
 
 router.beforeEach((to, from, next) => {
-    document.title = to.meta.title;
+    document.title = (to.meta.title as string);
     next();
 });
 
