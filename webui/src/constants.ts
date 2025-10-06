@@ -13,5 +13,16 @@ export const StringConstants = {
     Gender: "Пол",
     GenderMale: "Мужчина",
     GenderFemale: "Женщина",
-    Weight: "Вес, кг."
+    Weight: "Вес, кг.",
+    Height: "Рост, см.",
+    Age: "Возраст, лет.",
+    Calculate: "Рассчитать",
+    Indicator: "Показатель",
+    ValueCal: "Значение, ккал.",
+    Ubm: "Уровень Базального Метаболизма (УБМ)",
+    Activity1: "Сидячая активность",
+    Activity2: "Легкая активность",
+    Activity3: "Средняя активность",
+    Activity4: "Полноценная активность",
+    Activity5: "Cупер активность"
 };
