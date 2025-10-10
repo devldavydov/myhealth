@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { StringConstants } from './constants';
 </script>
 
 <template>
@@ -39,6 +40,14 @@ import { RouterLink, RouterView } from 'vue-router'
                 <li><RouterLink to="/activity/journal" class="dropdown-item">Журнал активности</RouterLink></li>
                 <li><RouterLink to="/activity" class="dropdown-item">Управление спортом</RouterLink></li>
                 <li><RouterLink to="/activity/stats" class="dropdown-item">Статистика</RouterLink></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Финансы
+              </a>
+              <ul class="dropdown-menu">
+                <li><RouterLink to="/finance/bondCalc" class="dropdown-item">{{ StringConstants.FinanceBondCalc }}</RouterLink></li>
               </ul>
             </li>
             <li class="nav-item dropdown">

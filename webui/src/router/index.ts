@@ -12,6 +12,7 @@ import CalcCalView from '@/views/settings/CalcCalView.vue'
 import UserView from '@/views/settings/UserView.vue'
 
 import { StringConstants } from '@/constants'
+import BondCalcView from '@/views/finance/BondCalcView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -72,6 +73,13 @@ const router = createRouter({
       name: 'activityStats',
       component: ActivityStatsView,
       meta: { title: StringConstants.Statistics }
+    },
+    // finance
+    {
+      path: '/finance/bondCalc',
+      name: 'financeBondCalc',
+      component: BondCalcView,
+      meta: { title: StringConstants.FinanceBondCalc }
     },
     // settings
     {
