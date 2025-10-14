@@ -1,134 +1,129 @@
 <script setup lang="ts">
-import { StringConstants } from '@/constants';
-import { ref, computed } from 'vue';
+  import { StringConstants } from '@/constants';
+  import { ref, computed } from 'vue';
 
-interface State {
-  nominal: number,
-  price: number
-  matDate: string
-  ncd: number
-  cd: number
-  cdCnt: number
-  sum: number
-  showNominalHelp: boolean
-  showPriceHelp: boolean
-  showMatDateHelp: boolean
-  showCdHelp: boolean
-  showCdCntHelp: boolean
-  showSumHelp: boolean
-  calculated: Array<{indicator: string, value: string}>
-}
-
-const state = ref({
-  nominal: 1000,
-  price: 0.0,
-  matDate: getTomorrowDate(),
-  ncd: 0.0,
-  cd: 0.0,
-  cdCnt: 0,
-  sum: 0.0,
-  showNominalHelp: false,
-  showPriceHelp: false,
-  showMatDateHelp: false,
-  showCdHelp: false,
-  showCdCntHelp: false,
-  showSumHelp: false,
-  calculated: []
-} as State)
-
-function bondCalc() {
-  if (!isCorrectInput()) {
-    return;
+  interface State {
+    nominal: number,
+    price: number
+    matDate: string
+    ncd: number
+    cd: number
+    cdCnt: number
+    sum: number
+    showNominalHelp: boolean
+    showPriceHelp: boolean
+    showMatDateHelp: boolean
+    showCdHelp: boolean
+    showCdCntHelp: boolean
+    showSumHelp: boolean
+    calculated: Array<{indicator: string, value: string}>
   }
 
-  const totalPrice = state.value.price + state.value.ncd;
-  const cdSum = state.value.cd * state.value.cdCnt;
-  const totalBoughtCnt = Math.round(state.value.sum / totalPrice);
-  const totalBoughtSum = totalBoughtCnt * totalPrice;
-  const daysToMaturity = getDaysBetween(new Date(state.value.matDate), new Date());
-  const ytm = ((state.value.nominal + cdSum - totalPrice) / totalPrice) * (365 / daysToMaturity) * 100;
-  const totalSum = totalBoughtCnt * (state.value.nominal + cdSum);
-  const diffSum = totalSum - totalBoughtSum;
+  const state = ref({
+    nominal: 1000,
+    price: 0.0,
+    matDate: getTomorrowDate(),
+    ncd: 0.0,
+    cd: 0.0,
+    cdCnt: 0,
+    sum: 0.0,
+    showNominalHelp: false,
+    showPriceHelp: false,
+    showMatDateHelp: false,
+    showCdHelp: false,
+    showCdCntHelp: false,
+    showSumHelp: false,
+    calculated: []
+  } as State)
 
-  state.value.calculated = [{indicator: StringConstants.TotalBoughtCnt, value: totalBoughtCnt.toString()}]
-  state.value.calculated.push({indicator: StringConstants.TotalBoughtSum, value: totalBoughtSum.toFixed(2)});
-  state.value.calculated.push({indicator: StringConstants.DaysToMaturity, value: daysToMaturity.toString()});
-  state.value.calculated.push({indicator: StringConstants.YTM, value: ytm.toFixed(2)});
-  state.value.calculated.push({indicator: StringConstants.TotalSum, value: totalSum.toFixed(2)});
-  state.value.calculated.push({indicator: StringConstants.DiffSum, value: diffSum.toFixed(2)});
-}
+  function bondCalc() {
+    if (!isCorrectInput()) {
+      return;
+    }
 
-function isCorrectInput() {
-  let res = true;
+    const totalPrice = state.value.price + state.value.ncd;
+    const cdSum = state.value.cd * state.value.cdCnt;
+    const totalBoughtCnt = Math.round(state.value.sum / totalPrice);
+    const totalBoughtSum = totalBoughtCnt * totalPrice;
+    const daysToMaturity = getDaysBetween(new Date(state.value.matDate), new Date());
+    const ytm = ((state.value.nominal + cdSum - totalPrice) / totalPrice) * (365 / daysToMaturity) * 100;
+    const totalSum = totalBoughtCnt * (state.value.nominal + cdSum);
+    const diffSum = totalSum - totalBoughtSum;
 
-  if (state.value.nominal <= 0.0) {
-    state.value.showNominalHelp = true;
-    res = false;
-  } else {
-    state.value.showNominalHelp = false;
+    state.value.calculated = [{indicator: StringConstants.TotalBoughtCnt, value: totalBoughtCnt.toString()}]
+    state.value.calculated.push({indicator: StringConstants.TotalBoughtSum, value: totalBoughtSum.toFixed(2)});
+    state.value.calculated.push({indicator: StringConstants.DaysToMaturity, value: daysToMaturity.toString()});
+    state.value.calculated.push({indicator: StringConstants.YTM, value: ytm.toFixed(2)});
+    state.value.calculated.push({indicator: StringConstants.TotalSum, value: totalSum.toFixed(2)});
+    state.value.calculated.push({indicator: StringConstants.DiffSum, value: diffSum.toFixed(2)});
   }
 
-  if (state.value.price <= 0.0) {
-    state.value.showPriceHelp = true;
-    res = false;
-  } else {
-    state.value.showPriceHelp = false;
+  function isCorrectInput() {
+    let res = true;
+
+    if (state.value.nominal <= 0.0) {
+      state.value.showNominalHelp = true;
+      res = false;
+    } else {
+      state.value.showNominalHelp = false;
+    }
+
+    if (state.value.price <= 0.0) {
+      state.value.showPriceHelp = true;
+      res = false;
+    } else {
+      state.value.showPriceHelp = false;
+    }
+
+    if (new Date() > new Date(state.value.matDate)) {
+      state.value.showMatDateHelp = true;
+      res = false;
+    } else {
+      state.value.showMatDateHelp = false;
+    }
+
+    if (state.value.cd <= 0.0) {
+      state.value.showCdHelp = true;
+      res = false;
+    } else {
+      state.value.showCdHelp = false;
+    }
+
+    if (state.value.cdCnt <= 0) {
+      state.value.showCdCntHelp = true;
+      res = false;
+    } else {
+      state.value.showCdCntHelp = false;
+    }
+
+    if (state.value.sum <= 0.0) {
+      state.value.showSumHelp = true;
+      res = false;
+    } else {
+      state.value.showSumHelp = false;
+    }
+
+    return res;
   }
 
-  if (new Date() > new Date(state.value.matDate)) {
-    state.value.showMatDateHelp = true;
-    res = false;
-  } else {
-    state.value.showMatDateHelp = false;
+  function getTomorrowDate() {
+    const today = new Date();
+    const dt = new Date(today);
+    
+    dt.setDate(today.getDate() + 1);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
   }
 
-  if (state.value.cd <= 0.0) {
-    state.value.showCdHelp = true;
-    res = false;
-  } else {
-    state.value.showCdHelp = false;
+  function getDaysBetween(startDate: Date, endDate: Date) {
+    const date1 = new Date(startDate);
+    const date2 = new Date(endDate);
+
+    const diffInMilliseconds = Math.abs(date2.getTime() - date1.getTime());
+    const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
+
+    const diffInDays = Math.round(diffInMilliseconds / oneDayInMilliseconds);
+    return diffInDays;
   }
-
-  if (state.value.cdCnt <= 0) {
-    state.value.showCdCntHelp = true;
-    res = false;
-  } else {
-    state.value.showCdCntHelp = false;
-  }
-
-  if (state.value.sum <= 0.0) {
-    state.value.showSumHelp = true;
-    res = false;
-  } else {
-    state.value.showSumHelp = false;
-  }
-
-  return res;
-}
-
-function getTomorrowDate() {
-  const today = new Date();
-  const dt = new Date(today);
-  
-  dt.setDate(today.getDate() + 1);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-}
-
-function getDaysBetween(startDate: Date, endDate: Date) {
-  const date1 = new Date(startDate);
-  const date2 = new Date(endDate);
-
-  const diffInMilliseconds = Math.abs(date2.getTime() - date1.getTime());
-  const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
-
-  const diffInDays = Math.round(diffInMilliseconds / oneDayInMilliseconds);
-  return diffInDays;
-}
-
-function trunc(v: number) {
-  return Math.trunc(v * 100) / 100;
-}
-
 </script>
 
 <template>

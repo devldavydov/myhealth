@@ -1,85 +1,85 @@
 <script setup lang="ts">
-import { StringConstants } from '@/constants';
-import { ref, computed } from 'vue';
+  import { StringConstants } from '@/constants';
+  import { ref } from 'vue';
 
-interface State {
-  gender: string
-  weight: number
-  height: number
-  age: number
-  showWeightHelp: boolean
-  showHeightHelp: boolean
-  showAgeHelp: boolean
-  calculated: Array<{indicator: string, value: number}>
-}
-
-const state = ref({
-  gender: "m",
-  weight: 0,
-  height: 0,
-  age: 0,
-  showWeightHelp: false,
-  showHeightHelp: false,
-  showAgeHelp: false,
-  calculated: []
-} as State)
-
-const genders = [
-  {key: "m", label: StringConstants.GenderMale},
-  {key: "f", label: StringConstants.GenderFemale}
-] as Array<{key: string, label: string}>;
-
-function calcCal() {
-  if (!isCorrectInput()) {
-    return;
+  interface State {
+    gender: string
+    weight: number
+    height: number
+    age: number
+    showWeightHelp: boolean
+    showHeightHelp: boolean
+    showAgeHelp: boolean
+    calculated: Array<{indicator: string, value: number}>
   }
 
-  let ubm = 10 * state.value.weight + 6.25 * state.value.height - 5 * state.value.age
-  if (state.value.gender === "m") 
-      ubm += 5
-  else
-      ubm -= 161
+  const state = ref({
+    gender: "m",
+    weight: 0,
+    height: 0,
+    age: 0,
+    showWeightHelp: false,
+    showHeightHelp: false,
+    showAgeHelp: false,
+    calculated: []
+  } as State);
 
-  const activities: Array<{name: string, k: number}> = [
-    {name: StringConstants.Activity1, k: 1.2},
-    {name: StringConstants.Activity2, k: 1.375},
-    {name: StringConstants.Activity3, k: 1.55},
-    {name: StringConstants.Activity4, k: 1.725},
-    {name: StringConstants.Activity5, k: 1.9}
-  ];
-  
-  state.value.calculated = [{indicator: StringConstants.Ubm, value: Math.round(ubm)}]
-  activities.forEach(a => {
-    state.value.calculated.push({indicator: a.name, value: Math.round(ubm * a.k)});
-  });
-}
+  const genders = [
+    {key: "m", label: StringConstants.GenderMale},
+    {key: "f", label: StringConstants.GenderFemale}
+  ] as Array<{key: string, label: string}>;
 
-function isCorrectInput() {
-  let res = true;
+  function calcCal() {
+    if (!isCorrectInput()) {
+      return;
+    }
 
-  if (state.value.weight <= 0.0) {
-    state.value.showWeightHelp = true;
-    res = false;
-  } else {
-    state.value.showWeightHelp = false;
+    let ubm = 10 * state.value.weight + 6.25 * state.value.height - 5 * state.value.age;
+    if (state.value.gender === "m") 
+        ubm += 5;
+    else
+        ubm -= 161;
+
+    const activities: Array<{name: string, k: number}> = [
+      {name: StringConstants.Activity1, k: 1.2},
+      {name: StringConstants.Activity2, k: 1.375},
+      {name: StringConstants.Activity3, k: 1.55},
+      {name: StringConstants.Activity4, k: 1.725},
+      {name: StringConstants.Activity5, k: 1.9}
+    ];
+    
+    state.value.calculated = [{indicator: StringConstants.Ubm, value: Math.round(ubm)}];
+    activities.forEach(a => {
+      state.value.calculated.push({indicator: a.name, value: Math.round(ubm * a.k)});
+    });
   }
 
-  if (state.value.height <= 0.0) {
-    state.value.showHeightHelp = true;
-    res = false;
-  } else {
-    state.value.showHeightHelp = false;
-  }
+  function isCorrectInput() {
+    let res = true;
 
-  if (state.value.age <= 0.0) {
-    state.value.showAgeHelp = true;
-    res = false;
-  } else {
-    state.value.showAgeHelp = false;
-  }
+    if (state.value.weight <= 0.0) {
+      state.value.showWeightHelp = true;
+      res = false;
+    } else {
+      state.value.showWeightHelp = false;
+    }
 
-  return res;
-}
+    if (state.value.height <= 0.0) {
+      state.value.showHeightHelp = true;
+      res = false;
+    } else {
+      state.value.showHeightHelp = false;
+    }
+
+    if (state.value.age <= 0.0) {
+      state.value.showAgeHelp = true;
+      res = false;
+    } else {
+      state.value.showAgeHelp = false;
+    }
+
+    return res;
+  }
 </script>
 
 <template>

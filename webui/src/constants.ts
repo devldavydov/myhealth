@@ -13,10 +13,17 @@ const ViewsNames = {
 
 const CommonLabels = {
     ValueG0: "Значение должно быть больше нуля",
-    DateGToday: "Дата должна быть больше сегодняшнего дня"
+    DateGToday: "Дата должна быть больше сегодняшнего дня",
+    Search: "Поиск",
+    Create: "Создать",
+    Name: "Наименование",
+    Comment: "Комментарий"
 };
 
-const FoodLabels = {};
+const FoodLabels = {
+    Brand: "Бренд",
+    Cal100: "ККал, 100г."
+};
 const WeightLabels = {};
 const ActivityLabels = {};
 
