@@ -1,4 +1,4 @@
-package usersettings
+package settings
 
 import (
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -7,8 +7,8 @@ import (
 )
 
 func Attach(group *gin.RouterGroup, stg storage.Storage, userID int64, logger *zap.Logger) {
-	usHandler := NewUserSettingsHandler(stg, userID, logger)
+	sHandler := NewSettingsHandler(stg, userID, logger)
 
-	group.GET("/", usHandler.GetAPI)
-	group.POST("/", usHandler.SetAPI)
+	group.GET("/calccal", sHandler.GetCalcCal)
+	group.POST("/calccal", sHandler.PostCalcCal)
 }

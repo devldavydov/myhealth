@@ -1,0 +1,81 @@
+{{ template "header.html" . }}
+
+<h3>{{ .Constants.Page_Settings_CalcCal }}</h3>
+<form method="post" action="/settings/calccal">
+  <div class="mb-3">
+    <label for="gender" class="form-label">{{ .Constants.Settings_Gender }}</label>
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        name="gender"
+        value="m"
+        type="radio"
+        {{ if eq .State.Gender "m" }}
+        checked
+        {{ end }}
+      >
+      <label class="form-check-label">{{ .Constants.Settings_GenderM }}</label>
+    </div>
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        name="gender"
+        value="f"
+        type="radio"
+        {{ if eq .State.Gender "f" }}
+        checked
+        {{ end }}
+      >
+      <label class="form-check-label">{{ .Constants.Settings_GenderF }}</label>
+    </div>
+  </div>
+  <div class="mb-3">
+    <label for="weight" class="form-label">{{ .Constants.Settings_Weight }}</label>
+    <input
+      type="number"
+      name="weight"
+      min="0.1"
+      step="0.1"
+      value="{{ .State.Weight }}"
+      class="form-control"
+      required>
+  </div>
+  <div class="mb-3">
+    <label for="height" class="form-label">{{ .Constants.Settings_Height }}</label>
+    <input
+      type="number"
+      name="height"
+      min="0.1"
+      step="0.1"
+      value="{{ .State.Height }}"
+      class="form-control"
+      required>
+  </div>
+  <div class="mb-3">
+    <label for="age" class="form-label">{{ .Constants.Settings_Age }}</label>
+    <input
+      type="number"
+      name="age"
+      min="1"
+      step="1"
+      value="{{ .State.Age }}"
+      class="form-control"
+      required>
+  </div>
+  <button type="submit" class="btn btn-primary">{{ .Constants.Common_Calc }}</button>
+</form>
+
+{{ if ne (len .State.Result) 0 }}
+<table class="table mt-3">
+  <tbody>
+    {{ range .State.Result }}
+    <tr>
+      <th>{{ .Name }}</th>
+      <td>{{ .Value }}</td>
+    </tr>
+    {{ end }}
+  </tb ody>
+</table>
+{{ end }}
+
+{{ template "footer.html" . }}
