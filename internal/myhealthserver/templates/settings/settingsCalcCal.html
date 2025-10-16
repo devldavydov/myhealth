@@ -3,25 +3,27 @@
 <h3>{{ .Constants.Page_Settings_CalcCal }}</h3>
 <form id="calc">
   <div class="mb-3">
-    <label for="gender" class="form-label">{{ .Constants.Settings_Gender }}</label>
+    <label class="form-label">{{ .Constants.Settings_Gender }}</label>
     <div class="form-check">
       <input
         class="form-check-input"
         name="gender"
         value="m"
         type="radio"
+        id="genderM"
         checked
       >
-      <label class="form-check-label">{{ .Constants.Settings_GenderM }}</label>
+      <label class="form-check-label" for="genderM">{{ .Constants.Settings_GenderM }}</label>
     </div>
     <div class="form-check">
       <input
         class="form-check-input"
         name="gender"
         value="f"
+        id="genderF"
         type="radio"
       >
-      <label class="form-check-label">{{ .Constants.Settings_GenderF }}</label>
+      <label class="form-check-label" for="genderF">{{ .Constants.Settings_GenderF }}</label>
     </div>
   </div>
   <div class="mb-3">
