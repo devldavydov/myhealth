@@ -1,7 +1,10 @@
 package response
 
 import (
+	"fmt"
+	"html/template"
 	"net/http"
+	"strings"
 
 	"github.com/devldavydov/myhealth/internal/myhealthserver/constants"
 	"github.com/gin-gonic/gin"
@@ -12,13 +15,17 @@ type Response struct {
 	tmplName string
 }
 
-func (r *Response) WithCustomScript(script string) *Response {
-	r.meta["CustomScript"] = script
+func (r *Response) WithCustomScript(scripts ...string) *Response {
+	var scriptHTML strings.Builder
+	for _, s := range scripts {
+		scriptHTML.WriteString(fmt.Sprintf(`<script src="%s"></script>`, s))
+	}
+	r.meta["CustomScripts"] = template.HTML(scriptHTML.String())
 	return r
 }
 
 func (r *Response) WithCustomStyle(style string) *Response {
-	r.meta["CustomStyle"] = style
+	r.meta["CustomStyle"] = template.HTML(style)
 	return r
 }
 

@@ -9,6 +9,5 @@ import (
 func Attach(group *gin.RouterGroup, stg storage.Storage, userID int64, logger *zap.Logger) {
 	sHandler := NewSettingsHandler(stg, userID, logger)
 
-	group.GET("/calccal", sHandler.GetCalcCal)
-	group.POST("/calccal", sHandler.PostCalcCal)
+	group.GET("/calccal", sHandler.CalcCalPage)
 }

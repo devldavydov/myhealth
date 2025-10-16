@@ -1,7 +1,7 @@
 {{ template "header.html" . }}
 
 <h3>{{ .Constants.Page_Settings_CalcCal }}</h3>
-<form method="post" action="/settings/calccal">
+<form id="calc">
   <div class="mb-3">
     <label for="gender" class="form-label">{{ .Constants.Settings_Gender }}</label>
     <div class="form-check">
@@ -10,9 +10,7 @@
         name="gender"
         value="m"
         type="radio"
-        {{ if eq .State.Gender "m" }}
         checked
-        {{ end }}
       >
       <label class="form-check-label">{{ .Constants.Settings_GenderM }}</label>
     </div>
@@ -22,9 +20,6 @@
         name="gender"
         value="f"
         type="radio"
-        {{ if eq .State.Gender "f" }}
-        checked
-        {{ end }}
       >
       <label class="form-check-label">{{ .Constants.Settings_GenderF }}</label>
     </div>
@@ -36,7 +31,6 @@
       name="weight"
       min="0.1"
       step="0.1"
-      value="{{ .State.Weight }}"
       class="form-control"
       required>
   </div>
@@ -47,7 +41,6 @@
       name="height"
       min="0.1"
       step="0.1"
-      value="{{ .State.Height }}"
       class="form-control"
       required>
   </div>
@@ -58,24 +51,15 @@
       name="age"
       min="1"
       step="1"
-      value="{{ .State.Age }}"
       class="form-control"
       required>
   </div>
   <button type="submit" class="btn btn-primary">{{ .Constants.Common_Calc }}</button>
 </form>
 
-{{ if ne (len .State.Result) 0 }}
-<table class="table mt-3">
+<table id="tblResult" class="table mt-3" display="none">
   <tbody>
-    {{ range .State.Result }}
-    <tr>
-      <th>{{ .Name }}</th>
-      <td>{{ .Value }}</td>
-    </tr>
-    {{ end }}
-  </tb ody>
+  </tbody>
 </table>
-{{ end }}
 
 {{ template "footer.html" . }}

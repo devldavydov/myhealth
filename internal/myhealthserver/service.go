@@ -1,3 +1,5 @@
+//go:generate go run ./gen/gen.go -in service.yaml
+
 package myhealthserver
 
 import (
