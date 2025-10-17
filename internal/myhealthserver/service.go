@@ -1,8 +1,12 @@
+//go:generate go run ./gen/gen.go -in service.yaml
+
 package myhealthserver
 
 import (
 	"context"
+	"embed"
 	"fmt"
+	"io/fs"
 	"net/http"
 
 	"github.com/devldavydov/myhealth/internal/myhealthserver/handlers"
@@ -20,6 +24,9 @@ type Service struct {
 	stg      storage.Storage
 }
 
+//go:embed templates/* static/*
+var embedFS embed.FS
+
 func NewService(settings *ServerSettings, logger *zap.Logger) (*Service, error) {
 	stg, err := slite.NewStorageSQLite(settings.DBFilePath, logger)
 	if err != nil {
@@ -30,10 +37,22 @@ func NewService(settings *ServerSettings, logger *zap.Logger) (*Service, error) 
 }
 
 func (r *Service) Run(ctx context.Context) error {
-	// Init HTTP API
+	// Init HTTP
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	files, err := loadTemplates("templates")
+	if err != nil {
+		return err
+	}
+	router.LoadHTMLFS(http.FS(embedFS), files...)
+
+	staticFS, err := fs.Sub(embedFS, "static")
+	if err != nil {
+		return err
+	}
+	router.StaticFS("/static", http.FS(staticFS))
 
 	handlers.Init(router, r.stg, r.settings.UserID, r.logger)
 
@@ -65,4 +84,29 @@ func (r *Service) Run(ctx context.Context) error {
 		r.logger.Info("Service finished")
 		return nil
 	}
+}
+
+func loadTemplates(root string) (files []string, err error) {
+	err = fs.WalkDir(embedFS, root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		fi, err := d.Info()
+		if err != nil {
+			return err
+		}
+
+		if fi.IsDir() {
+			if path != root {
+				loadTemplates(path)
+			}
+		} else {
+			files = append(files, path)
+		}
+
+		return err
+	})
+
+	return files, err
 }

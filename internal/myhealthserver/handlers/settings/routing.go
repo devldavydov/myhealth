@@ -1,4 +1,4 @@
-package food
+package settings
 
 import (
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -7,7 +7,7 @@ import (
 )
 
 func Attach(group *gin.RouterGroup, stg storage.Storage, userID int64, logger *zap.Logger) {
-	foodHandler := NewFoodHander(stg, userID, logger)
+	sHandler := NewSettingsHandler(stg, userID, logger)
 
-	group.GET("/", foodHandler.ListPage)
+	group.GET("/calccal", sHandler.CalcCalPage)
 }

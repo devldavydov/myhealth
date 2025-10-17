@@ -22,7 +22,7 @@
             "program": "${workspaceFolder}/cmd/myhealthserver/",
             "args": [
                 "-d", "${workspaceFolder}/myhealth.db",
-                "-u", "98132409",
+                "-u", "USER_ID",
             ]
         },
     ]

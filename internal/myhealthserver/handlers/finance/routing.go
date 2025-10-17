@@ -1,4 +1,4 @@
-package food
+package finance
 
 import (
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -7,7 +7,7 @@ import (
 )
 
 func Attach(group *gin.RouterGroup, stg storage.Storage, userID int64, logger *zap.Logger) {
-	foodHandler := NewFoodHander(stg, userID, logger)
+	fHandler := NewFinanceHandler(stg, userID, logger)
 
-	group.GET("/", foodHandler.ListPage)
+	group.GET("/bondcalc", fHandler.BoncCalcPage)
 }
