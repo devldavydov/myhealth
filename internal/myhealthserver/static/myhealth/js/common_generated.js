@@ -1,7 +1,21 @@
 
 var Constants = {
 	"Common_Calc": "Рассчитать",
+	"Common_DateGToday": "Дата должна быть больше сегодняшнего дня",
 	"Common_ValueG0": "Значение должно быть больше нуля",
+	"Finance_BondCd": "КД, руб.",
+	"Finance_BondCdCount": "Количество выплат КД",
+	"Finance_BondCurrentPrice": "Текущая цена, руб.",
+	"Finance_BondMaturityDate": "Дата погашения облигации",
+	"Finance_BondNcd": "НКД, руб.",
+	"Finance_BondSum": "Сумма приобретения, руб.",
+	"Finance_DaysToMaturity": "Дней до погашения",
+	"Finance_DiffSum": "Разница, руб.",
+	"Finance_Nominal": "Номинал, руб.",
+	"Finance_TotalBoughtCnt": "Количество купленных облигаций",
+	"Finance_TotalBoughtSum": "Сумма купленных облигаций, руб.",
+	"Finance_TotalSum": "Итоговая сумма, руб.",
+	"Finance_YTM": "Доходность к погашению, %г.",
 	"Menu_Activity": "Активность",
 	"Menu_Activity_Journal": "Журнал активности",
 	"Menu_Activity_SportList": "Управление спортом",
@@ -18,6 +32,7 @@ var Constants = {
 	"Menu_Weight": "Вес",
 	"Menu_Weight_Stats": "Статистика",
 	"Menu_Weight_WeightList": "Вес тела",
+	"Page_Finance_BondCalc": "Расчет доходности облигаций",
 	"Page_Food_FoodList": "Управление едой",
 	"Page_Main": "Главная страница",
 	"Page_NotFound": "Страница не найдена",
@@ -35,3 +50,13 @@ var Constants = {
 	"Settings_Ubm": "Уровень базального метаболизма, ккал.",
 	"Settings_Weight": "Вес, кг.",
 };
+
+function hideElement(sel) {
+	el = $(sel);
+	el.addClass('d-none');
+}
+
+function showElement(sel) {
+	el = $(sel);
+	el.removeClass('d-none');
+}

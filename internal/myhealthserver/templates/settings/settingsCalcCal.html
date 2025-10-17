@@ -30,7 +30,7 @@
     <label for="weight" class="form-label">{{ .Constants.Settings_Weight }}</label>
     <input
       type="number"
-      name="weight"
+      id="weight"
       min="0.1"
       step="0.1"
       class="form-control"
@@ -40,7 +40,7 @@
     <label for="height" class="form-label">{{ .Constants.Settings_Height }}</label>
     <input
       type="number"
-      name="height"
+      id="height"
       min="0.1"
       step="0.1"
       class="form-control"
@@ -50,7 +50,7 @@
     <label for="age" class="form-label">{{ .Constants.Settings_Age }}</label>
     <input
       type="number"
-      name="age"
+      id="age"
       min="1"
       step="1"
       class="form-control"
@@ -59,7 +59,7 @@
   <button type="submit" class="btn btn-primary">{{ .Constants.Common_Calc }}</button>
 </form>
 
-<table id="tblResult" class="table mt-3" display="none">
+<table id="tblResult" class="table mt-3 d-none">
   <tbody>
   </tbody>
 </table>

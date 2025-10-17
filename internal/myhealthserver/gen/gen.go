@@ -25,6 +25,16 @@ var Constants = {
 	"{{ $key }}": "{{ $value }}",
 	{{- end }}
 };
+
+function hideElement(sel) {
+	el = $(sel);
+	el.addClass('d-none');
+}
+
+function showElement(sel) {
+	el = $(sel);
+	el.removeClass('d-none');
+}
 `))
 
 type ServiceConfig struct {

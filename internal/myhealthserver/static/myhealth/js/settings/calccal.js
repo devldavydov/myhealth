@@ -6,9 +6,9 @@ function doCalc(e) {
     e.preventDefault();
 
     const gender = $('input[name="gender"]:checked').val();
-    const weight = $('input[name="weight"]').val();
-    const height = $('input[name="height"]').val();
-    const age = $('input[name="age"]').val();
+    const weight = parseFloat($('#weight').val());
+    const height = parseFloat($('#height').val());
+    const age = parseInt($('#age').val(), 10);
    
     let ubm = 10 * weight + 6.25 * height - 5 * age;
     if (gender === "m") 
@@ -29,5 +29,5 @@ function doCalc(e) {
     activities.forEach(el => {
         $('#tblResult tbody').append(`<tr><th>${el.name}</th><td>${(ubm * el.k).toFixed(2)}</td>`)
     });
-    $('#tblResult').show();
+    showElement('#tblResult');
 }
