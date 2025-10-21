@@ -10,6 +10,10 @@ $( document ).ready(function() {
         });
 
     $("#search").on("keyup", search);
+    $("#btnSearchClear").on('click', function() {
+        $('#search').val('');
+        $('#search').trigger('keyup');
+    });
 });
 
 async function getFoodList() {
