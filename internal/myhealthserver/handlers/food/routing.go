@@ -10,4 +10,5 @@ func Attach(group *gin.RouterGroup, stg storage.Storage, userID int64, logger *z
 	foodHandler := NewFoodHander(stg, userID, logger)
 
 	group.GET("/", foodHandler.ListPage)
+	group.GET("/api/list", foodHandler.GetListAPI)
 }

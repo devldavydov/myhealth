@@ -2,7 +2,9 @@ package constants
 
 var TotalConstants = map[string]string {
 	"Common_Calc": "Рассчитать",
+	"Common_Create": "Создать",
 	"Common_DateGToday": "Дата должна быть больше сегодняшнего дня",
+	"Common_Search": "Поиск",
 	"Common_ValueG0": "Значение должно быть больше нуля",
 	"Finance_BondCd": "КД, руб.",
 	"Finance_BondCdCount": "Количество выплат КД",
@@ -17,6 +19,10 @@ var TotalConstants = map[string]string {
 	"Finance_TotalBoughtSum": "Сумма купленных облигаций, руб.",
 	"Finance_TotalSum": "Итоговая сумма, руб.",
 	"Finance_YTM": "Доходность к погашению, %г.",
+	"Food_Brand": "Бренд",
+	"Food_Cal100": "ККал, 100г.",
+	"Food_Comment": "Комментарий",
+	"Food_Name": "Наименование",
 	"Menu_Activity": "Активность",
 	"Menu_Activity_Journal": "Журнал активности",
 	"Menu_Activity_SportList": "Управление спортом",

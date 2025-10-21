@@ -49,7 +49,14 @@ constants:
   Finance_YTM: "Доходность к погашению, %г."
   Finance_TotalSum: "Итоговая сумма, руб."
   Finance_DiffSum: "Разница, руб."
+  # Food
+  Food_Name: "Наименование"
+  Food_Brand: "Бренд"
+  Food_Cal100: "ККал, 100г."
+  Food_Comment: "Комментарий"
   # Common
   Common_Calc: "Рассчитать"
   Common_ValueG0: "Значение должно быть больше нуля"
   Common_DateGToday: "Дата должна быть больше сегодняшнего дня"
+  Common_Search: "Поиск"
+  Common_Create: "Создать"
