@@ -26,6 +26,10 @@ var Constants = {
 	{{- end }}
 };
 
+function createPage(tmpl) {
+	$('#page').html(tmpl);
+}
+
 function hideElement(sel) {
 	el = $(sel);
 	el.addClass('d-none');

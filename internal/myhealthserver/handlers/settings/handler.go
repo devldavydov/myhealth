@@ -21,8 +21,8 @@ func NewSettingsHandler(stg storage.Storage, userID int64, logger *zap.Logger) *
 func (r *SettingsHandler) CalcCalPage(c *gin.Context) {
 	rr.
 		NewResponse(cc.TotalConstants["Page_Settings_CalcCal"],
-			"settingsCalcCal.html",
+			"layout.html",
 			nil).
-		WithCustomScript("/static/myhealth/js/settings/calccal.js").
+		WithScripts("/static/myhealth/js/settings/calccal.js").
 		OK(c)
 }

@@ -8,12 +8,14 @@ import (
 
 func Index(c *gin.Context) {
 	rr.
-		NewResponse(cc.TotalConstants["Page_Main"], "index.html", nil).
+		NewResponse(cc.TotalConstants["Page_Main"], "layout.html", nil).
+		WithScripts("/static/myhealth/js/index.js").
 		OK(c)
 }
 
 func NotFound(c *gin.Context) {
 	rr.
-		NewResponse(cc.TotalConstants["Page_NotFound"], "notFound.html", nil).
+		NewResponse(cc.TotalConstants["Page_NotFound"], "layout.html", nil).
+		WithScripts("/static/myhealth/js/notFound.js").
 		OK(c)
 }
