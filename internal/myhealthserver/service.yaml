@@ -54,6 +54,11 @@ constants:
   Food_Brand: "Бренд"
   Food_Cal100: "ККал, 100г."
   Food_Comment: "Комментарий"
+  Food_CPFC: "КБЖУ, 100г."
+  Food_C: "К"
+  Food_P: "Б"
+  Food_F: "Ж"
+  Food_Cb: "У"
   # Common
   Common_Calc: "Рассчитать"
   Common_ValueG0: "Значение должно быть больше нуля"

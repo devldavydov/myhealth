@@ -35,6 +35,9 @@ type FoodItem struct {
 	Name    string  `json:"name"`
 	Brand   string  `json:"brand"`
 	Cal100  float64 `json:"cal100"`
+	Prot100 float64 `json:"prot100"`
+	Fat100  float64 `json:"fat100"`
+	Carb100 float64 `json:"carb100"`
 	Comment string  `json:"comment"`
 }
 
@@ -60,6 +63,9 @@ func (r *FoodHandler) GetListAPI(c *gin.Context) {
 			Name:    f.Name,
 			Brand:   f.Brand,
 			Cal100:  f.Cal100,
+			Prot100: f.Prot100,
+			Fat100:  f.Fat100,
+			Carb100: f.Carb100,
 			Comment: f.Comment,
 		})
 	}

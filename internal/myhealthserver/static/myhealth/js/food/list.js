@@ -30,6 +30,9 @@ async function getFoodList() {
             name: f.name,
             brand: f.brand,
             cal100: f.cal100,
+            prot100: f.prot100,
+            fat100: f.fat100,
+            carb100: f.carb100,
             comment: f.comment,
         });
     }
@@ -43,12 +46,26 @@ function applyResult(data) {
             <tr>
                 <td class="myhealth-name">${f.name}</td>
                 <td class="myhealth-brand">${f.brand }</td>
-                <td>${f.cal100 }</td>
+                <td class="align-middle text-center">
+                    <button
+                        class="btn btn-sm btn-info"
+                        data-bs-toggle="popover"
+                        data-bs-content="<strong>${Constants.Food_C}</strong>: ${f.cal100}<br/><strong>${Constants.Food_P}</strong>: ${f.prot100}<br/><strong>${Constants.Food_F}</strong>: ${f.fat100}<br/><strong>${Constants.Food_Cb}</strong>: ${f.carb100}"
+                        data-bs-html="true"
+                    >
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                </td>
                 <td class="myhealth-comment">${f.comment}</td>
                 <td class="align-middle text-center"><a class="btn btn-sm btn-warning" href="edit/${f.key}"><i class="bi bi-pencil"></i></a></td>
             </tr>
         `);
     }
+
+    $('[data-bs-toggle="popover"]').each((_, el) => {
+        new bootstrap.Popover(el);
+    });
+
     showElement('#tblFood');
 }
 
