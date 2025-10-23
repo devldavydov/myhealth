@@ -15,17 +15,12 @@ type Response struct {
 	tmplName string
 }
 
-func (r *Response) WithCustomScript(scripts ...string) *Response {
+func (r *Response) WithScripts(scripts ...string) *Response {
 	var scriptHTML strings.Builder
 	for _, s := range scripts {
 		scriptHTML.WriteString(fmt.Sprintf(`<script src="%s"></script>`, s))
 	}
-	r.meta["CustomScripts"] = template.HTML(scriptHTML.String())
-	return r
-}
-
-func (r *Response) WithCustomStyle(style string) *Response {
-	r.meta["CustomStyle"] = template.HTML(style)
+	r.meta["PageScripts"] = template.HTML(scriptHTML.String())
 	return r
 }
 
@@ -42,4 +37,8 @@ func NewResponse(title, tmplName string, meta gin.H) *Response {
 	totalMeta["Title"] = title
 
 	return &Response{meta: totalMeta, tmplName: tmplName}
+}
+
+func NewPageResponse(title string, scripts ...string) *Response {
+	return NewResponse(title, "layout.html", nil).WithScripts(scripts...)
 }

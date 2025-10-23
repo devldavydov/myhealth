@@ -20,9 +20,8 @@ func NewFinanceHandler(stg storage.Storage, userID int64, logger *zap.Logger) *F
 
 func (r *FinanceHandler) BoncCalcPage(c *gin.Context) {
 	rr.
-		NewResponse(cc.TotalConstants["Page_Finance_BondCalc"],
-			"bondCalc.html",
-			nil).
-		WithCustomScript("/static/myhealth/js/finance/bondcalc.js").
+		NewPageResponse(
+			cc.TotalConstants["Page_Finance_BondCalc"],
+			"/static/myhealth/js/finance/bondcalc.js").
 		OK(c)
 }

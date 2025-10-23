@@ -25,8 +25,17 @@ func NewFoodHander(stg storage.Storage, userID int64, logger *zap.Logger) *FoodH
 
 func (r *FoodHandler) ListPage(c *gin.Context) {
 	rr.
-		NewResponse(cc.TotalConstants["Page_Food_FoodList"], "foodList.html", nil).
-		WithCustomScript("/static/myhealth/js/food/list.js").
+		NewPageResponse(
+			cc.TotalConstants["Page_Food_FoodList"],
+			"/static/myhealth/js/food/list.js").
+		OK(c)
+}
+
+func (r *FoodHandler) EditPage(c *gin.Context) {
+	rr.
+		NewPageResponse(
+			cc.TotalConstants["Page_Food_FoodEdit"],
+			"/static/myhealth/js/food/edit.js").
 		OK(c)
 }
 
@@ -71,4 +80,38 @@ func (r *FoodHandler) GetListAPI(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, rr.NewDataAPIResponse(data))
+}
+
+func (r *FoodHandler) GetFoodAPI(c *gin.Context) {
+	// Get food from DB
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	food, err := r.stg.GetFood(ctx, r.userID, c.Param("key"))
+	if err != nil {
+		if errors.Is(err, storage.ErrFoodNotFound) {
+			c.JSON(http.StatusOK, rr.NewErrorAPIResponse(messages.MsgErrFoodNotFound))
+			return
+		}
+
+		r.logger.Error(
+			"food get api DB error",
+			zap.Int64("userID", r.userID),
+			zap.Error(err),
+		)
+
+		c.JSON(http.StatusOK, rr.NewErrorAPIResponse(messages.MsgErrInternal))
+		return
+	}
+
+	c.JSON(http.StatusOK, FoodItem{
+		Key:     food.Key,
+		Name:    food.Name,
+		Brand:   food.Brand,
+		Cal100:  food.Cal100,
+		Prot100: food.Prot100,
+		Fat100:  food.Fat100,
+		Carb100: food.Carb100,
+		Comment: food.Comment,
+	})
 }

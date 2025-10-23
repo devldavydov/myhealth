@@ -6,8 +6,7 @@
     <link rel="icon" href="/static/favicon.ico" />
     <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/static/bootstrap/css/bootstrap-icons.min.css" rel="stylesheet" />
-
-    {{ .CustomStyles}}
+    <link href="/static/myhealth/css/common.css" rel="stylesheet" />
 
     <title>{{ .Title }}</title>
   </head>
@@ -132,3 +131,15 @@
       </div>
     </nav>    
     <div class="container">
+        <div id="page"></div>
+    </div>
+
+    <script src="/static/jquery/jquery-3.7.1.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/axios/axios.min.js"></script>
+    <script src="/static/myhealth/js/common_generated.js"></script>
+
+    {{ .PageScripts }}
+    
+  </body>
+</html>

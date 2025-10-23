@@ -1,8 +1,11 @@
 
 var Constants = {
 	"Common_Calc": "Рассчитать",
+	"Common_Comment": "Комментарий",
 	"Common_Create": "Создать",
 	"Common_DateGToday": "Дата должна быть больше сегодняшнего дня",
+	"Common_Delete": "Удалить",
+	"Common_Save": "Сохранить",
 	"Common_Search": "Поиск",
 	"Common_ValueG0": "Значение должно быть больше нуля",
 	"Finance_BondCd": "КД, руб.",
@@ -22,11 +25,14 @@ var Constants = {
 	"Food_C": "К",
 	"Food_CPFC": "КБЖУ, 100г.",
 	"Food_Cal100": "ККал, 100г.",
+	"Food_Carb100": "Углеводы, 100г.",
 	"Food_Cb": "У",
-	"Food_Comment": "Комментарий",
 	"Food_F": "Ж",
+	"Food_Fat100": "Жиры, 100г.",
 	"Food_Name": "Наименование",
+	"Food_NotFound": "Еда не найдена",
 	"Food_P": "Б",
+	"Food_Prot100": "Белки, 100г.",
 	"Menu_Activity": "Активность",
 	"Menu_Activity_Journal": "Журнал активности",
 	"Menu_Activity_SportList": "Управление спортом",
@@ -44,6 +50,7 @@ var Constants = {
 	"Menu_Weight_Stats": "Статистика",
 	"Menu_Weight_WeightList": "Вес тела",
 	"Page_Finance_BondCalc": "Расчет доходности облигаций",
+	"Page_Food_FoodEdit": "Редактирование еды",
 	"Page_Food_FoodList": "Управление едой",
 	"Page_Main": "Главная страница",
 	"Page_NotFound": "Страница не найдена",
@@ -62,6 +69,10 @@ var Constants = {
 	"Settings_Weight": "Вес, кг.",
 };
 
+function createPage(tmpl) {
+	$('#page').html(tmpl);
+}
+
 function hideElement(sel) {
 	el = $(sel);
 	el.addClass('d-none');
@@ -70,4 +81,47 @@ function hideElement(sel) {
 function showElement(sel) {
 	el = $(sel);
 	el.removeClass('d-none');
+}
+
+function getQueryParams() {
+	return new URLSearchParams(window.location.search);
+}
+
+function tmplLoader() {
+	return `
+	<div id="loader" class="spinner-border" role="status">
+		<span class="visually-hidden">Loading...</span>
+	</div>	
+	`;
+}
+
+function tmplSearch() {
+	return `
+	<div class="input-group">
+    	<span class="input-group-text"><i class="bi bi-search"></i></span>
+    	<input id="search" type="text" class="form-control" placeholder="Поиск">
+    	<button class="btn btn-outline-secondary" type="button" id="btnSearchClear"><i class="bi bi-x-lg"></i></button>
+	</div>
+	`;
+}
+
+function tmplToast() {
+	return `
+	<div class="toast-container position-fixed top-0 end-0 p-3">
+	<div id="liveToast" class="toast bg-light" role="alert" aria-live="assertive" aria-atomic="true">
+		<div class="d-flex">
+		<div id="toastBody" class="toast-body">
+		</div>
+		<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+	</div>	
+	`;
+}
+
+function tmplAlert(alClass, alID) {
+	return `
+	<div class="alert ${alClass}" id="${alID}" role="alert">
+	</div>
+	`;
 }
