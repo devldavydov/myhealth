@@ -71,7 +71,7 @@ const template = `
       class="form-control"
       required>
   </div>
-  <button type="submit" class="btn btn-primary">${Constants.Common_Calc}</button>
+  <button type="submit" class="btn btn-primary mb-3">${Constants.Common_Calc}</button>
 </form>
 
 <table id="tblResult" class="table mt-3 d-none">

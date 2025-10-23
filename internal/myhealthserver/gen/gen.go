@@ -40,6 +40,10 @@ function showElement(sel) {
 	el.removeClass('d-none');
 }
 
+function getQueryParams() {
+	return new URLSearchParams(window.location.search);
+}
+
 function tmplLoader() {
 	return ` + "`" + `
 	<div id="loader" class="spinner-border" role="status">
@@ -69,6 +73,13 @@ function tmplToast() {
 		</div>
 	</div>
 	</div>	
+	` + "`" + `;
+}
+
+function tmplAlert(alClass, alID) {
+	return ` + "`" + `
+	<div class="alert ${alClass}" id="${alID}" role="alert">
+	</div>
 	` + "`" + `;
 }
 `))
