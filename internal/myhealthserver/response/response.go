@@ -38,3 +38,7 @@ func NewResponse(title, tmplName string, meta gin.H) *Response {
 
 	return &Response{meta: totalMeta, tmplName: tmplName}
 }
+
+func NewPageResponse(title string, scripts ...string) *Response {
+	return NewResponse(title, "layout.html", nil).WithScripts(scripts...)
+}

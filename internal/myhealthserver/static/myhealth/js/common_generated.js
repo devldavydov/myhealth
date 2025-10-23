@@ -75,3 +75,35 @@ function showElement(sel) {
 	el = $(sel);
 	el.removeClass('d-none');
 }
+
+function tmplLoader() {
+	return `
+	<div id="loader" class="spinner-border" role="status">
+		<span class="visually-hidden">Loading...</span>
+	</div>	
+	`;
+}
+
+function tmplSearch() {
+	return `
+	<div class="input-group">
+    	<span class="input-group-text"><i class="bi bi-search"></i></span>
+    	<input id="search" type="text" class="form-control" placeholder="Поиск">
+    	<button class="btn btn-outline-secondary" type="button" id="btnSearchClear"><i class="bi bi-x-lg"></i></button>
+	</div>
+	`;
+}
+
+function tmplToast() {
+	return `
+	<div class="toast-container position-fixed top-0 end-0 p-3">
+	<div id="liveToast" class="toast bg-light" role="alert" aria-live="assertive" aria-atomic="true">
+		<div class="d-flex">
+		<div id="toastBody" class="toast-body">
+		</div>
+		<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+	</div>	
+	`;
+}

@@ -25,8 +25,9 @@ func NewFoodHander(stg storage.Storage, userID int64, logger *zap.Logger) *FoodH
 
 func (r *FoodHandler) ListPage(c *gin.Context) {
 	rr.
-		NewResponse(cc.TotalConstants["Page_Food_FoodList"], "foodList.html", nil).
-		WithScripts("/static/myhealth/js/food/list.js").
+		NewPageResponse(
+			cc.TotalConstants["Page_Food_FoodList"],
+			"/static/myhealth/js/food/list.js").
 		OK(c)
 }
 

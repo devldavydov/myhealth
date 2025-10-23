@@ -1,4 +1,37 @@
+const template = `
+<h3>${Constants.Page_Food_FoodList}</h3>
+<div class="row mb-2">
+  <div class="col-sm-2">
+    <a class="btn btn-primary" href="/food/create" role="button"><i class="bi-plus-square"></i> ${Constants.Common_Create}</a>  
+  </div>
+</div>
+<div class="row mb-2">
+${tmplSearch()}
+</div>
+
+${tmplLoader()}
+${tmplToast()}
+
+<div id="tblFood" class="table-responsive d-none">
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th class="align-middle col-4">${Constants.Food_Name}</th>
+        <th class="align-middle col-2">${Constants.Food_Brand}</th>
+        <th class="align-middle col-1">${Constants.Food_CPFC}</th>
+        <th class="align-middle col-2">${Constants.Food_Comment}</th>
+        <th class="align-middle col-1 text-center"><i class="bi bi-gear"></i></th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</div>
+`;
+
 $( document ).ready(function() {
+    createPage(template);
+
     getFoodList()
         .finally(() => {
             hideElement('#loader')
