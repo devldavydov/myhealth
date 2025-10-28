@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	m "github.com/devldavydov/myhealth/internal/common/messages"
+
 	"github.com/devldavydov/myhealth/internal/common/html"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
@@ -28,7 +30,7 @@ func (r *CmdProcessor) sportSetCommand(userID int64, key, name, unit, comment st
 		Comment: comment,
 	}); err != nil {
 		if errors.Is(err, storage.ErrSportInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		r.logger.Error(
@@ -37,10 +39,10 @@ func (r *CmdProcessor) sportSetCommand(userID int64, key, name, unit, comment st
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) sportSetTemplateCommand(userID int64, key string) []CmdResponse {
@@ -51,7 +53,7 @@ func (r *CmdProcessor) sportSetTemplateCommand(userID int64, key string) []CmdRe
 	sport, err := r.stg.GetSport(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrSportNotFound) {
-			return NewSingleCmdResponse(MsgErrSportNotFound)
+			return NewSingleCmdResponse(m.MsgErrSportNotFound)
 		}
 
 		r.logger.Error(
@@ -60,7 +62,7 @@ func (r *CmdProcessor) sportSetTemplateCommand(userID int64, key string) []CmdRe
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	return NewSingleCmdResponse(fmt.Sprintf("s,set,%s,%s,%s,%s", sport.Key, sport.Name, sport.Unit, sport.Comment))
@@ -73,7 +75,7 @@ func (r *CmdProcessor) sportDelCommand(userID int64, key string) []CmdResponse {
 
 	if err := r.stg.DeleteSport(ctx, userID, key); err != nil {
 		if errors.Is(err, storage.ErrSportIsUsed) {
-			return NewSingleCmdResponse(MsgErrSportIsUsed)
+			return NewSingleCmdResponse(m.MsgErrSportIsUsed)
 		}
 
 		r.logger.Error(
@@ -82,10 +84,10 @@ func (r *CmdProcessor) sportDelCommand(userID int64, key string) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) sportListCommand(userID int64) []CmdResponse {
@@ -96,7 +98,7 @@ func (r *CmdProcessor) sportListCommand(userID int64) []CmdResponse {
 	sportList, err := r.stg.GetSportList(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -105,7 +107,7 @@ func (r *CmdProcessor) sportListCommand(userID int64) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Build html
@@ -160,11 +162,11 @@ func (r *CmdProcessor) sportActivitySetCommand(
 		Comment:   comment,
 	}); err != nil {
 		if errors.Is(err, storage.ErrSportActivityInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		if errors.Is(err, storage.ErrSportNotFound) {
-			return NewSingleCmdResponse(MsgErrSportNotFound)
+			return NewSingleCmdResponse(m.MsgErrSportNotFound)
 		}
 
 		r.logger.Error(
@@ -173,10 +175,10 @@ func (r *CmdProcessor) sportActivitySetCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) sportActivityDelCommand(userID int64, ts time.Time, sportKey string) []CmdResponse {
@@ -191,10 +193,10 @@ func (r *CmdProcessor) sportActivityDelCommand(userID int64, ts time.Time, sport
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo time.Time) []CmdResponse {
@@ -205,7 +207,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 	dbRes, err := r.stg.GetSportActivityReport(ctx, userID, storage.NewTimestamp(tsFrom), storage.NewTimestamp(tsTo))
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -214,7 +216,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	type grpItem struct {
@@ -363,7 +365,7 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 				zap.Error(err),
 			)
 
-			return NewSingleCmdResponse(MsgErrInternal)
+			return NewSingleCmdResponse(m.MsgErrInternal)
 		}
 		chartSnippets = append(chartSnippets, html.NewS(snippet))
 	}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
@@ -27,7 +28,7 @@ func (r *CmdProcessor) medSetCommand(userID int64, key, name, unit, comment stri
 		Comment: comment,
 	}); err != nil {
 		if errors.Is(err, storage.ErrMedicineInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		r.logger.Error(
@@ -36,10 +37,10 @@ func (r *CmdProcessor) medSetCommand(userID int64, key, name, unit, comment stri
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) medSetTemplateCommand(userID int64, key string) []CmdResponse {
@@ -50,7 +51,7 @@ func (r *CmdProcessor) medSetTemplateCommand(userID int64, key string) []CmdResp
 	med, err := r.stg.GetMedicine(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrMedicineNotFound) {
-			return NewSingleCmdResponse(MsgErrMedicineNotFound)
+			return NewSingleCmdResponse(m.MsgErrMedicineNotFound)
 		}
 
 		r.logger.Error(
@@ -59,7 +60,7 @@ func (r *CmdProcessor) medSetTemplateCommand(userID int64, key string) []CmdResp
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	return NewSingleCmdResponse(fmt.Sprintf("m,set,%s,%s,%s,%s", med.Key, med.Name, med.Unit, med.Comment))
@@ -72,7 +73,7 @@ func (r *CmdProcessor) medDelCommand(userID int64, key string) []CmdResponse {
 
 	if err := r.stg.DeleteMedicine(ctx, userID, key); err != nil {
 		if errors.Is(err, storage.ErrMedicineIsUsed) {
-			return NewSingleCmdResponse(MsgErrMedicineIsUsed)
+			return NewSingleCmdResponse(m.MsgErrMedicineIsUsed)
 		}
 
 		r.logger.Error(
@@ -81,10 +82,10 @@ func (r *CmdProcessor) medDelCommand(userID int64, key string) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) medListCommand(userID int64) []CmdResponse {
@@ -95,7 +96,7 @@ func (r *CmdProcessor) medListCommand(userID int64) []CmdResponse {
 	sportList, err := r.stg.GetMedicineList(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -104,7 +105,7 @@ func (r *CmdProcessor) medListCommand(userID int64) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Build html
@@ -157,11 +158,11 @@ func (r *CmdProcessor) medIndicatorSetCommand(
 		Value:       value,
 	}); err != nil {
 		if errors.Is(err, storage.ErrMedicineIndicatorInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		if errors.Is(err, storage.ErrMedicineNotFound) {
-			return NewSingleCmdResponse(MsgErrMedicineNotFound)
+			return NewSingleCmdResponse(m.MsgErrMedicineNotFound)
 		}
 
 		r.logger.Error(
@@ -170,10 +171,10 @@ func (r *CmdProcessor) medIndicatorSetCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) medIndicatorDelCommand(userID int64, ts time.Time, medKey string) []CmdResponse {
@@ -188,10 +189,10 @@ func (r *CmdProcessor) medIndicatorDelCommand(userID int64, ts time.Time, medKey
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) medIndicatorReportCommand(userID int64, tsFrom, tsTo time.Time) []CmdResponse {
@@ -202,7 +203,7 @@ func (r *CmdProcessor) medIndicatorReportCommand(userID int64, tsFrom, tsTo time
 	dbRes, err := r.stg.GetMedicineIndicatorReport(ctx, userID, storage.NewTimestamp(tsFrom), storage.NewTimestamp(tsTo))
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -211,7 +212,7 @@ func (r *CmdProcessor) medIndicatorReportCommand(userID int64, tsFrom, tsTo time
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	type grpItem struct {
@@ -329,7 +330,7 @@ func (r *CmdProcessor) medIndicatorReportCommand(userID int64, tsFrom, tsTo time
 				zap.Error(err),
 			)
 
-			return NewSingleCmdResponse(MsgErrInternal)
+			return NewSingleCmdResponse(m.MsgErrInternal)
 		}
 		chartSnippets = append(chartSnippets, html.NewS(snippet))
 	}

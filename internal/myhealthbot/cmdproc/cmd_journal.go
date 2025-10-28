@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
@@ -33,11 +34,11 @@ func (r *CmdProcessor) journalSetCommand(
 		FoodWeight: foodWeight,
 	}); err != nil {
 		if errors.Is(err, storage.ErrJournalInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		if errors.Is(err, storage.ErrFoodNotFound) {
-			return NewSingleCmdResponse(MsgErrFoodNotFound)
+			return NewSingleCmdResponse(m.MsgErrFoodNotFound)
 		}
 
 		r.logger.Error(
@@ -46,10 +47,10 @@ func (r *CmdProcessor) journalSetCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) journalSetBundleCommand(
@@ -64,11 +65,11 @@ func (r *CmdProcessor) journalSetBundleCommand(
 
 	if err := r.stg.SetJournalBundle(ctx, userID, storage.NewTimestamp(ts), meal, bndlKey); err != nil {
 		if errors.Is(err, storage.ErrFoodNotFound) {
-			return NewSingleCmdResponse(MsgErrFoodNotFound)
+			return NewSingleCmdResponse(m.MsgErrFoodNotFound)
 		}
 
 		if errors.Is(err, storage.ErrBundleNotFound) {
-			return NewSingleCmdResponse(MsgErrBundleNotFound)
+			return NewSingleCmdResponse(m.MsgErrBundleNotFound)
 		}
 
 		r.logger.Error(
@@ -77,10 +78,10 @@ func (r *CmdProcessor) journalSetBundleCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) journalDelCommand(
@@ -100,10 +101,10 @@ func (r *CmdProcessor) journalDelCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) journalDelMealCommand(userID int64, ts time.Time, meal storage.Meal) []CmdResponse {
@@ -118,10 +119,10 @@ func (r *CmdProcessor) journalDelMealCommand(userID int64, ts time.Time, meal st
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) journalDelBundleCommand(
@@ -136,11 +137,11 @@ func (r *CmdProcessor) journalDelBundleCommand(
 
 	if err := r.stg.DelJournalBundle(ctx, userID, storage.NewTimestamp(ts), meal, bndlKey); err != nil {
 		if errors.Is(err, storage.ErrFoodNotFound) {
-			return NewSingleCmdResponse(MsgErrFoodNotFound)
+			return NewSingleCmdResponse(m.MsgErrFoodNotFound)
 		}
 
 		if errors.Is(err, storage.ErrBundleNotFound) {
-			return NewSingleCmdResponse(MsgErrBundleNotFound)
+			return NewSingleCmdResponse(m.MsgErrBundleNotFound)
 		}
 
 		r.logger.Error(
@@ -149,10 +150,10 @@ func (r *CmdProcessor) journalDelBundleCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) journalCopyCommand(
@@ -179,7 +180,7 @@ func (r *CmdProcessor) journalCopyCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	return NewSingleCmdResponse(fmt.Sprintf("Скопировано записей: %d", cnt))
@@ -202,7 +203,7 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	burnedCal, err := r.stg.GetTotalBurnedCal(ctx, userID, storage.NewTimestamp(ts))
@@ -213,7 +214,7 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	var totalBurnedCal float64
@@ -227,7 +228,7 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 	lst, err := r.stg.GetJournalReport(ctx, userID, storage.NewTimestamp(ts), storage.NewTimestamp(ts))
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -236,7 +237,7 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Report table
@@ -395,7 +396,7 @@ func (r *CmdProcessor) journalReportDayCalloriesCommand(userID int64, ts time.Ti
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	burnedCal, err := r.stg.GetTotalBurnedCal(ctx, userID, storage.NewTimestamp(ts))
@@ -406,7 +407,7 @@ func (r *CmdProcessor) journalReportDayCalloriesCommand(userID int64, ts time.Ti
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	var totalBurnedCal float64
@@ -420,7 +421,7 @@ func (r *CmdProcessor) journalReportDayCalloriesCommand(userID int64, ts time.Ti
 	lst, err := r.stg.GetJournalReport(ctx, userID, storage.NewTimestamp(ts), storage.NewTimestamp(ts))
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -429,7 +430,7 @@ func (r *CmdProcessor) journalReportDayCalloriesCommand(userID int64, ts time.Ti
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	var sb strings.Builder
@@ -470,7 +471,7 @@ func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, me
 	rep, err := r.stg.GetJournalReport(ctx, userID, storage.NewTimestamp(ts), storage.NewTimestamp(ts))
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -479,7 +480,7 @@ func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, me
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	tsStr := formatTimestamp(ts)
@@ -517,7 +518,7 @@ func (r *CmdProcessor) journalFoodStatCommand(userID int64, foodKey string) []Cm
 	food, err := r.stg.GetFood(ctx, userID, foodKey)
 	if err != nil {
 		if errors.Is(err, storage.ErrFoodNotFound) {
-			return NewSingleCmdResponse(MsgErrFoodNotFound)
+			return NewSingleCmdResponse(m.MsgErrFoodNotFound)
 		}
 
 		r.logger.Error(
@@ -525,7 +526,7 @@ func (r *CmdProcessor) journalFoodStatCommand(userID int64, foodKey string) []Cm
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	foodStat, err := r.stg.GetJournalFoodStat(ctx,
@@ -534,7 +535,7 @@ func (r *CmdProcessor) journalFoodStatCommand(userID int64, foodKey string) []Cm
 	)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -542,7 +543,7 @@ func (r *CmdProcessor) journalFoodStatCommand(userID int64, foodKey string) []Cm
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	var sb strings.Builder
@@ -567,7 +568,7 @@ func (r *CmdProcessor) journalSetDayTotalCal(userID int64, ts time.Time, totalCa
 
 	if err := r.stg.SetTotalBurnedCal(ctx, userID, storage.NewTimestamp(ts), totalCal); err != nil {
 		if errors.Is(err, storage.ErrDayTotalCalInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		r.logger.Error(
@@ -576,10 +577,10 @@ func (r *CmdProcessor) journalSetDayTotalCal(userID int64, ts time.Time, totalCa
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) journalDeleteDayTotalCal(userID int64, ts time.Time) []CmdResponse {
@@ -594,10 +595,10 @@ func (r *CmdProcessor) journalDeleteDayTotalCal(userID int64, ts time.Time) []Cm
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func pfcSnippet(val, totalVal float64) html.IELement {

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
@@ -22,12 +23,12 @@ func (r *CmdProcessor) bundleSetCommand(userID int64, key string, bndlParts []st
 			// Add dependant food
 			parts := strings.Split(bndlPart, ":")
 			if len(parts) > 2 {
-				return NewSingleCmdResponse(MsgErrInvalidCommand)
+				return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 			}
 
 			weight, err := strconv.ParseFloat(parts[1], 64)
 			if err != nil {
-				return NewSingleCmdResponse(MsgErrInvalidCommand)
+				return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 			}
 
 			bndlData[parts[0]] = weight
@@ -43,16 +44,16 @@ func (r *CmdProcessor) bundleSetCommand(userID int64, key string, bndlParts []st
 
 	if err := r.stg.SetBundle(ctx, userID, &storage.Bundle{Key: key, Data: bndlData}, true); err != nil {
 		if errors.Is(err, storage.ErrBundleInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 		if errors.Is(err, storage.ErrBundleDepBundleNotFound) {
-			return NewSingleCmdResponse(MsgErrBundleDepBundleNotFound)
+			return NewSingleCmdResponse(m.MsgErrBundleDepBundleNotFound)
 		}
 		if errors.Is(err, storage.ErrBundleDepRecursive) {
-			return NewSingleCmdResponse(MsgErrBundleDepBundleRecursive)
+			return NewSingleCmdResponse(m.MsgErrBundleDepBundleRecursive)
 		}
 		if errors.Is(err, storage.ErrBundleDepFoodNotFound) {
-			return NewSingleCmdResponse(MsgErrBundleDepFoodNotFound)
+			return NewSingleCmdResponse(m.MsgErrBundleDepFoodNotFound)
 		}
 
 		r.logger.Error(
@@ -62,10 +63,10 @@ func (r *CmdProcessor) bundleSetCommand(userID int64, key string, bndlParts []st
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) bundleSetTemplateCommand(userID int64, key string) []CmdResponse {
@@ -76,7 +77,7 @@ func (r *CmdProcessor) bundleSetTemplateCommand(userID int64, key string) []CmdR
 	bndl, err := r.stg.GetBundle(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrBundleNotFound) {
-			return NewSingleCmdResponse(MsgErrBundleNotFound)
+			return NewSingleCmdResponse(m.MsgErrBundleNotFound)
 		}
 
 		r.logger.Error(
@@ -85,7 +86,7 @@ func (r *CmdProcessor) bundleSetTemplateCommand(userID int64, key string) []CmdR
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	var sb strings.Builder
@@ -112,7 +113,7 @@ func (r *CmdProcessor) bundleListCommand(userID int64) []CmdResponse {
 	lst, err := r.stg.GetBundleList(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -121,7 +122,7 @@ func (r *CmdProcessor) bundleListCommand(userID int64) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Build html
@@ -176,7 +177,7 @@ func (r *CmdProcessor) bundleDelCommand(userID int64, key string) []CmdResponse 
 
 	if err := r.stg.DeleteBundle(ctx, userID, key); err != nil {
 		if errors.Is(err, storage.ErrBundleIsUsed) {
-			return NewSingleCmdResponse(MsgErrBundleIsUsed)
+			return NewSingleCmdResponse(m.MsgErrBundleIsUsed)
 		}
 
 		r.logger.Error(
@@ -185,8 +186,8 @@ func (r *CmdProcessor) bundleDelCommand(userID int64, key string) []CmdResponse 
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }

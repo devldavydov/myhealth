@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
 )
@@ -18,7 +19,7 @@ func (r *CmdProcessor) userSettingsSetCommand(userID int64, calLimit float64) []
 		CalLimit: calLimit,
 	}); err != nil {
 		if errors.Is(err, storage.ErrUserSettingsInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		r.logger.Error(
@@ -27,10 +28,10 @@ func (r *CmdProcessor) userSettingsSetCommand(userID int64, calLimit float64) []
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) userSettingsGetCommand(userID int64) []CmdResponse {
@@ -41,7 +42,7 @@ func (r *CmdProcessor) userSettingsGetCommand(userID int64) []CmdResponse {
 	us, err := r.stg.GetUserSettings(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserSettingsNotFound) {
-			return NewSingleCmdResponse(MsgErrUserSettingsNotFound)
+			return NewSingleCmdResponse(m.MsgErrUserSettingsNotFound)
 		}
 
 		r.logger.Error(
@@ -50,7 +51,7 @@ func (r *CmdProcessor) userSettingsGetCommand(userID int64) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	return NewSingleCmdResponse(fmt.Sprintf("<b>Лимит калорий:</b> %.2f", us.CalLimit), optsHTML)
@@ -64,7 +65,7 @@ func (r *CmdProcessor) userSettingsSetTemplateCommand(userID int64) []CmdRespons
 	us, err := r.stg.GetUserSettings(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserSettingsNotFound) {
-			return NewSingleCmdResponse(MsgErrUserSettingsNotFound)
+			return NewSingleCmdResponse(m.MsgErrUserSettingsNotFound)
 		}
 
 		r.logger.Error(
@@ -73,7 +74,7 @@ func (r *CmdProcessor) userSettingsSetTemplateCommand(userID int64) []CmdRespons
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	return NewSingleCmdResponse(fmt.Sprintf("u,set,%.2f", us.CalLimit))

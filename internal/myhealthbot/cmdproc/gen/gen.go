@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"	
 
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 
 	"go.uber.org/zap"
@@ -38,7 +39,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 			zap.String("command", cmd),
 			zap.Int64("userID", userID),
 		)
-		return c.Send(MsgErrInvalidCommand)
+		return c.Send(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -56,7 +57,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 			zap.String("command", cmd),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}	
 
 	if r.debugMode {
@@ -82,7 +83,7 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -92,7 +93,7 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 	case "{{ .Name }}":
 		{{- if (ne (len .Args) 0) }}
 		if len(cmdParts[1:]) != {{ len .Args }} {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -170,7 +171,7 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -300,7 +301,7 @@ func parseFloatArr(arg string) ([]float64, error) {
 }
 
 func argError(argName string) []CmdResponse {
-	return NewSingleCmdResponse(fmt.Sprintf("%s: %s", MsgErrInvalidArg, argName))
+	return NewSingleCmdResponse(fmt.Sprintf("%s: %s", m.MsgErrInvalidArg, argName))
 }
 
 func formatTimestamp(ts time.Time) string {

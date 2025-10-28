@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
@@ -25,7 +26,7 @@ func (r *CmdProcessor) weightSetCommand(userID int64, ts time.Time, weight float
 		},
 	); err != nil {
 		if errors.Is(err, storage.ErrWeightInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		r.logger.Error(
@@ -34,10 +35,10 @@ func (r *CmdProcessor) weightSetCommand(userID int64, ts time.Time, weight float
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) weightDelCommand(userID int64, ts time.Time) []CmdResponse {
@@ -54,10 +55,10 @@ func (r *CmdProcessor) weightDelCommand(userID int64, ts time.Time) []CmdRespons
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) []CmdResponse {
@@ -71,7 +72,7 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 	)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -80,7 +81,7 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Report table
@@ -138,7 +139,7 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Doc

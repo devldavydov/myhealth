@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	tele "gopkg.in/telebot.v4"
 
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -27,7 +28,7 @@ func (r *CmdProcessor) maintenanceBackupCommand(userID int64) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Generate response.
@@ -39,7 +40,7 @@ func (r *CmdProcessor) maintenanceBackupCommand(userID int64) []CmdResponse {
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	if err := zw.Close(); err != nil {
@@ -48,7 +49,7 @@ func (r *CmdProcessor) maintenanceBackupCommand(userID int64) []CmdResponse {
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	return NewSingleCmdResponse(&tele.Document{

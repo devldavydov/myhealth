@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"	
 
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 
 	"go.uber.org/zap"
@@ -26,7 +27,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 			zap.String("command", cmd),
 			zap.Int64("userID", userID),
 		)
-		return c.Send(MsgErrInvalidCommand)
+		return c.Send(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -58,7 +59,7 @@ func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
 			zap.String("command", cmd),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}	
 
 	if r.debugMode {
@@ -83,7 +84,7 @@ func (r *CmdProcessor) process_w(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -91,7 +92,7 @@ func (r *CmdProcessor) process_w(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "set":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -114,7 +115,7 @@ func (r *CmdProcessor) process_w(baseCmd string, cmdParts []string, userID int64
 				
 	case "del":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -131,7 +132,7 @@ func (r *CmdProcessor) process_w(baseCmd string, cmdParts []string, userID int64
 				
 	case "list":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -181,7 +182,7 @@ func (r *CmdProcessor) process_w(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -194,7 +195,7 @@ func (r *CmdProcessor) process_u(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -202,7 +203,7 @@ func (r *CmdProcessor) process_u(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "set":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -248,7 +249,7 @@ func (r *CmdProcessor) process_u(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -261,7 +262,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -269,7 +270,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "set":
 		if len(cmdParts[1:]) != 8 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -328,7 +329,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 				
 	case "st":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -345,7 +346,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 				
 	case "find":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -362,7 +363,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 				
 	case "calc":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -388,7 +389,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 				
 	case "del":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -452,7 +453,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -465,7 +466,7 @@ func (r *CmdProcessor) process_x(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -490,7 +491,7 @@ func (r *CmdProcessor) process_x(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -503,7 +504,7 @@ func (r *CmdProcessor) process_c(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -511,7 +512,7 @@ func (r *CmdProcessor) process_c(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "c":
 		if len(cmdParts[1:]) != 4 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -564,7 +565,7 @@ func (r *CmdProcessor) process_c(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -577,7 +578,7 @@ func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -585,7 +586,7 @@ func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "set":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -608,7 +609,7 @@ func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64
 				
 	case "st":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -628,7 +629,7 @@ func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64
 				
 	case "del":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -676,7 +677,7 @@ func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -689,7 +690,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -697,7 +698,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "set":
 		if len(cmdParts[1:]) != 4 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -732,7 +733,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "sb":
 		if len(cmdParts[1:]) != 3 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -761,7 +762,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "del":
 		if len(cmdParts[1:]) != 3 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -790,7 +791,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "dm":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -813,7 +814,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "db":
 		if len(cmdParts[1:]) != 3 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -842,7 +843,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "cp":
 		if len(cmdParts[1:]) != 4 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -877,7 +878,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "rd":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -894,7 +895,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "rdc":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -911,7 +912,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "tm":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -934,7 +935,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "fs":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -951,7 +952,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "sc":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -974,7 +975,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				
 	case "dc":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1076,7 +1077,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -1089,7 +1090,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -1097,7 +1098,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "set":
 		if len(cmdParts[1:]) != 4 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1132,7 +1133,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				
 	case "st":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1149,7 +1150,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				
 	case "del":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1169,7 +1170,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				
 	case "as":
 		if len(cmdParts[1:]) != 4 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1204,7 +1205,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				
 	case "ad":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1227,7 +1228,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				
 	case "ar":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1302,7 +1303,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -1315,7 +1316,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		return NewSingleCmdResponse(MsgErrInvalidCommand)
+		return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	var resp []CmdResponse
@@ -1323,7 +1324,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 	switch cmdParts[0] {
 	case "set":
 		if len(cmdParts[1:]) != 4 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1358,7 +1359,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 				
 	case "st":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1375,7 +1376,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 				
 	case "del":
 		if len(cmdParts[1:]) != 1 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1395,7 +1396,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 				
 	case "is":
 		if len(cmdParts[1:]) != 3 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1424,7 +1425,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 				
 	case "id":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1447,7 +1448,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 				
 	case "ir":
 		if len(cmdParts[1:]) != 2 {
-			return NewSingleCmdResponse(MsgErrInvalidArgsCount)
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
 		}
 		
 		cmdParts = cmdParts[1:]
@@ -1521,7 +1522,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 			zap.Strings("cmdParts", cmdParts),
 			zap.Int64("userID", userID),
 		)
-		resp = NewSingleCmdResponse(MsgErrInvalidCommand)
+		resp = NewSingleCmdResponse(m.MsgErrInvalidCommand)
 	}
 
 	return resp
@@ -1662,7 +1663,7 @@ func parseFloatArr(arg string) ([]float64, error) {
 }
 
 func argError(argName string) []CmdResponse {
-	return NewSingleCmdResponse(fmt.Sprintf("%s: %s", MsgErrInvalidArg, argName))
+	return NewSingleCmdResponse(fmt.Sprintf("%s: %s", m.MsgErrInvalidArg, argName))
 }
 
 func formatTimestamp(ts time.Time) string {

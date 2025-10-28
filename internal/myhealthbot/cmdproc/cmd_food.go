@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
+	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
@@ -41,7 +42,7 @@ func (r *CmdProcessor) foodSetCommand(
 
 	if err := r.stg.SetFood(ctx, userID, food); err != nil {
 		if errors.Is(err, storage.ErrFoodInvalid) {
-			return NewSingleCmdResponse(MsgErrInvalidCommand)
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
 		}
 
 		r.logger.Error(
@@ -50,10 +51,10 @@ func (r *CmdProcessor) foodSetCommand(
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
 
 func (r *CmdProcessor) foodSetTemplateCommand(userID int64, key string) []CmdResponse {
@@ -64,7 +65,7 @@ func (r *CmdProcessor) foodSetTemplateCommand(userID int64, key string) []CmdRes
 	food, err := r.stg.GetFood(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrFoodNotFound) {
-			return NewSingleCmdResponse(MsgErrFoodNotFound)
+			return NewSingleCmdResponse(m.MsgErrFoodNotFound)
 		}
 
 		r.logger.Error(
@@ -73,7 +74,7 @@ func (r *CmdProcessor) foodSetTemplateCommand(userID int64, key string) []CmdRes
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	foodSetTemplate := fmt.Sprintf(
@@ -98,7 +99,7 @@ func (r *CmdProcessor) foodFindCommand(userID int64, pattern string) []CmdRespon
 	foodLst, err := r.stg.FindFood(ctx, userID, pattern)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -107,7 +108,7 @@ func (r *CmdProcessor) foodFindCommand(userID int64, pattern string) []CmdRespon
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	var sb strings.Builder
@@ -138,7 +139,7 @@ func (r *CmdProcessor) foodCalcCommand(userID int64, key string, foodWeight floa
 	food, err := r.stg.GetFood(ctx, userID, key)
 	if err != nil {
 		if errors.Is(err, storage.ErrFoodNotFound) {
-			return NewSingleCmdResponse(MsgErrFoodNotFound)
+			return NewSingleCmdResponse(m.MsgErrFoodNotFound)
 		}
 
 		r.logger.Error(
@@ -147,7 +148,7 @@ func (r *CmdProcessor) foodCalcCommand(userID int64, key string, foodWeight floa
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	var sb strings.Builder
@@ -170,7 +171,7 @@ func (r *CmdProcessor) foodListCommand(userID int64) []CmdResponse {
 	foodList, err := r.stg.GetFoodList(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
-			return NewSingleCmdResponse(MsgErrEmptyResult)
+			return NewSingleCmdResponse(m.MsgErrEmptyResult)
 		}
 
 		r.logger.Error(
@@ -179,7 +180,7 @@ func (r *CmdProcessor) foodListCommand(userID int64) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
 	// Build html
@@ -230,7 +231,7 @@ func (r *CmdProcessor) foodDelCommand(userID int64, key string) []CmdResponse {
 
 	if err := r.stg.DeleteFood(ctx, userID, key); err != nil {
 		if errors.Is(err, storage.ErrFoodIsUsed) {
-			return NewSingleCmdResponse(MsgErrFoodIsUsed)
+			return NewSingleCmdResponse(m.MsgErrFoodIsUsed)
 		}
 
 		r.logger.Error(
@@ -239,8 +240,8 @@ func (r *CmdProcessor) foodDelCommand(userID int64, key string) []CmdResponse {
 			zap.Error(err),
 		)
 
-		return NewSingleCmdResponse(MsgErrInternal)
+		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(MsgOK)
+	return NewSingleCmdResponse(m.MsgOK)
 }
