@@ -2,7 +2,7 @@ const template = `
 <h3>${Constants.Page_Food_FoodList}</h3>
 <div class="row mb-2">
   <div class="col-sm-2">
-    <a class="btn btn-primary" href="/food/create" role="button">${Constants.Common_Create}</a>  
+    <a class="btn btn-primary" href="/food/create" role="button"><i class="bi bi-plus-circle"></i></a>  
   </div>
 </div>
 <div class="row mb-2">
@@ -92,7 +92,6 @@ function applyResult(data) {
                 <td class="myhealth-comment">${f.comment}</td>
                 <td class="align-middle text-center">
                     <a class="btn btn-sm btn-warning" href="edit?key=${f.key}"><i class="bi bi-pencil"></i></a>
-                    <button class="btn btn-sm btn-danger""><i class="bi bi-trash"></i></button>
                 </td>
             </tr>
         `);

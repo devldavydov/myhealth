@@ -17,8 +17,7 @@ ${tmplAlert('alert-danger d-none', 'alrt')}
     <input
       type="text"
       id="brand"
-      class="form-control"
-      required>
+      class="form-control">
   </div>
   <div class="mb-3">
     <label for="cal100" class="form-label">${Constants.Food_Cal100}</label>
@@ -66,11 +65,14 @@ ${tmplAlert('alert-danger d-none', 'alrt')}
       type="text"
       id="comment"
       class="form-control"
-      rows="3"
-      required>
+      rows="3">
     </textarea>
   </div>
-  <button type="submit" class="btn btn-primary mb-3">${Constants.Common_Save}</button>
+  <div class="mb-3">
+    <a href="/food" class="btn btn-primary"><i class="bi bi-arrow-90deg-left"></i></a>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-floppy"></i></button>
+    <button type="button" class="btn btn-danger"><i class="bi bi-trash"></i></button>
+  </div>
 </form>
 `;
 
@@ -91,15 +93,63 @@ $( document ).ready(function() {
         .finally(() => {
             hideElement('#loader')
         })
-        .then(setFood)
+        .then(setFoodForm)
         .catch((error) => {
             $('#toastBody').text(error.message);
             bootstrap.Toast.getOrCreateInstance($('#liveToast')).show();
         });
+
+    $('#frmEdit').submit(doEdit);
 });
 
+function setFoodForm(food) {
+    $('#name').val(food.name);
+    $('#brand').val(food.brand);
+    $('#cal100').val(food.cal100);
+    $('#prot100').val(food.prot100);
+    $('#fat100').val(food.fat100);
+    $('#carb100').val(food.carb100);
+    $('#comment').val(food.comment);
+
+    showElement('#frmEdit');    
+}
+
+function doEdit(e) {
+  e.preventDefault();
+
+  const params = getQueryParams();
+  const key = params.get('key');
+
+  const name = $('#name').val().trim();
+  const brand = $('#brand').val().trim();
+  const cal100 = parseFloat($('#cal100').val());
+  const prot100 = parseFloat($('#prot100').val());
+  const fat100 = parseFloat($('#fat100').val());
+  const carb100 = parseFloat($('#carb100').val());
+  const comment = $('#comment').val().trim();
+
+  setFood(key, {
+    key: key,
+    name: name,
+    brand: brand,
+    cal100: cal100,
+    prot100: prot100,
+    fat100: fat100,
+    carb100: carb100,
+    comment: comment
+  })
+    .then(() => {
+        $('#toastBody').text(Constants.Food_Saved);
+        bootstrap.Toast.getOrCreateInstance($('#liveToast')).show();
+    })
+    .catch((error) => {
+        $('#toastBody').text(error.message);
+        bootstrap.Toast.getOrCreateInstance($('#liveToast')).show();
+    });
+}
+
 async function getFood(key) {
-    const resp = await axios.get(`api/get/${key}`);
+    const resp = await axios.get(`api/${key}`);
         
     if (resp.data.error) {
         throw new Error(resp.data.error);
@@ -108,13 +158,12 @@ async function getFood(key) {
     return resp.data;
 }
 
-function setFood(food) {
-    $('#name').val(food.name);
-    $('#brand').val(food.brand);
-    $('#cal100').val(food.cal100);
-    $('#prot100').val(food.prot100);
-    $('#fat100').val(food.fat100);
-    $('#carb100').val(food.carb100);
-    $('#comment').val(food.comment);
-    showElement('#frmEdit');
+async function setFood(key, food) {
+    const resp = await axios.post(`api/${key}`, food);
+        
+    if (resp.data.error) {
+        throw new Error(resp.data.error);
+    }
+
+    return resp.data;
 }

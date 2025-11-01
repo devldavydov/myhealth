@@ -115,3 +115,43 @@ func (r *FoodHandler) GetFoodAPI(c *gin.Context) {
 		Comment: food.Comment,
 	})
 }
+
+func (r *FoodHandler) SetFoodAPI(c *gin.Context) {
+	reqFood := &FoodItem{}
+	if err := c.Bind(reqFood); err != nil {
+		c.JSON(http.StatusOK, rr.NewErrorAPIResponse(messages.MsgErrBadRequest))
+		return
+	}
+
+	food := &storage.Food{
+		Key:     reqFood.Key,
+		Name:    reqFood.Name,
+		Brand:   reqFood.Brand,
+		Cal100:  reqFood.Cal100,
+		Prot100: reqFood.Prot100,
+		Fat100:  reqFood.Fat100,
+		Carb100: reqFood.Carb100,
+		Comment: reqFood.Comment,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.SetFood(ctx, r.userID, food); err != nil {
+		if errors.Is(err, storage.ErrFoodInvalid) {
+			c.JSON(http.StatusOK, rr.NewErrorAPIResponse(messages.MsgErrBadRequest))
+			return
+		}
+
+		r.logger.Error(
+			"food set DB error",
+			zap.Int64("userID", r.userID),
+			zap.Error(err),
+		)
+
+		c.JSON(http.StatusOK, rr.NewErrorAPIResponse(messages.MsgErrInternal))
+		return
+	}
+
+	c.JSON(http.StatusOK, rr.NewOKAPIResponse())
+}

@@ -2,10 +2,7 @@
 var Constants = {
 	"Common_Calc": "Рассчитать",
 	"Common_Comment": "Комментарий",
-	"Common_Create": "Создать",
 	"Common_DateGToday": "Дата должна быть больше сегодняшнего дня",
-	"Common_Delete": "Удалить",
-	"Common_Save": "Сохранить",
 	"Common_Search": "Поиск",
 	"Common_ValueG0": "Значение должно быть больше нуля",
 	"Finance_BondCd": "КД, руб.",
@@ -33,6 +30,7 @@ var Constants = {
 	"Food_NotFound": "Еда не найдена",
 	"Food_P": "Б",
 	"Food_Prot100": "Белки, 100г.",
+	"Food_Saved": "Еда успешно сохранена",
 	"Menu_Activity": "Активность",
 	"Menu_Activity_Journal": "Журнал активности",
 	"Menu_Activity_SportList": "Управление спортом",

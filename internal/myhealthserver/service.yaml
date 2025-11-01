@@ -63,12 +63,10 @@ constants:
   Food_F: "Ж"
   Food_Cb: "У"
   Food_NotFound: "Еда не найдена"
+  Food_Saved: "Еда успешно сохранена"
   # Common
   Common_Calc: "Рассчитать"
   Common_ValueG0: "Значение должно быть больше нуля"
   Common_DateGToday: "Дата должна быть больше сегодняшнего дня"
   Common_Search: "Поиск"
-  Common_Create: "Создать"
-  Common_Save: "Сохранить"
-  Common_Delete: "Удалить"
   Common_Comment: "Комментарий"
