@@ -10,6 +10,7 @@ import (
 	rr "github.com/devldavydov/myhealth/internal/myhealthserver/response"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -139,6 +140,11 @@ func (r *FoodHandler) SetFoodAPI(c *gin.Context) {
 		Fat100:  reqFood.Fat100,
 		Carb100: reqFood.Carb100,
 		Comment: reqFood.Comment,
+	}
+
+	if food.Key == "" {
+		// If key empty - create new food
+		food.Key = uuid.New().String()
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)

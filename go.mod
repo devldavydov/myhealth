@@ -5,10 +5,12 @@ go 1.23.5
 require (
 	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-gonic/gin v1.11.0
+	github.com/google/uuid v1.1.2
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
 	gopkg.in/telebot.v4 v4.0.0-beta.4
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -46,5 +48,4 @@ require (
 	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

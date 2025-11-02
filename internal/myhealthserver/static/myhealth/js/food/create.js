@@ -81,7 +81,6 @@ $( document ).ready(function() {
 function doCreate(e) {
     e.preventDefault();
 
-    const key = crypto.randomUUID();
     const name = $('#name').val().trim();
     const brand = $('#brand').val().trim();
     const cal100 = parseFloat($('#cal100').val());
@@ -91,7 +90,7 @@ function doCreate(e) {
     const comment = $('#comment').val().trim();
 
     setFood({
-        key: key,
+        key: "",
         name: name,
         brand: brand,
         cal100: cal100,
