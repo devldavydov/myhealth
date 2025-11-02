@@ -21,6 +21,7 @@ constants:
   Page_NotFound: "Страница не найдена"
   Page_Food_FoodList: "Управление едой"
   Page_Food_FoodEdit: "Редактирование еды"
+  Page_Food_FoodCreate: "Создание еды"
   Page_Settings_CalcCal: "Расчет лимита ккал."
   Page_Finance_BondCalc: "Расчет доходности облигаций"
   # Settings
@@ -64,6 +65,7 @@ constants:
   Food_Cb: "У"
   Food_NotFound: "Еда не найдена"
   Food_Saved: "Еда успешно сохранена"
+  Food_DeletePrompt: "Удалить еду?"
   # Common
   Common_Calc: "Рассчитать"
   Common_ValueG0: "Значение должно быть больше нуля"

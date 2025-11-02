@@ -39,6 +39,14 @@ func (r *FoodHandler) EditPage(c *gin.Context) {
 		OK(c)
 }
 
+func (r *FoodHandler) CreatePage(c *gin.Context) {
+	rr.
+		NewPageResponse(
+			cc.TotalConstants["Page_Food_FoodCreate"],
+			"/static/myhealth/js/food/create.js").
+		OK(c)
+}
+
 type FoodItem struct {
 	Key     string  `json:"key"`
 	Name    string  `json:"name"`
@@ -83,7 +91,6 @@ func (r *FoodHandler) GetListAPI(c *gin.Context) {
 }
 
 func (r *FoodHandler) GetFoodAPI(c *gin.Context) {
-	// Get food from DB
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
@@ -145,6 +152,29 @@ func (r *FoodHandler) SetFoodAPI(c *gin.Context) {
 
 		r.logger.Error(
 			"food set DB error",
+			zap.Int64("userID", r.userID),
+			zap.Error(err),
+		)
+
+		c.JSON(http.StatusOK, rr.NewErrorAPIResponse(messages.MsgErrInternal))
+		return
+	}
+
+	c.JSON(http.StatusOK, rr.NewOKAPIResponse())
+}
+
+func (r *FoodHandler) DeleteFoodAPI(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.DeleteFood(ctx, r.userID, c.Param("key")); err != nil {
+		if errors.Is(err, storage.ErrFoodIsUsed) {
+			c.JSON(http.StatusOK, rr.NewErrorAPIResponse(messages.MsgErrFoodIsUsed))
+			return
+		}
+
+		r.logger.Error(
+			"food del api DB error",
 			zap.Int64("userID", r.userID),
 			zap.Error(err),
 		)

@@ -11,8 +11,10 @@ func Attach(group *gin.RouterGroup, stg storage.Storage, userID int64, logger *z
 
 	group.GET("/", foodHandler.ListPage)
 	group.GET("/edit", foodHandler.EditPage)
+	group.GET("/create", foodHandler.CreatePage)
 
 	group.GET("/api/list", foodHandler.GetListAPI)
 	group.GET("/api/:key", foodHandler.GetFoodAPI)
-	group.POST("/api/:key", foodHandler.SetFoodAPI)
+	group.POST("/api/set", foodHandler.SetFoodAPI)
+	group.DELETE("/api/:key", foodHandler.DeleteFoodAPI)
 }

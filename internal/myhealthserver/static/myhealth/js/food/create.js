@@ -1,9 +1,7 @@
 const template = `
-<h3>${Constants.Page_Food_FoodEdit}</h3>
-${tmplLoader()}
+<h3>${Constants.Page_Food_FoodCreate}</h3>
 ${tmplToast()}
-${tmplAlert('alert-danger d-none', 'alrt')}
-<form id="frmEdit" class="d-none">
+<form id="frmCreate">
   <div class="mb-3">
     <label for="name" class="form-label">${Constants.Food_Name}</label>
     <input
@@ -65,13 +63,11 @@ ${tmplAlert('alert-danger d-none', 'alrt')}
       type="text"
       id="comment"
       class="form-control"
-      rows="3">
-    </textarea>
+      rows="3"></textarea>
   </div>
   <div class="mb-3">
     <a href="/food" class="btn btn-primary"><i class="bi bi-arrow-90deg-left"></i></a>
     <button type="submit" class="btn btn-primary"><i class="bi bi-floppy"></i></button>
-    <button id="btnDelete" type="button" class="btn btn-danger"><i class="bi bi-trash"></i></button>
   </div>
 </form>
 `;
@@ -79,48 +75,13 @@ ${tmplAlert('alert-danger d-none', 'alrt')}
 $( document ).ready(function() {
     createPage(template);
 
-    const params = getQueryParams();
-    if (!params.has('key')) {
-        $('#alrt').text(Constants.Food_NotFound);
-        showElement('#alrt');
-        hideElement('#loader')
-        return;
-    }
-
-    const foodKey = params.get('key');
-
-    getFood(foodKey)
-        .finally(() => {
-            hideElement('#loader')
-        })
-        .then(setFoodForm)
-        .catch((error) => {
-            $('#toastBody').text(error.message);
-            bootstrap.Toast.getOrCreateInstance($('#liveToast')).show();
-        });
-
-    $('#frmEdit').submit(doEdit);
-    $('#btnDelete').on('click', doDelete);
+    $('#frmCreate').submit(doCreate);
 });
 
-function setFoodForm(food) {
-    $('#name').val(food.name);
-    $('#brand').val(food.brand);
-    $('#cal100').val(food.cal100);
-    $('#prot100').val(food.prot100);
-    $('#fat100').val(food.fat100);
-    $('#carb100').val(food.carb100);
-    $('#comment').val(food.comment);
-
-    showElement('#frmEdit');    
-}
-
-function doEdit(e) {
+function doCreate(e) {
     e.preventDefault();
 
-    const params = getQueryParams();
-    const key = params.get('key');
-
+    const key = crypto.randomUUID();
     const name = $('#name').val().trim();
     const brand = $('#brand').val().trim();
     const cal100 = parseFloat($('#cal100').val());
@@ -140,24 +101,6 @@ function doEdit(e) {
         comment: comment
     })
         .then(() => {
-            $('#toastBody').text(Constants.Food_Saved);
-            bootstrap.Toast.getOrCreateInstance($('#liveToast')).show();
-        })
-        .catch((error) => {
-            $('#toastBody').text(error.message);
-            bootstrap.Toast.getOrCreateInstance($('#liveToast')).show();
-        });
-}
-
-function doDelete() {
-    if (!confirm(Constants.Food_DeletePrompt)) {
-        return;
-    }
-
-    const params = getQueryParams();
-    const key = params.get('key');
-    delFood(key)
-        .then(() => {
             window.location.href = "/food";
         })
         .catch((error) => {
@@ -166,28 +109,8 @@ function doDelete() {
         });
 }
 
-async function getFood(key) {
-    const resp = await axios.get(`api/${key}`);
-        
-    if (resp.data.error) {
-        throw new Error(resp.data.error);
-    }
-
-    return resp.data;
-}
-
 async function setFood(food) {
     const resp = await axios.post('api/set', food);
-        
-    if (resp.data.error) {
-        throw new Error(resp.data.error);
-    }
-
-    return resp.data;
-}
-
-async function delFood(key) {
-    const resp = await axios.delete(`api/${key}`);
         
     if (resp.data.error) {
         throw new Error(resp.data.error);
