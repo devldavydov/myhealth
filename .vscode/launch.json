@@ -23,6 +23,8 @@
             "args": [
                 "-d", "${workspaceFolder}/myhealth.db",
                 "-u", "USER_ID",
+                "-c", "${workspaceFolder}/cicd/server/server.crt",
+                "-k", "${workspaceFolder}/cicd/server/server.key",
             ]
         },
     ]

@@ -25,5 +25,9 @@ go.work.sum
 # env file
 .env
 
-#DB
+# DB
 myhealth.db*
+
+# TLS
+cicd/server/server.crt
+cicd/server/server.key

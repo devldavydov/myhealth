@@ -90,7 +90,7 @@ function doCreate(e) {
     const comment = $('#comment').val().trim();
 
     setFood({
-        key: "",
+        key: crypto.randomUUID(),
         name: name,
         brand: brand,
         cal100: cal100,

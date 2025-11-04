@@ -64,7 +64,7 @@ func (r *Service) Run(ctx context.Context) error {
 
 	errChan := make(chan error)
 	go func(ch chan error) {
-		ch <- httpServer.ListenAndServe()
+		ch <- httpServer.ListenAndServeTLS(r.settings.TLSCertFile, r.settings.TLSKeyFile)
 	}(errChan)
 
 	select {

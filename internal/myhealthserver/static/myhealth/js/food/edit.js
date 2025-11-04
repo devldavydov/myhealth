@@ -76,6 +76,8 @@ ${tmplAlert('alert-danger d-none', 'alrt')}
 </form>
 `;
 
+let foodKey = "";
+
 $( document ).ready(function() {
     createPage(template);
 
@@ -87,8 +89,7 @@ $( document ).ready(function() {
         return;
     }
 
-    const foodKey = params.get('key');
-
+    foodKey = params.get('key');
     getFood(foodKey)
         .finally(() => {
             hideElement('#loader')
@@ -118,9 +119,6 @@ function setFoodForm(food) {
 function doEdit(e) {
     e.preventDefault();
 
-    const params = getQueryParams();
-    const key = params.get('key');
-
     const name = $('#name').val().trim();
     const brand = $('#brand').val().trim();
     const cal100 = parseFloat($('#cal100').val());
@@ -130,7 +128,7 @@ function doEdit(e) {
     const comment = $('#comment').val().trim();
 
     setFood({
-        key: key,
+        key: foodKey,
         name: name,
         brand: brand,
         cal100: cal100,
@@ -154,9 +152,7 @@ function doDelete() {
         return;
     }
 
-    const params = getQueryParams();
-    const key = params.get('key');
-    delFood(key)
+    delFood(foodKey)
         .then(() => {
             window.location.href = "/food";
         })

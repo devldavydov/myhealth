@@ -10,6 +10,8 @@ type ServerSettings struct {
 	DBFilePath      string
 	ShutdownTimeout time.Duration
 	UserID          int64
+	TLSCertFile     string
+	TLSKeyFile      string
 }
 
 func NewServerSettings(
@@ -17,6 +19,8 @@ func NewServerSettings(
 	dbFilePath string,
 	shutdownTimeout time.Duration,
 	userID int64,
+	tlsCertFile string,
+	tlsKeyFile string,
 ) (*ServerSettings, error) {
 
 	urlRunAddress, err := url.ParseRequestURI(runAddress)
@@ -29,5 +33,7 @@ func NewServerSettings(
 		DBFilePath:      dbFilePath,
 		ShutdownTimeout: shutdownTimeout,
 		UserID:          userID,
+		TLSCertFile:     tlsCertFile,
+		TLSKeyFile:      tlsKeyFile,
 	}, nil
 }

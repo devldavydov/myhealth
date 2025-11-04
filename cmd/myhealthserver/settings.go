@@ -15,6 +15,8 @@ const (
 	_defaultLogLevel        = "INFO"
 	_defaultDBFilePath      = ""
 	_defaultUserID          = -1
+	_defaultTLSCertFile     = ""
+	_defaultTLSKeyFile      = ""
 )
 
 type Config struct {
@@ -23,6 +25,8 @@ type Config struct {
 	DBFilePath      string
 	LogLevel        string
 	UserID          int64
+	TLSCertFile     string
+	TLSKeyFile      string
 }
 
 func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
@@ -33,6 +37,8 @@ func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
 	flagSet.StringVar(&config.LogLevel, "l", _defaultLogLevel, "Log level")
 	flagSet.Int64Var(&config.UserID, "u", _defaultUserID, "User ID")
 	flagSet.DurationVar(&config.ShutdownTimeout, "t", _defaultShutdownTimeout, "Server shutdown timeout")
+	flagSet.StringVar(&config.TLSCertFile, "c", _defaultTLSCertFile, "TLS cert file")
+	flagSet.StringVar(&config.TLSKeyFile, "k", _defaultTLSKeyFile, "TLS key file")
 
 	flagSet.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -52,6 +58,14 @@ func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
 		return nil, fmt.Errorf("invalid user ID")
 	}
 
+	if config.TLSCertFile == _defaultTLSCertFile {
+		return nil, fmt.Errorf("invalid TLS cert file")
+	}
+
+	if config.TLSKeyFile == _defaultTLSKeyFile {
+		return nil, fmt.Errorf("invalid TLS key file")
+	}
+
 	return config, nil
 }
 
@@ -60,5 +74,7 @@ func ServiceSettingsAdapt(config *Config) (*srv.ServerSettings, error) {
 		config.RunAddress,
 		config.DBFilePath,
 		config.ShutdownTimeout,
-		config.UserID)
+		config.UserID,
+		config.TLSCertFile,
+		config.TLSKeyFile)
 }
