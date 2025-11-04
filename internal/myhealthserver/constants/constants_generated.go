@@ -3,6 +3,7 @@ package constants
 var TotalConstants = map[string]string {
 	"Common_Calc": "Рассчитать",
 	"Common_Comment": "Комментарий",
+	"Common_Date": "Дата",
 	"Common_DateGToday": "Дата должна быть больше сегодняшнего дня",
 	"Common_Search": "Поиск",
 	"Common_ValueG0": "Значение должно быть больше нуля",
@@ -56,6 +57,7 @@ var TotalConstants = map[string]string {
 	"Page_Main": "Главная страница",
 	"Page_NotFound": "Страница не найдена",
 	"Page_Settings_CalcCal": "Расчет лимита ккал.",
+	"Page_Weight_WeightList": "Вес тела",
 	"Settings_Activity1": "Сидячая активность",
 	"Settings_Activity2": "Легкая активность",
 	"Settings_Activity3": "Средняя активность",
@@ -68,4 +70,5 @@ var TotalConstants = map[string]string {
 	"Settings_Height": "Рост, см.",
 	"Settings_Ubm": "Уровень базального метаболизма, ккал.",
 	"Settings_Weight": "Вес, кг.",
+	"Weight_Value": "Вес, кг.",
 }
