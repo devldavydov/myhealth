@@ -69,6 +69,7 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 		userID,
 		storage.NewTimestamp(tsFrom),
 		storage.NewTimestamp(tsTo),
+		false,
 	)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {

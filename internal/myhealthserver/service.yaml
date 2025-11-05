@@ -23,6 +23,8 @@ constants:
   Page_Food_FoodEdit: "Редактирование еды"
   Page_Food_FoodCreate: "Создание еды"
   Page_Weight_WeightList: "Вес тела"
+  Page_Weight_WeightEdit: "Редактирование веса тела"
+  Page_Weight_WeightCreate: "Добавить вес"
   Page_Settings_CalcCal: "Расчет лимита ккал."
   Page_Finance_BondCalc: "Расчет доходности облигаций"
   # Settings
@@ -69,6 +71,9 @@ constants:
   Food_DeletePrompt: "Удалить еду?"
   # Weight
   Weight_Value: "Вес, кг."
+  Weight_NotFound: "Вес не найден"
+  Weight_Saved: "Вес успешно сохранен"
+  Weight_DeletePrompt: "Удалить вес?"
   # Common
   Common_Calc: "Рассчитать"
   Common_ValueG0: "Значение должно быть больше нуля"
@@ -76,3 +81,4 @@ constants:
   Common_Search: "Поиск"
   Common_Comment: "Комментарий"
   Common_Date: "Дата"
+  Common_DateRange: "Диапазон дат:"

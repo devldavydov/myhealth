@@ -79,14 +79,14 @@ func (r *StorageSQLiteTestSuite) TestBackupRestore() {
 	r.Run("check db after restore", func() {
 		// Weight
 		{
-			res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 3000)
+			res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 3000, false)
 			r.NoError(err)
 			r.Equal([]s.Weight{
 				{Timestamp: 1000, Value: 90.1},
 				{Timestamp: 2000, Value: 92.1},
 			}, res)
 
-			res, err = r.stg.GetWeightList(context.Background(), 2, 1000, 3000)
+			res, err = r.stg.GetWeightList(context.Background(), 2, 1000, 3000, false)
 			r.NoError(err)
 			r.Equal([]s.Weight{
 				{Timestamp: 1000, Value: 87.8},

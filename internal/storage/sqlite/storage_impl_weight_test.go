@@ -8,7 +8,7 @@ import (
 
 func (r *StorageSQLiteTestSuite) TestWeightCRUD() {
 	r.Run("check empty weight list", func() {
-		_, err := r.stg.GetWeightList(context.Background(), 1, 1000, 2000)
+		_, err := r.stg.GetWeightList(context.Background(), 1, 1000, 2000, false)
 		r.ErrorIs(err, s.ErrEmptyResult)
 	})
 
@@ -24,7 +24,7 @@ func (r *StorageSQLiteTestSuite) TestWeightCRUD() {
 	})
 
 	r.Run("get weight for user 1", func() {
-		res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 4000)
+		res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 4000, false)
 		r.NoError(err)
 		r.Equal([]s.Weight{
 			{Timestamp: 1000, Value: 94.3},
@@ -33,8 +33,29 @@ func (r *StorageSQLiteTestSuite) TestWeightCRUD() {
 		}, res)
 	})
 
+	r.Run("get weight for user 1 desc", func() {
+		res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 4000, true)
+		r.NoError(err)
+		r.Equal([]s.Weight{
+			{Timestamp: 3000, Value: 96},
+			{Timestamp: 2000, Value: 94},
+			{Timestamp: 1000, Value: 94.3},
+		}, res)
+	})
+
+	r.Run("get single weight for user 1", func() {
+		res, err := r.stg.GetWeight(context.Background(), 1, 1000)
+		r.NoError(err)
+		r.Equal(&s.Weight{Timestamp: 1000, Value: 94.3}, res)
+	})
+
+	r.Run("get not exists single weight for user 1", func() {
+		_, err := r.stg.GetWeight(context.Background(), 1, 9999)
+		r.ErrorIs(err, s.ErrWeightNotFound)
+	})
+
 	r.Run("get weight for user 2", func() {
-		res, err := r.stg.GetWeightList(context.Background(), 2, 1000, 4000)
+		res, err := r.stg.GetWeightList(context.Background(), 2, 1000, 4000, false)
 		r.NoError(err)
 		r.Equal([]s.Weight{
 			{Timestamp: 1000, Value: 87},
@@ -46,7 +67,7 @@ func (r *StorageSQLiteTestSuite) TestWeightCRUD() {
 	})
 
 	r.Run("check update", func() {
-		res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 1000)
+		res, err := r.stg.GetWeightList(context.Background(), 1, 1000, 1000, false)
 		r.NoError(err)
 		r.Equal([]s.Weight{
 			{Timestamp: 1000, Value: 104.3},
@@ -58,7 +79,7 @@ func (r *StorageSQLiteTestSuite) TestWeightCRUD() {
 	})
 
 	r.Run("get weight empty list for user 2", func() {
-		_, err := r.stg.GetWeightList(context.Background(), 2, 1000, 4000)
+		_, err := r.stg.GetWeightList(context.Background(), 2, 1000, 4000, false)
 		r.ErrorIs(err, s.ErrEmptyResult)
 	})
 }

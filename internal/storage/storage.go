@@ -12,7 +12,8 @@ const (
 
 type Storage interface {
 	// Weight
-	GetWeightList(ctx context.Context, userID int64, from, to Timestamp) ([]Weight, error)
+	GetWeightList(ctx context.Context, userID int64, from, to Timestamp, desc bool) ([]Weight, error)
+	GetWeight(ctx context.Context, userID int64, ts Timestamp) (*Weight, error)
 	SetWeight(ctx context.Context, userID int64, weight *Weight) error
 	DeleteWeight(ctx context.Context, userID int64, timestamp Timestamp) error
 

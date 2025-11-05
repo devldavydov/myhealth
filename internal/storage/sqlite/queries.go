@@ -34,6 +34,12 @@ const (
     ) STRICT
 	`
 
+	_sqlGetWeight = `
+	SELECT timestamp, value
+	FROM weight
+	WHERE user_id = $1 AND timestamp = $2
+	`
+
 	_sqlGetWeightList = `
 	SELECT timestamp, value
     FROM weight
@@ -43,6 +49,17 @@ const (
         timestamp <= $3
     ORDER BY
         timestamp
+	`
+
+	_sqlGetWeightListDesc = `
+	SELECT timestamp, value
+    FROM weight
+    WHERE
+        user_id = $1 AND
+        timestamp >= $2 AND
+        timestamp <= $3
+    ORDER BY
+        timestamp DESC
 	`
 
 	_sqlWeightBackup = `

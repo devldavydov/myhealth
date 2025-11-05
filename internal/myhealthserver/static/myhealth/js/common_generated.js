@@ -4,6 +4,7 @@ var Constants = {
 	"Common_Comment": "Комментарий",
 	"Common_Date": "Дата",
 	"Common_DateGToday": "Дата должна быть больше сегодняшнего дня",
+	"Common_DateRange": "Диапазон дат:",
 	"Common_Search": "Поиск",
 	"Common_ValueG0": "Значение должно быть больше нуля",
 	"Finance_BondCd": "КД, руб.",
@@ -56,6 +57,8 @@ var Constants = {
 	"Page_Main": "Главная страница",
 	"Page_NotFound": "Страница не найдена",
 	"Page_Settings_CalcCal": "Расчет лимита ккал.",
+	"Page_Weight_WeightCreate": "Добавить вес",
+	"Page_Weight_WeightEdit": "Редактирование веса тела",
 	"Page_Weight_WeightList": "Вес тела",
 	"Settings_Activity1": "Сидячая активность",
 	"Settings_Activity2": "Легкая активность",
@@ -69,6 +72,9 @@ var Constants = {
 	"Settings_Height": "Рост, см.",
 	"Settings_Ubm": "Уровень базального метаболизма, ккал.",
 	"Settings_Weight": "Вес, кг.",
+	"Weight_DeletePrompt": "Удалить вес?",
+	"Weight_NotFound": "Вес не найден",
+	"Weight_Saved": "Вес успешно сохранен",
 	"Weight_Value": "Вес, кг.",
 };
 
@@ -122,9 +128,14 @@ function tmplToast() {
 	`;
 }
 
-function tmplAlert(alClass, alID) {
+function tmplAlert(alClass, alID, urlBack) {
 	return `
-	<div class="alert ${alClass}" id="${alID}" role="alert">
+	<div id="${alID}" class="d-none">
+		<div class="msg alert ${alClass}" role="alert">
+		</div>
+		<div class="mb-3">
+    		<a href="${urlBack}" class="btn btn-primary"><i class="bi bi-arrow-90deg-left"></i></a>
+		</div>
 	</div>
 	`;
 }

@@ -10,6 +10,11 @@ func Attach(group *gin.RouterGroup, stg storage.Storage, userID int64, logger *z
 	weightHandler := NewWeightHander(stg, userID, logger)
 
 	group.GET("/", weightHandler.ListPage)
+	group.GET("/edit", weightHandler.EditPage)
+	group.GET("/create", weightHandler.CreatePage)
 
 	group.GET("/api/list", weightHandler.GetListAPI)
+	group.GET("/api/:key", weightHandler.GetWeightAPI)
+	group.POST("/api/set", weightHandler.SetWeightAPI)
+	group.DELETE("/api/:key", weightHandler.DeleteWeightAPI)
 }

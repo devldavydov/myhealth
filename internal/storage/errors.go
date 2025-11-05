@@ -7,7 +7,8 @@ var (
 	ErrMealWrong = errors.New("wrong meal")
 
 	// Weight
-	ErrWeightInvalid = errors.New("invalid weight")
+	ErrWeightNotFound = errors.New("weight not found")
+	ErrWeightInvalid  = errors.New("invalid weight")
 
 	// Food
 	ErrFoodNotFound = errors.New("food not found")

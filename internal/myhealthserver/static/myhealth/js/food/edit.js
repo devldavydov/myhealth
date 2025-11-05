@@ -2,7 +2,7 @@ const template = `
 <h3>${Constants.Page_Food_FoodEdit}</h3>
 ${tmplLoader()}
 ${tmplToast()}
-${tmplAlert('alert-danger d-none', 'alrt')}
+${tmplAlert('alert-danger', 'alrt', '/food')}
 <form id="frmEdit" class="d-none">
   <div class="mb-3">
     <label for="name" class="form-label">${Constants.Food_Name}</label>
@@ -81,23 +81,22 @@ let foodKey = "";
 $( document ).ready(function() {
     createPage(template);
 
-    const params = getQueryParams();
-    if (!params.has('key')) {
-        $('#alrt').text(Constants.Food_NotFound);
+    foodKey = (getQueryParams().get('key') || '').trim();
+    if (foodKey === '' ) {
+        $('#alrt .msg').text(Constants.Food_NotFound);
         showElement('#alrt');
         hideElement('#loader')
         return;
     }
-
-    foodKey = params.get('key');
+    
     getFood(foodKey)
         .finally(() => {
             hideElement('#loader')
         })
         .then(setFoodForm)
         .catch((error) => {
-            $('#toastBody').text(error.message);
-            bootstrap.Toast.getOrCreateInstance($('#liveToast')).show();
+            $('#alrt .msg').text(error.message);
+            showElement('#alrt');
         });
 
     $('#frmEdit').submit(doEdit);

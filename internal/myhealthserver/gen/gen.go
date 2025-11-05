@@ -76,9 +76,14 @@ function tmplToast() {
 	` + "`" + `;
 }
 
-function tmplAlert(alClass, alID) {
+function tmplAlert(alClass, alID, urlBack) {
 	return ` + "`" + `
-	<div class="alert ${alClass}" id="${alID}" role="alert">
+	<div id="${alID}" class="d-none">
+		<div class="msg alert ${alClass}" role="alert">
+		</div>
+		<div class="mb-3">
+    		<a href="${urlBack}" class="btn btn-primary"><i class="bi bi-arrow-90deg-left"></i></a>
+		</div>
 	</div>
 	` + "`" + `;
 }

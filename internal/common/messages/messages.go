@@ -15,6 +15,8 @@ const (
 	MsgErrMedicineNotFound = "Медицина не найдена"
 	MsgErrMedicineIsUsed   = "Медицина используется в показателях"
 
+	MsgErrWeightNotFound = "Вес не найден"
+
 	MsgErrFoodNotFound = "Еда не найдена"
 	MsgErrFoodIsUsed   = "Еда уже используется в журнале приема пищи или бандле"
 	MsgErrFoodInvalid  = "Еда задана не правильно"

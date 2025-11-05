@@ -11,7 +11,7 @@ ${tmplLoader()}
 ${tmplToast()}
 
 <div id="tblWeight" class="table-responsive d-none">
-  <div class="mb-2">Диапазон: <span id="dateFrom"></span> - <span id="dateTo"></span></div>
+  <div class="mb-2">${Constants.Common_DateRange} <span id="dateFrom"></span> - <span id="dateTo"></span></div>
   <table class="table table-striped table-bordered table-hover">
     <thead>
       <tr>
