@@ -40,6 +40,11 @@ function showElement(sel) {
 	el.removeClass('d-none');
 }
 
+function showAlert(id, msg) {
+	$('#' + id + ' .msg').text(msg);
+	showElement('#' + id);
+}
+
 function getQueryParams() {
 	return new URLSearchParams(window.location.search);
 }

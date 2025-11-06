@@ -37,8 +37,7 @@ $( document ).ready(function() {
 
     weightKey = (getQueryParams().get('key') || '').trim();
     if (weightKey === '' ) {
-        $('#alrt .msg').text(Constants.Weight_NotFound);
-        showElement('#alrt');
+        showAlert('alrt', Constants.Weight_NotFound);
         hideElement('#loader')
         return;
     }
@@ -49,8 +48,7 @@ $( document ).ready(function() {
         })
         .then(setWeightForm)
         .catch((error) => {
-            $('#alrt .msg').text(error.message);
-            showElement('#alrt');
+            showAlert('alrt', error.message);
         });
 
     $('#frmEdit').submit(doEdit);

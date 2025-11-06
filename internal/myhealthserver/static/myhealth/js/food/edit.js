@@ -83,9 +83,8 @@ $( document ).ready(function() {
 
     foodKey = (getQueryParams().get('key') || '').trim();
     if (foodKey === '' ) {
-        $('#alrt .msg').text(Constants.Food_NotFound);
-        showElement('#alrt');
-        hideElement('#loader')
+        showAlert('alrt', Constants.Food_NotFound);
+        hideElement('#loader');
         return;
     }
     
@@ -95,8 +94,7 @@ $( document ).ready(function() {
         })
         .then(setFoodForm)
         .catch((error) => {
-            $('#alrt .msg').text(error.message);
-            showElement('#alrt');
+            showAlert('alrt', error.message);
         });
 
     $('#frmEdit').submit(doEdit);
