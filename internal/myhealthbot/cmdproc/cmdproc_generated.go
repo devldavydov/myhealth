@@ -327,6 +327,71 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 			val7,
 			)
 				
+	case "setw":
+		if len(cmdParts[1:]) != 9 {
+			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
+		}
+		
+		cmdParts = cmdParts[1:]
+		
+		val0, err := parseStringG0(cmdParts[0])
+		if err != nil {
+			return argError("Ключ")
+		}
+		
+		val1, err := parseStringG0(cmdParts[1])
+		if err != nil {
+			return argError("Наименование")
+		}
+		
+		val2, err := parseStringGE0(cmdParts[2])
+		if err != nil {
+			return argError("Бренд")
+		}
+		
+		val3, err := parseFloatG0(cmdParts[3])
+		if err != nil {
+			return argError("Вес, г.")
+		}
+		
+		val4, err := parseFloatGE0(cmdParts[4])
+		if err != nil {
+			return argError("ККал на вес")
+		}
+		
+		val5, err := parseFloatGE0(cmdParts[5])
+		if err != nil {
+			return argError("Б на вес")
+		}
+		
+		val6, err := parseFloatGE0(cmdParts[6])
+		if err != nil {
+			return argError("Ж на вес")
+		}
+		
+		val7, err := parseFloatGE0(cmdParts[7])
+		if err != nil {
+			return argError("У на вес")
+		}
+		
+		val8, err := parseStringGE0(cmdParts[8])
+		if err != nil {
+			return argError("Комментарий")
+		}
+		
+		resp = r.foodSetWeightCommand(
+			userID,
+			val0,
+			val1,
+			val2,
+			val3,
+			val4,
+			val5,
+			val6,
+			val7,
+			val8,
+			)
+				
 	case "st":
 		if len(cmdParts[1:]) != 1 {
 			return NewSingleCmdResponse(m.MsgErrInvalidArgsCount)
@@ -417,6 +482,19 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 				"Б 100г [Дробное>=0]",
 				"Ж 100г [Дробное>=0]",
 				"У 100г [Дробное>=0]",
+				"Комментарий [Строка>=0]",
+				).
+			addCmd(
+				"Установка по весу",
+				"setw",
+				"Ключ [Строка>0]",
+				"Наименование [Строка>0]",
+				"Бренд [Строка>=0]",
+				"Вес, г. [Дробное>0]",
+				"ККал на вес [Дробное>=0]",
+				"Б на вес [Дробное>=0]",
+				"Ж на вес [Дробное>=0]",
+				"У на вес [Дробное>=0]",
 				"Комментарий [Строка>=0]",
 				).
 			addCmd(

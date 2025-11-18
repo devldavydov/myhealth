@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/devldavydov/myhealth/internal/common/html"
@@ -47,6 +48,55 @@ func (r *CmdProcessor) foodSetCommand(
 
 		r.logger.Error(
 			"food set command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(m.MsgErrInternal)
+	}
+
+	return NewSingleCmdResponse(m.MsgOK)
+}
+
+func (r *CmdProcessor) foodSetWeightCommand(
+	userID int64,
+	key string,
+	name string,
+	brand string,
+	weight float64,
+	cal float64,
+	prot float64,
+	fat float64,
+	carb float64,
+	comment string,
+) []CmdResponse {
+	cal100 := math.Round((cal/weight*100)*100) / 100
+	prot100 := math.Round((prot/weight*100)*100) / 100
+	fat100 := math.Round((fat/weight*100)*100) / 100
+	carb100 := math.Round((carb/weight*100)*100) / 100
+
+	food := &storage.Food{
+		Key:     key,
+		Name:    name,
+		Brand:   brand,
+		Cal100:  cal100,
+		Prot100: prot100,
+		Fat100:  fat100,
+		Carb100: carb100,
+		Comment: comment,
+	}
+
+	// Save in DB
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.SetFood(ctx, userID, food); err != nil {
+		if errors.Is(err, storage.ErrFoodInvalid) {
+			return NewSingleCmdResponse(m.MsgErrInvalidCommand)
+		}
+
+		r.logger.Error(
+			"food set weight command DB error",
 			zap.Int64("userID", userID),
 			zap.Error(err),
 		)

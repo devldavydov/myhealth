@@ -65,6 +65,28 @@ commands:
         type: floatGE0
       - name: Комментарий
         type: stringGE0
+    - name: setw
+      func: foodSetWeightCommand
+      description: Установка по весу
+      args:
+      - name: Ключ
+        type: stringG0
+      - name: Наименование
+        type: stringG0
+      - name: Бренд
+        type: stringGE0
+      - name: Вес, г.
+        type: floatG0
+      - name: ККал на вес
+        type: floatGE0
+      - name: Б на вес
+        type: floatGE0
+      - name: Ж на вес
+        type: floatGE0
+      - name: У на вес
+        type: floatGE0
+      - name: Комментарий
+        type: stringGE0
     - name: st
       func: foodSetTemplateCommand
       description: Шаблон команды установки
