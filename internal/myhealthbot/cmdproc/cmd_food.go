@@ -146,7 +146,7 @@ func (r *CmdProcessor) foodFindCommand(userID int64, pattern string) []CmdRespon
 	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
 	defer cancel()
 
-	foodLst, err := r.stg.FindFood(ctx, userID, pattern)
+	foodList, err := r.stg.FindFood(ctx, userID, pattern)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmptyResult) {
 			return NewSingleCmdResponse(m.MsgErrEmptyResult)
@@ -161,24 +161,7 @@ func (r *CmdProcessor) foodFindCommand(userID int64, pattern string) []CmdRespon
 		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	var sb strings.Builder
-
-	for i, food := range foodLst {
-		sb.WriteString(fmt.Sprintf("<b>Ключ:</b> %s\n", food.Key))
-		sb.WriteString(fmt.Sprintf("<b>Наименование:</b> %s\n", food.Name))
-		sb.WriteString(fmt.Sprintf("<b>Бренд:</b> %s\n", food.Brand))
-		sb.WriteString(fmt.Sprintf("<b>ККал100:</b> %.2f\n", food.Cal100))
-		sb.WriteString(fmt.Sprintf("<b>Бел100:</b> %.2f\n", food.Prot100))
-		sb.WriteString(fmt.Sprintf("<b>Жир100:</b> %.2f\n", food.Fat100))
-		sb.WriteString(fmt.Sprintf("<b>Угл100:</b> %.2f\n", food.Carb100))
-		sb.WriteString(fmt.Sprintf("<b>Комментарий:</b> %s\n", food.Comment))
-
-		if i != len(foodLst)-1 {
-			sb.WriteString("\n")
-		}
-	}
-
-	return NewSingleCmdResponse(sb.String(), optsHTML)
+	return getFoodListPage(foodList)
 }
 
 func (r *CmdProcessor) foodCalcCommand(userID int64, key string, foodWeight float64) []CmdResponse {
@@ -233,6 +216,32 @@ func (r *CmdProcessor) foodListCommand(userID int64) []CmdResponse {
 		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
+	return getFoodListPage(foodList)
+}
+
+func (r *CmdProcessor) foodDelCommand(userID int64, key string) []CmdResponse {
+	// Delete from DB
+	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
+	defer cancel()
+
+	if err := r.stg.DeleteFood(ctx, userID, key); err != nil {
+		if errors.Is(err, storage.ErrFoodIsUsed) {
+			return NewSingleCmdResponse(m.MsgErrFoodIsUsed)
+		}
+
+		r.logger.Error(
+			"food del command DB error",
+			zap.Int64("userID", userID),
+			zap.Error(err),
+		)
+
+		return NewSingleCmdResponse(m.MsgErrInternal)
+	}
+
+	return NewSingleCmdResponse(m.MsgOK)
+}
+
+func getFoodListPage(foodList []storage.Food) []CmdResponse {
 	// Build html
 	htmlBuilder := html.NewBuilder("Список продуктов")
 
@@ -272,26 +281,4 @@ func (r *CmdProcessor) foodListCommand(userID int64) []CmdResponse {
 		MIME:     "text/html",
 		FileName: "food.html",
 	})
-}
-
-func (r *CmdProcessor) foodDelCommand(userID int64, key string) []CmdResponse {
-	// Delete from DB
-	ctx, cancel := context.WithTimeout(context.Background(), storage.StorageOperationTimeout)
-	defer cancel()
-
-	if err := r.stg.DeleteFood(ctx, userID, key); err != nil {
-		if errors.Is(err, storage.ErrFoodIsUsed) {
-			return NewSingleCmdResponse(m.MsgErrFoodIsUsed)
-		}
-
-		r.logger.Error(
-			"food del command DB error",
-			zap.Int64("userID", userID),
-			zap.Error(err),
-		)
-
-		return NewSingleCmdResponse(m.MsgErrInternal)
-	}
-
-	return NewSingleCmdResponse(m.MsgOK)
 }
