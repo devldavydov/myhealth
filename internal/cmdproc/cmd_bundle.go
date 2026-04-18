@@ -12,7 +12,6 @@ import (
 	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )
 
 func (r *CmdProcessor) bundleSetCommand(userID int64, key string, bndlParts []string) []CmdResponse {
@@ -163,11 +162,11 @@ func (r *CmdProcessor) bundleListCommand(userID int64) []CmdResponse {
 			tbl))
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: "bundles.html",
-	})
+	return NewSingleCmdResponse(
+		r.typeAdapter.File(
+			bytes.NewBufferString(htmlBuilder.Build()),
+			"text/html",
+			"bundles.html"))
 }
 
 func (r *CmdProcessor) bundleDelCommand(userID int64, key string) []CmdResponse {

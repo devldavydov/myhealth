@@ -3,6 +3,7 @@
 package cmdproc
 
 import (
+	"bytes"
 	"time"
 
 	"github.com/devldavydov/myhealth/internal/storage"
@@ -13,15 +14,27 @@ type ICmdProcessor interface {
 	Send(what any, opts ...any) error
 }
 
-type CmdProcessor struct {
-	stg       storage.Storage
-	tz        *time.Location
-	logger    *zap.Logger
-	debugMode bool
+type ITypeAdapter interface {
+	File(buf *bytes.Buffer, mime string, fileName string) any
+	OptsHTML() any
 }
 
-func NewCmdProcessor(stg storage.Storage, tz *time.Location, debugMode bool, logger *zap.Logger) *CmdProcessor {
-	return &CmdProcessor{stg: stg, tz: tz, debugMode: debugMode, logger: logger}
+type CmdProcessor struct {
+	stg         storage.Storage
+	typeAdapter ITypeAdapter
+	tz          *time.Location
+	logger      *zap.Logger
+	debugMode   bool
+}
+
+func NewCmdProcessor(
+	stg storage.Storage,
+	typeAdapter ITypeAdapter,
+	tz *time.Location,
+	debugMode bool,
+	logger *zap.Logger,
+) *CmdProcessor {
+	return &CmdProcessor{stg: stg, typeAdapter: typeAdapter, tz: tz, debugMode: debugMode, logger: logger}
 }
 
 func (r *CmdProcessor) Stop() {

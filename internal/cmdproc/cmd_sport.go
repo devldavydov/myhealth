@@ -15,7 +15,6 @@ import (
 	"github.com/devldavydov/myhealth/internal/common/html"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )
 
 func (r *CmdProcessor) sportSetCommand(userID int64, key, name, unit, comment string) []CmdResponse {
@@ -137,11 +136,11 @@ func (r *CmdProcessor) sportListCommand(userID int64) []CmdResponse {
 			tbl))
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: "sport.html",
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		bytes.NewBufferString(htmlBuilder.Build()),
+		"text/html",
+		"sport.html",
+	))
 }
 
 func (r *CmdProcessor) sportActivitySetCommand(
@@ -390,9 +389,9 @@ func (r *CmdProcessor) sportActivityReportCommand(userID int64, tsFrom, tsTo tim
 		)
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: fmt.Sprintf("sport_act_%s_%s.html", tsFromStr, tsToStr),
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		bytes.NewBufferString(htmlBuilder.Build()),
+		"text/html",
+		fmt.Sprintf("sport_act_%s_%s.html", tsFromStr, tsToStr),
+	))
 }

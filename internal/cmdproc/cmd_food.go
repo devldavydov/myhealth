@@ -12,7 +12,6 @@ import (
 	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )
 
 func (r *CmdProcessor) foodSetCommand(
@@ -138,7 +137,7 @@ func (r *CmdProcessor) foodSetTemplateCommand(userID int64, key string) []CmdRes
 		food.Carb100,
 		food.Comment,
 	)
-	return NewSingleCmdResponse(foodSetTemplate, optsHTML)
+	return NewSingleCmdResponse(foodSetTemplate, r.typeAdapter.OptsHTML())
 }
 
 func (r *CmdProcessor) foodFindCommand(userID int64, pattern string) []CmdResponse {
@@ -161,7 +160,7 @@ func (r *CmdProcessor) foodFindCommand(userID int64, pattern string) []CmdRespon
 		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return getFoodListPage(foodList)
+	return r.getFoodListPage(foodList)
 }
 
 func (r *CmdProcessor) foodCalcCommand(userID int64, key string, foodWeight float64) []CmdResponse {
@@ -193,7 +192,7 @@ func (r *CmdProcessor) foodCalcCommand(userID int64, key string, foodWeight floa
 	sb.WriteString(fmt.Sprintf("<b>Жир:</b> %.2f\n", foodWeight/100*food.Fat100))
 	sb.WriteString(fmt.Sprintf("<b>Угл:</b> %.2f\n", foodWeight/100*food.Carb100))
 
-	return NewSingleCmdResponse(sb.String(), optsHTML)
+	return NewSingleCmdResponse(sb.String(), r.typeAdapter.OptsHTML())
 }
 
 func (r *CmdProcessor) foodListCommand(userID int64) []CmdResponse {
@@ -216,7 +215,7 @@ func (r *CmdProcessor) foodListCommand(userID int64) []CmdResponse {
 		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return getFoodListPage(foodList)
+	return r.getFoodListPage(foodList)
 }
 
 func (r *CmdProcessor) foodDelCommand(userID int64, key string) []CmdResponse {
@@ -241,7 +240,7 @@ func (r *CmdProcessor) foodDelCommand(userID int64, key string) []CmdResponse {
 	return NewSingleCmdResponse(m.MsgOK)
 }
 
-func getFoodListPage(foodList []storage.Food) []CmdResponse {
+func (r *CmdProcessor) getFoodListPage(foodList []storage.Food) []CmdResponse {
 	// Build html
 	htmlBuilder := html.NewBuilder("Список продуктов")
 
@@ -276,9 +275,9 @@ func getFoodListPage(foodList []storage.Food) []CmdResponse {
 			tbl))
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: "food.html",
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		bytes.NewBufferString(htmlBuilder.Build()),
+		"text/html",
+		"food.html",
+	))
 }

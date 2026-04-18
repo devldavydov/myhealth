@@ -11,7 +11,6 @@ import (
 	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )
 
 func (r *CmdProcessor) weightSetCommand(userID int64, ts time.Time, weight float64) []CmdResponse {
@@ -156,9 +155,9 @@ func (r *CmdProcessor) weightListCommand(userID int64, tsFrom, tsTo time.Time) [
 	)
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: fmt.Sprintf("weight_%s_%s.html", tsFromStr, tsToStr),
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		bytes.NewBufferString(htmlBuilder.Build()),
+		"text/html",
+		fmt.Sprintf("weight_%s_%s.html", tsFromStr, tsToStr),
+	))
 }

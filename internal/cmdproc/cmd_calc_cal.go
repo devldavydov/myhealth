@@ -33,5 +33,5 @@ func (r *CmdProcessor) calcCalCalcCommand(userID int64, gender string, weight fl
 		sb.WriteString("\n")
 	}
 
-	return NewSingleCmdResponse(sb.String(), optsHTML)
+	return NewSingleCmdResponse(sb.String(), r.typeAdapter.OptsHTML())
 }

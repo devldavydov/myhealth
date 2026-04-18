@@ -13,7 +13,6 @@ import (
 	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )
 
 func (r *CmdProcessor) medSetCommand(userID int64, key, name, unit, comment string) []CmdResponse {
@@ -135,11 +134,11 @@ func (r *CmdProcessor) medListCommand(userID int64) []CmdResponse {
 			tbl))
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: "medicine.html",
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		bytes.NewBufferString(htmlBuilder.Build()),
+		"text/html",
+		"medicine.html",
+	))
 }
 
 func (r *CmdProcessor) medIndicatorSetCommand(
@@ -355,9 +354,9 @@ func (r *CmdProcessor) medIndicatorReportCommand(userID int64, tsFrom, tsTo time
 		)
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: fmt.Sprintf("medicine_ind_%s_%s.html", tsFromStr, tsToStr),
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		bytes.NewBufferString(htmlBuilder.Build()),
+		"text/html",
+		fmt.Sprintf("medicine_ind_%s_%s.html", tsFromStr, tsToStr),
+	))
 }

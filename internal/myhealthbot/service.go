@@ -36,7 +36,7 @@ func NewService(settings *ServiceSettings, logger *zap.Logger) (*Service, error)
 
 	srv := &Service{
 		settings: settings,
-		cmdProc:  cmdproc.NewCmdProcessor(stg, settings.TZ, settings.DebugMode, logger),
+		cmdProc:  cmdproc.NewCmdProcessor(stg, NewBotTypeAdapter(), settings.TZ, settings.DebugMode, logger),
 		logger:   logger,
 	}
 

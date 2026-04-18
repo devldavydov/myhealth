@@ -173,7 +173,7 @@ func (r *CmdProcessor) process_w(baseCmd string, cmdParts []string, userID int64
 				"По [Дата]",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -240,7 +240,7 @@ func (r *CmdProcessor) process_u(baseCmd string, cmdParts []string, userID int64
 				"get",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -522,7 +522,7 @@ func (r *CmdProcessor) process_f(baseCmd string, cmdParts []string, userID int64
 				"Ключ [Строка>0]",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -560,7 +560,7 @@ func (r *CmdProcessor) process_x(baseCmd string, cmdParts []string, userID int64
 				"backup",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -634,7 +634,7 @@ func (r *CmdProcessor) process_c(baseCmd string, cmdParts []string, userID int64
 				"Возраст [Дробное>0]",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -746,7 +746,7 @@ func (r *CmdProcessor) process_b(baseCmd string, cmdParts []string, userID int64
 				"Ключ [Строка>0]",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -1146,7 +1146,7 @@ func (r *CmdProcessor) process_j(baseCmd string, cmdParts []string, userID int64
 				"Дата [Дата]",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -1372,7 +1372,7 @@ func (r *CmdProcessor) process_s(baseCmd string, cmdParts []string, userID int64
 				"По [Дата]",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -1591,7 +1591,7 @@ func (r *CmdProcessor) process_m(baseCmd string, cmdParts []string, userID int64
 				"По [Дата]",
 				).
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -1627,7 +1627,7 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 	sb.WriteString("<b>\u2022 Прием пищи</b> - Прием пищи - одно из значений завтрак|до обеда|обед|полдник|до ужина|ужин\n")
 	sb.WriteString("<b>\u2022 Массив строк</b> - Массив строк (разделитель /, длина > 0)\n")
 	sb.WriteString("<b>\u2022 Массив дробных чисел</b> - Массив дробных чисел (разделитель /, длина > 0)\n")
-	return NewSingleCmdResponse(sb.String(), optsHTML)
+	return NewSingleCmdResponse(sb.String(), r.typeAdapter.OptsHTML())
 }
 
 func parseTimestamp(tz *time.Location, arg string) (time.Time, error) {

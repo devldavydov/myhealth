@@ -162,7 +162,7 @@ func (r *CmdProcessor) process_{{ $cmd.Name }}(baseCmd string, cmdParts []string
 			{{ end -}}		 
 			{{ end -}}
 			build(),
-		optsHTML)
+		r.typeAdapter.OptsHTML())
 
 	default:
 		r.logger.Error(
@@ -187,7 +187,7 @@ func (r *CmdProcessor) processHelp() []CmdResponse {
 	{{- range $cfg.Config.Types }}
 	sb.WriteString("<b>\u2022 {{ .DescriptionShort }}</b> - {{ .Description }}\n")
 	{{- end }}
-	return NewSingleCmdResponse(sb.String(), optsHTML)
+	return NewSingleCmdResponse(sb.String(), r.typeAdapter.OptsHTML())
 }
 
 func parseTimestamp(tz *time.Location, arg string) (time.Time, error) {

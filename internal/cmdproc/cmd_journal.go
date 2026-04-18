@@ -13,7 +13,6 @@ import (
 	m "github.com/devldavydov/myhealth/internal/common/messages"
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )
 
 func (r *CmdProcessor) journalSetCommand(
@@ -374,11 +373,11 @@ func (r *CmdProcessor) journalReportDayCommand(userID int64, ts time.Time) []Cmd
 	)
 
 	// Response
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(bytes.NewBufferString(htmlBuilder.Build())),
-		MIME:     "text/html",
-		FileName: fmt.Sprintf("report_%s.html", tsStr),
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		bytes.NewBufferString(htmlBuilder.Build()),
+		"text/html",
+		fmt.Sprintf("report_%s.html", tsStr),
+	))
 }
 
 func (r *CmdProcessor) journalReportDayCalloriesCommand(userID int64, ts time.Time) []CmdResponse {
@@ -460,7 +459,7 @@ func (r *CmdProcessor) journalReportDayCalloriesCommand(userID int64, ts time.Ti
 		sb.WriteString(fmt.Sprintf("Разница, ккал: <b>%+.2f</b>\n", totalBurnedCal-totalCal))
 	}
 
-	return NewSingleCmdResponse(sb.String(), optsHTML)
+	return NewSingleCmdResponse(sb.String(), r.typeAdapter.OptsHTML())
 }
 
 func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, meal storage.Meal) []CmdResponse {
@@ -486,7 +485,7 @@ func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, me
 	tsStr := formatTimestamp(ts)
 	resp := make([]CmdResponse, 0)
 
-	resp = append(resp, NewCmdResponse("<b>Изменение еды</b>", optsHTML))
+	resp = append(resp, NewCmdResponse("<b>Изменение еды</b>", r.typeAdapter.OptsHTML()))
 	for _, item := range rep {
 		if item.Meal != meal {
 			continue
@@ -496,7 +495,7 @@ func (r *CmdProcessor) journalTemplateMealCommand(userID int64, ts time.Time, me
 			fmt.Sprintf("j,set,%s,%s,%s,%.1f", tsStr, item.Meal.MustToString(), item.FoodKey, item.FoodWeight),
 		))
 	}
-	resp = append(resp, NewCmdResponse("<b>Удаление еды</b>", optsHTML))
+	resp = append(resp, NewCmdResponse("<b>Удаление еды</b>", r.typeAdapter.OptsHTML()))
 	for _, item := range rep {
 		if item.Meal != meal {
 			continue
@@ -558,7 +557,7 @@ func (r *CmdProcessor) journalFoodStatCommand(userID int64, foodKey string) []Cm
 	sb.WriteString(fmt.Sprintf("<b>Первый раз:</b> %s\n", formatTimestamp(foodStat.FirstTimestamp.ToTime(r.tz))))
 	sb.WriteString(fmt.Sprintf("<b>Последний раз:</b> %s\n", formatTimestamp(foodStat.LastTimestamp.ToTime(r.tz))))
 
-	return NewSingleCmdResponse(sb.String(), optsHTML)
+	return NewSingleCmdResponse(sb.String(), r.typeAdapter.OptsHTML())
 }
 
 func (r *CmdProcessor) journalSetDayTotalCal(userID int64, ts time.Time, totalCal float64) []CmdResponse {

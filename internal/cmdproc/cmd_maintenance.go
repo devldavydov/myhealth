@@ -9,7 +9,6 @@ import (
 	"time"
 
 	m "github.com/devldavydov/myhealth/internal/common/messages"
-	tele "gopkg.in/telebot.v4"
 
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
@@ -52,9 +51,9 @@ func (r *CmdProcessor) maintenanceBackupCommand(userID int64) []CmdResponse {
 		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(&tele.Document{
-		File:     tele.FromReader(&buf),
-		MIME:     "application/x-gzip-compressed",
-		FileName: fmt.Sprintf("backup_%s.json.gz", formatTimestamp(time.Now().In(r.tz))),
-	})
+	return NewSingleCmdResponse(r.typeAdapter.File(
+		&buf,
+		"application/x-gzip-compressed",
+		fmt.Sprintf("backup_%s.json.gz", formatTimestamp(time.Now().In(r.tz))),
+	))
 }

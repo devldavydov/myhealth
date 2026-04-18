@@ -54,7 +54,7 @@ func (r *CmdProcessor) userSettingsGetCommand(userID int64) []CmdResponse {
 		return NewSingleCmdResponse(m.MsgErrInternal)
 	}
 
-	return NewSingleCmdResponse(fmt.Sprintf("<b>Лимит калорий:</b> %.2f", us.CalLimit), optsHTML)
+	return NewSingleCmdResponse(fmt.Sprintf("<b>Лимит калорий:</b> %.2f", us.CalLimit), r.typeAdapter.OptsHTML())
 }
 
 func (r *CmdProcessor) userSettingsSetTemplateCommand(userID int64) []CmdResponse {
