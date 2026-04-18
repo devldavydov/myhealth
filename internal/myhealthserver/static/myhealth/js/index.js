@@ -17,7 +17,28 @@ $( document ).ready(function() {
     
         $('#messageInput').val('');
 
-        addMessage('received', 'OK');
+        $.ajax({
+            type: "POST",
+            url: "/api",
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({'cmd': cmd}),
+            dataType: "json",
+            success: function(response) {
+                if (response.error !== '') {
+                    // error
+                    addMessage('received', response.error);
+                } else if (response.isFile) {
+                    // file
+                } else {
+                    // text
+                    addMessage('received', response.textResponse);
+                }
+            },
+            error: function(xhr, status, error) {
+                addMessage('received', error);
+            }
+        });
 
         $chat.scrollTop($chat.prop('scrollHeight'));
     });
