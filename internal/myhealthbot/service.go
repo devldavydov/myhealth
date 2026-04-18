@@ -10,7 +10,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/devldavydov/myhealth/internal/myhealthbot/cmdproc"
+	"github.com/devldavydov/myhealth/internal/cmdproc"
 	s "github.com/devldavydov/myhealth/internal/storage"
 	slite "github.com/devldavydov/myhealth/internal/storage/sqlite"
 	"go.uber.org/zap"
