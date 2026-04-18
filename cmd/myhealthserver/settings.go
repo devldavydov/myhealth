@@ -17,6 +17,8 @@ const (
 	_defaultUserID          = -1
 	_defaultTLSCertFile     = ""
 	_defaultTLSKeyFile      = ""
+	_defaultTZ              = "Europe/Moscow"
+	_defaultDebugMode       = false
 )
 
 type Config struct {
@@ -27,6 +29,8 @@ type Config struct {
 	UserID          int64
 	TLSCertFile     string
 	TLSKeyFile      string
+	TZ              string
+	DebugMode       bool
 }
 
 func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
@@ -39,6 +43,8 @@ func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
 	flagSet.DurationVar(&config.ShutdownTimeout, "t", _defaultShutdownTimeout, "Server shutdown timeout")
 	flagSet.StringVar(&config.TLSCertFile, "c", _defaultTLSCertFile, "TLS cert file")
 	flagSet.StringVar(&config.TLSKeyFile, "k", _defaultTLSKeyFile, "TLS key file")
+	flagSet.StringVar(&config.TZ, "z", _defaultTZ, "Timezone")
+	flagSet.BoolVar(&config.DebugMode, "b", _defaultDebugMode, "Debug mode")
 
 	flagSet.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -76,5 +82,7 @@ func ServiceSettingsAdapt(config *Config) (*srv.ServerSettings, error) {
 		config.ShutdownTimeout,
 		config.UserID,
 		config.TLSCertFile,
-		config.TLSKeyFile)
+		config.TLSKeyFile,
+		config.TZ,
+		config.DebugMode)
 }

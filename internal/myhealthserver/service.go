@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"net/http"
 
+	"github.com/devldavydov/myhealth/internal/cmdproc"
 	"github.com/devldavydov/myhealth/internal/myhealthserver/handlers"
 	"github.com/devldavydov/myhealth/internal/storage"
 	slite "github.com/devldavydov/myhealth/internal/storage/sqlite"
@@ -20,6 +21,7 @@ import (
 
 type Service struct {
 	settings *ServerSettings
+	cmdProc  *cmdproc.CmdProcessor
 	logger   *zap.Logger
 	stg      storage.Storage
 }
@@ -33,7 +35,11 @@ func NewService(settings *ServerSettings, logger *zap.Logger) (*Service, error) 
 		return nil, err
 	}
 
-	return &Service{settings: settings, stg: stg, logger: logger}, nil
+	return &Service{
+		settings: settings,
+		cmdProc:  cmdproc.NewCmdProcessor(stg, nil, settings.TZ, settings.DebugMode, logger),
+		stg:      stg,
+		logger:   logger}, nil
 }
 
 func (r *Service) Run(ctx context.Context) error {
@@ -54,7 +60,7 @@ func (r *Service) Run(ctx context.Context) error {
 	}
 	router.StaticFS("/static", http.FS(staticFS))
 
-	handlers.Init(router, r.stg, r.settings.UserID, r.logger)
+	handlers.Init(router, r.cmdProc, r.settings.UserID)
 
 	// Start server
 	httpServer := &http.Server{

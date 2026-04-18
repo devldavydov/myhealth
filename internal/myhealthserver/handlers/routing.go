@@ -1,19 +1,14 @@
 package handlers
 
 import (
-	"net/http"
-
-	"github.com/devldavydov/myhealth/internal/storage"
+	"github.com/devldavydov/myhealth/internal/cmdproc"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
-func Init(router *gin.Engine, stg storage.Storage, userID int64, logger *zap.Logger) {
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
-	})
+func Init(router *gin.Engine, cmdProc *cmdproc.CmdProcessor, userID int64) {
+	handler := NewHandler(cmdProc, userID)
 
-	router.NoRoute(func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/")
-	})
+	router.GET("/", handler.Index)
+	router.POST("/api", handler.Api)
+	router.NoRoute(handler.NotFound)
 }

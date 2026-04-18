@@ -12,6 +12,8 @@ type ServerSettings struct {
 	UserID          int64
 	TLSCertFile     string
 	TLSKeyFile      string
+	TZ              *time.Location
+	DebugMode       bool
 }
 
 func NewServerSettings(
@@ -21,9 +23,16 @@ func NewServerSettings(
 	userID int64,
 	tlsCertFile string,
 	tlsKeyFile string,
+	stz string,
+	debugMode bool,
 ) (*ServerSettings, error) {
 
 	urlRunAddress, err := url.ParseRequestURI(runAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	tz, err := time.LoadLocation(stz)
 	if err != nil {
 		return nil, err
 	}
@@ -35,5 +44,7 @@ func NewServerSettings(
 		UserID:          userID,
 		TLSCertFile:     tlsCertFile,
 		TLSKeyFile:      tlsKeyFile,
+		TZ:              tz,
+		DebugMode:       debugMode,
 	}, nil
 }
