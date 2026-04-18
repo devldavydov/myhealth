@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/static/favicon.ico" />
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/bootstrap/css/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="/static/myhealth/css/common.css" rel="stylesheet" />
+
+    <title>MyHealth</title>
+  </head>
+
+  <body class="h-100">
+    <div class="main-wrapper">
+        <!-- Header -->
+        <nav class="navbar navbar-light bg-white border-bottom shadow-sm">
+            <div class="container">
+                <span class="navbar-brand mb-0 h1">MyHealth Web</span>
+            </div>
+        </nav>
+
+        <!-- Message window -->
+        <div class="chat-container container" id="chatWindow">
+            <div class="message received">Привет! Теперь поле ввода всегда внизу экрана.</div>
+            <div class="message sent">Отлично, это именно то, что нужно.</div>
+            <!-- Сюда будут падать новые сообщения -->
+        </div>
+
+        <!-- Input field -->
+        <div class="input-area">
+            <div class="container">
+                <div class="input-group">
+                    <input type="text" class="form-control border-0 bg-light" placeholder="Написать сообщение..." id="messageInput">
+                    <button class="btn btn-primary px-4" id="sendBtn">Отправить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/jquery/jquery-3.7.1.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/myhealth/js/index.js"></script>
+
+    <script>
+
+    </script>
+  </body>
+</html>
