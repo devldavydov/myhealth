@@ -1,19 +1,32 @@
 $( document ).ready(function() {
-  const input = document.getElementById('messageInput');
-  const btn = document.getElementById('sendBtn');
-  const chat = document.getElementById('chatWindow');
+    var $chat = $('#chatWindow');
 
-  btn.onclick = () => {
-      if (!input.value.trim()) return;
-      const msg = document.createElement('div');
-      msg.className = 'message sent';
-      msg.innerHTML = input.value + `<div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>`;
-      chat.appendChild(msg);
-      input.value = '';
-      chat.scrollTop = chat.scrollHeight;
-  };
+    function addMessage(type, msg) {
+        $('<div>').
+            addClass('message ' + type).
+            html(msg + `<div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>`).
+            appendTo($chat);
+    }
 
-  input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") btn.click();
-  });
+    $('#sendBtn').click(function() {
+        let cmd = $('#messageInput').val();
+        if (!cmd.trim())
+            return;
+
+        addMessage('sent', cmd);
+    
+        $('#messageInput').val('');
+
+        addMessage('received', 'OK');
+
+        $chat.scrollTop($chat.prop('scrollHeight'));
+    });
+
+    $('#messageInput').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            $('#sendBtn').click();
+        }
+    });
+    
+    addMessage('received', 'Привет! Введи команду....')
 });
