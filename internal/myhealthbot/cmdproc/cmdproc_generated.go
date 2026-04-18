@@ -12,10 +12,9 @@ import (
 	"github.com/devldavydov/myhealth/internal/storage"
 
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )	
 
-func (r *CmdProcessor) process(c tele.Context, cmd string, userID int64) error {
+func (r *CmdProcessor) process(c ICmdProcessor, cmd string, userID int64) error {
 	cmdParts := []string{}
 	for _, part := range strings.Split(cmd, ",") {
 		cmdParts = append(cmdParts, strings.Trim(part, " "))

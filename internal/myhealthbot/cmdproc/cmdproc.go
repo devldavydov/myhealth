@@ -7,8 +7,11 @@ import (
 
 	"github.com/devldavydov/myhealth/internal/storage"
 	"go.uber.org/zap"
-	tele "gopkg.in/telebot.v4"
 )
+
+type ICmdProcessor interface {
+	Send(what any, opts ...any) error
+}
 
 type CmdProcessor struct {
 	stg       storage.Storage
@@ -27,7 +30,7 @@ func (r *CmdProcessor) Stop() {
 	}
 }
 
-func (r *CmdProcessor) Process(c tele.Context, cmd string, userID int64) error {
+func (r *CmdProcessor) Process(c ICmdProcessor, cmd string, userID int64) error {
 	return r.process(c, cmd, userID)
 }
 
