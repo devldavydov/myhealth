@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/devldavydov/myhealth/internal/cmdproc"
 	"github.com/devldavydov/myhealth/internal/common/messages"
+	p "github.com/devldavydov/myhealth/internal/myhealthserver/process"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,22 +26,29 @@ func (r *Handler) NotFound(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
-type ApiRequest struct {
+type Request struct {
 	Cmd string `json:"cmd"`
 }
 
-type ApiResponse struct {
-	IsFile       bool   `json:"isFile"`
-	TextResponse string `json:"textResponse"`
-	Error        string `json:"error"`
-}
-
 func (r *Handler) Api(c *gin.Context) {
-	req := ApiRequest{}
+	req := Request{}
 	if err := c.Bind(&req); err != nil {
-		c.JSON(http.StatusOK, &ApiResponse{Error: messages.MsgErrBadRequest})
+		c.JSON(http.StatusOK, &p.Response{Error: messages.MsgErrBadRequest})
 	}
 
-	loc, _ := time.LoadLocation("Europe/Moscow")
-	c.JSON(http.StatusOK, &ApiResponse{TextResponse: time.Now().In(loc).Format("2006-01-02 15:04:05")})
+	prc := p.NewCmdProcessImpl()
+
+	if err := r.cmdProc.Process(prc, req.Cmd, r.userID); err != nil {
+		c.JSON(http.StatusOK, &p.Response{Error: err.Error()})
+	}
+
+	c.JSON(http.StatusOK, prc.GetResponses())
+}
+
+func (r *Handler) File(c *gin.Context) {
+	fileUUID, _ := c.GetQuery("fileUUID")
+	fileName, _ := c.GetQuery("fileName")
+	fileMime, _ := c.GetQuery("fileMime")
+
+	c.String(http.StatusOK, "Download file [name=%s, mime=%s, uuid=%s]", fileName, fileMime, fileUUID)
 }

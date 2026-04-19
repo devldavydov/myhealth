@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type ICmdProcessor interface {
+type ICmdProcess interface {
 	Send(what any, opts ...any) error
 }
 
@@ -43,7 +43,7 @@ func (r *CmdProcessor) Stop() {
 	}
 }
 
-func (r *CmdProcessor) Process(c ICmdProcessor, cmd string, userID int64) error {
+func (r *CmdProcessor) Process(c ICmdProcess, cmd string, userID int64) error {
 	return r.process(c, cmd, userID)
 }
 

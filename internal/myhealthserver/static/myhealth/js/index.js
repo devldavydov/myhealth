@@ -25,15 +25,23 @@ $( document ).ready(function() {
             data: JSON.stringify({'cmd': cmd}),
             dataType: "json",
             success: function(response) {
-                if (response.error !== '') {
-                    // error
-                    addMessage('received', response.error);
-                } else if (response.isFile) {
-                    // file
-                } else {
-                    // text
-                    addMessage('received', response.textResponse);
-                }
+                response.forEach((r) => {
+                    if (r.error !== '') {
+                        // error
+                        addMessage('received', r.error);
+                    } else if (r.isFile) {
+                        // file
+                        let fileUUID = encodeURIComponent(r.fileUUID);
+                        let fileName = encodeURIComponent(r.fileName);
+                        let fileMime = encodeURIComponent(r.fileMime);
+                        let link = `<a href="file?fileUUID=${fileUUID}&fileName=${fileName}&fileMime=${fileMime}" target="_blank">Скачать</a>`;
+                        
+                        addMessage('received', link);
+                    } else {
+                        // text
+                        addMessage('received', r.textResponse);
+                    }
+                })
             },
             error: function(xhr, status, error) {
                 addMessage('received', error);

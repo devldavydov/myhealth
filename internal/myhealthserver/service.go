@@ -11,6 +11,7 @@ import (
 
 	"github.com/devldavydov/myhealth/internal/cmdproc"
 	"github.com/devldavydov/myhealth/internal/myhealthserver/handlers"
+	p "github.com/devldavydov/myhealth/internal/myhealthserver/process"
 	"github.com/devldavydov/myhealth/internal/storage"
 	slite "github.com/devldavydov/myhealth/internal/storage/sqlite"
 	"go.uber.org/zap"
@@ -37,7 +38,7 @@ func NewService(settings *ServerSettings, logger *zap.Logger) (*Service, error) 
 
 	return &Service{
 		settings: settings,
-		cmdProc:  cmdproc.NewCmdProcessor(stg, nil, settings.TZ, settings.DebugMode, logger),
+		cmdProc:  cmdproc.NewCmdProcessor(stg, p.NewTypeAdapter(), settings.TZ, settings.DebugMode, logger),
 		stg:      stg,
 		logger:   logger}, nil
 }

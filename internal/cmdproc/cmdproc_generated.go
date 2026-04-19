@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )	
 
-func (r *CmdProcessor) process(c ICmdProcessor, cmd string, userID int64) error {
+func (r *CmdProcessor) process(c ICmdProcess, cmd string, userID int64) error {
 	cmdParts := []string{}
 	for _, part := range strings.Split(cmd, ",") {
 		cmdParts = append(cmdParts, strings.Trim(part, " "))

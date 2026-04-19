@@ -21,7 +21,18 @@ body {
     flex-direction: column; 
 }
 
-.message { max-width: 75%; margin-bottom: 12px; padding: 8px 15px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+.message { 
+    max-width: 80%; 
+    margin-bottom: 12px; 
+    padding: 8px 15px; 
+    border-radius: 15px; 
+    font-size: 15px; 
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    box-sizing: border-box;
+}
 .received { background: white; align-self: flex-start; border-bottom-left-radius: 4px; }
 .sent { background: #effdde; align-self: flex-end; border-bottom-right-radius: 4px; }
 .message-time { font-size: 11px; color: #a0acb6; text-align: right; margin-top: 2px; }
