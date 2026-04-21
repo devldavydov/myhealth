@@ -2,6 +2,8 @@ package process
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/devldavydov/myhealth/internal/cmdproc"
 	"github.com/google/uuid"
@@ -22,11 +24,12 @@ type Response struct {
 }
 
 type CmdProcessImpl struct {
-	responses []Response
+	responses       []Response
+	fileStoragePath string
 }
 
-func NewCmdProcessImpl() *CmdProcessImpl {
-	return &CmdProcessImpl{}
+func NewCmdProcessImpl(fileStoragePath string) *CmdProcessImpl {
+	return &CmdProcessImpl{fileStoragePath: fileStoragePath}
 }
 
 func (r *CmdProcessImpl) Send(what any, opts ...any) error {
@@ -38,12 +41,19 @@ func (r *CmdProcessImpl) Send(what any, opts ...any) error {
 	case *FileType:
 		fileUUID := string(uuid.New().String())
 
-		r.responses = append(r.responses, Response{
-			IsFile:   true,
-			FileUUID: fileUUID,
-			FileMime: w.Mime,
-			FileName: w.Name,
-		})
+		if err := os.WriteFile(
+			filepath.Join(r.fileStoragePath, fileUUID),
+			w.Buffer.Bytes(),
+			0644); err != nil {
+			r.responses = append(r.responses, Response{Error: err.Error()})
+		} else {
+			r.responses = append(r.responses, Response{
+				IsFile:   true,
+				FileUUID: fileUUID,
+				FileMime: w.Mime,
+				FileName: w.Name,
+			})
+		}
 	default:
 		panic(fmt.Sprintf("unknown type [%T] in CmdProcess Send: %v", what, what))
 	}

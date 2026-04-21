@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"github.com/devldavydov/myhealth/internal/cmdproc"
 	"github.com/devldavydov/myhealth/internal/common/messages"
@@ -10,12 +11,16 @@ import (
 )
 
 type Handler struct {
-	cmdProc *cmdproc.CmdProcessor
-	userID  int64
+	cmdProcessor    *cmdproc.CmdProcessor
+	fileStoragePath string
+	userID          int64
 }
 
-func NewHandler(cmdProc *cmdproc.CmdProcessor, userID int64) *Handler {
-	return &Handler{cmdProc: cmdProc, userID: userID}
+func NewHandler(cmdProcessor *cmdproc.CmdProcessor, fileStoragePath string, userID int64) *Handler {
+	return &Handler{
+		cmdProcessor:    cmdProcessor,
+		fileStoragePath: fileStoragePath,
+		userID:          userID}
 }
 
 func (r *Handler) Index(c *gin.Context) {
@@ -36,9 +41,9 @@ func (r *Handler) Api(c *gin.Context) {
 		c.JSON(http.StatusOK, &p.Response{Error: messages.MsgErrBadRequest})
 	}
 
-	prc := p.NewCmdProcessImpl()
+	prc := p.NewCmdProcessImpl(r.fileStoragePath)
 
-	if err := r.cmdProc.Process(prc, req.Cmd, r.userID); err != nil {
+	if err := r.cmdProcessor.Process(prc, req.Cmd, r.userID); err != nil {
 		c.JSON(http.StatusOK, &p.Response{Error: err.Error()})
 	}
 
@@ -50,5 +55,6 @@ func (r *Handler) File(c *gin.Context) {
 	fileName, _ := c.GetQuery("fileName")
 	fileMime, _ := c.GetQuery("fileMime")
 
-	c.String(http.StatusOK, "Download file [name=%s, mime=%s, uuid=%s]", fileName, fileMime, fileUUID)
+	c.Header("Content-Type", fileMime)
+	c.FileAttachment(filepath.Join(r.fileStoragePath, fileUUID), fileName)
 }

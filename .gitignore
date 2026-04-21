@@ -31,3 +31,6 @@ myhealth.db*
 # TLS
 cicd/server/server.crt
 cicd/server/server.key
+
+# FileStorage
+.filestorage/*

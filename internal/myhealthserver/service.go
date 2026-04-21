@@ -8,6 +8,10 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
+	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/devldavydov/myhealth/internal/cmdproc"
 	"github.com/devldavydov/myhealth/internal/myhealthserver/handlers"
@@ -21,10 +25,11 @@ import (
 )
 
 type Service struct {
-	settings *ServerSettings
-	cmdProc  *cmdproc.CmdProcessor
-	logger   *zap.Logger
-	stg      storage.Storage
+	settings     *ServerSettings
+	cmdProceccor *cmdproc.CmdProcessor
+	logger       *zap.Logger
+	stg          storage.Storage
+	wg           sync.WaitGroup
 }
 
 //go:embed templates/* static/*
@@ -38,9 +43,14 @@ func NewService(settings *ServerSettings, logger *zap.Logger) (*Service, error) 
 
 	return &Service{
 		settings: settings,
-		cmdProc:  cmdproc.NewCmdProcessor(stg, p.NewTypeAdapter(), settings.TZ, settings.DebugMode, logger),
-		stg:      stg,
-		logger:   logger}, nil
+		cmdProceccor: cmdproc.NewCmdProcessor(
+			stg,
+			p.NewTypeAdapter(),
+			settings.TZ,
+			settings.DebugMode,
+			logger),
+		stg:    stg,
+		logger: logger}, nil
 }
 
 func (r *Service) Run(ctx context.Context) error {
@@ -61,7 +71,10 @@ func (r *Service) Run(ctx context.Context) error {
 	}
 	router.StaticFS("/static", http.FS(staticFS))
 
-	handlers.Init(router, r.cmdProc, r.settings.UserID)
+	handlers.Init(router, r.cmdProceccor, r.settings.FileStoragePath, r.settings.UserID)
+
+	r.wg.Add(1)
+	go r.filesCleanJob(ctx)
 
 	// Start server
 	httpServer := &http.Server{
@@ -90,6 +103,64 @@ func (r *Service) Run(ctx context.Context) error {
 
 		r.logger.Info("Service finished")
 		return nil
+	}
+}
+
+func (r *Service) filesCleanJob(ctx context.Context) {
+	defer r.wg.Done()
+
+	ticker := time.NewTicker(1 * time.Hour)
+	defer ticker.Stop()
+
+	cleanOldFiles := func() {
+		now := time.Now()
+		threshold := 24 * time.Hour
+
+		files, err := os.ReadDir(r.settings.FileStoragePath)
+		if err != nil {
+			r.logger.Error(
+				"failed to read file storage path",
+				zap.String("fileStoragePath", r.settings.FileStoragePath),
+				zap.Error(err))
+			return
+		}
+
+		for _, file := range files {
+			if file.IsDir() {
+				continue
+			}
+
+			info, err := file.Info()
+			if err != nil {
+				continue
+			}
+
+			if now.Sub(info.ModTime()) > threshold {
+				fullPath := filepath.Join(r.settings.FileStoragePath, file.Name())
+				err := os.Remove(fullPath)
+				if err != nil {
+					r.logger.Info(
+						"failed to delete file",
+						zap.String("path", fullPath),
+						zap.Error(err))
+				} else {
+					r.logger.Info(
+						"file deleted",
+						zap.String("path", fullPath),
+					)
+				}
+			}
+		}
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			r.logger.Info("files clean job context canceled")
+			return
+		case <-ticker.C:
+			cleanOldFiles()
+		}
 	}
 }
 

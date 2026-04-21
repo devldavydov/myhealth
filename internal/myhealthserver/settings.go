@@ -13,6 +13,7 @@ type ServerSettings struct {
 	TLSCertFile     string
 	TLSKeyFile      string
 	TZ              *time.Location
+	FileStoragePath string
 	DebugMode       bool
 }
 
@@ -24,6 +25,7 @@ func NewServerSettings(
 	tlsCertFile string,
 	tlsKeyFile string,
 	stz string,
+	fileStoragePath string,
 	debugMode bool,
 ) (*ServerSettings, error) {
 
@@ -45,6 +47,7 @@ func NewServerSettings(
 		TLSCertFile:     tlsCertFile,
 		TLSKeyFile:      tlsKeyFile,
 		TZ:              tz,
+		FileStoragePath: fileStoragePath,
 		DebugMode:       debugMode,
 	}, nil
 }

@@ -5,4 +5,5 @@ nohup ./myhealthserver \
         -u USER_ID \
         -c ./server.crt \
         -k ./server.key \
+        -s ./filestorage \
         -d ./myhealth.db &

@@ -18,6 +18,7 @@ const (
 	_defaultTLSCertFile     = ""
 	_defaultTLSKeyFile      = ""
 	_defaultTZ              = "Europe/Moscow"
+	_defaultFileStorafePath = ""
 	_defaultDebugMode       = false
 )
 
@@ -30,6 +31,7 @@ type Config struct {
 	TLSCertFile     string
 	TLSKeyFile      string
 	TZ              string
+	FileStoragePath string
 	DebugMode       bool
 }
 
@@ -44,6 +46,7 @@ func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
 	flagSet.StringVar(&config.TLSCertFile, "c", _defaultTLSCertFile, "TLS cert file")
 	flagSet.StringVar(&config.TLSKeyFile, "k", _defaultTLSKeyFile, "TLS key file")
 	flagSet.StringVar(&config.TZ, "z", _defaultTZ, "Timezone")
+	flagSet.StringVar(&config.FileStoragePath, "s", _defaultFileStorafePath, "File storage path")
 	flagSet.BoolVar(&config.DebugMode, "b", _defaultDebugMode, "Debug mode")
 
 	flagSet.Usage = func() {
@@ -72,6 +75,10 @@ func LoadConfig(flagSet flag.FlagSet, flags []string) (*Config, error) {
 		return nil, fmt.Errorf("invalid TLS key file")
 	}
 
+	if config.FileStoragePath == _defaultFileStorafePath {
+		return nil, fmt.Errorf("invalid file storage path")
+	}
+
 	return config, nil
 }
 
@@ -84,5 +91,6 @@ func ServiceSettingsAdapt(config *Config) (*srv.ServerSettings, error) {
 		config.TLSCertFile,
 		config.TLSKeyFile,
 		config.TZ,
+		config.FileStoragePath,
 		config.DebugMode)
 }

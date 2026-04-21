@@ -25,6 +25,7 @@
                 "-u", "USER_ID",
                 "-c", "${workspaceFolder}/cicd/server/server.crt",
                 "-k", "${workspaceFolder}/cicd/server/server.key",
+                "-s", "${workspaceFolder}/.filestorage"
             ]
         },
     ]
