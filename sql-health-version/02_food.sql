@@ -1,4 +1,4 @@
-CREATE TABLE food (
+CREATE TABLE IF NOT EXISTS food (
     key     TEXT NOT NULL,
     name    TEXT NOT NULL,
     brand   TEXT NOT NULL,

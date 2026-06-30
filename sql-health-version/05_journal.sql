@@ -72,7 +72,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION get_journal(p_date_str TEXT, cal_limit REAL)
+CREATE OR REPLACE FUNCTION get_journal(p_date_str TEXT)
 RETURNS TABLE (
     meal_block TEXT,
     food_name TEXT,
@@ -86,6 +86,7 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     v_date DATE := get_date(p_date_str);
+    cal_limit REAL := get_act_cal(v_date);
 BEGIN
     RETURN QUERY
     WITH detailed_data AS (
@@ -160,7 +161,7 @@ BEGIN
     UNION ALL
     SELECT
         '',
-        '',
+        '*** ЛИМИТ ККАЛ: ' || cal_limit::TEXT || ', % БЖУ ***',
         '',
         CASE
             WHEN diff_cal < 0 THEN '- ' || diff_cal::TEXT
