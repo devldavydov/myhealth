@@ -14,6 +14,8 @@ CALL set_journal_bundle(
     'два_бут_кс'
 );
 
+CALL cp_journal('-1', 'ужин', '', 'ужин');
+
 SELECT * FROM get_journal('');
 SELECT * FROM get_journal('2026-06-30');
 

@@ -30,7 +30,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE delete_bundle(
+CREATE OR REPLACE PROCEDURE del_bundle(
     p_bundle_key TEXT
 ) 
 LANGUAGE plpgsql AS $$

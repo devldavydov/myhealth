@@ -19,7 +19,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE PROCEDURE delete_weight(p_date_str TEXT)
+CREATE OR REPLACE PROCEDURE del_weight(p_date_str TEXT)
 AS $$
 DECLARE
     v_date DATE := get_date(p_date_str);

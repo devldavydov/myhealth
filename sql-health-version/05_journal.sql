@@ -72,6 +72,51 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE del_journal(
+    p_date_str TEXT,
+    p_meal meal_type,
+    p_food_key TEXT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_date DATE := get_date(p_date_str);
+BEGIN
+    DELETE FROM journal
+    WHERE
+        dt = v_date AND
+        meal = p_meal AND
+        foodkey = p_food_key;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE cp_journal(
+    p_date_from_str TEXT,
+    p_meal_from meal_type,
+    p_date_to_str TEXT,
+    p_meal_to meal_type
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_date_from DATE := get_date(p_date_from_str);
+    v_date_to DATE := get_date(p_date_to_str);
+BEGIN
+    INSERT INTO journal
+    SELECT
+        v_date_to,
+        p_meal_to,
+        foodkey,
+        foodweight
+    FROM journal
+    WHERE
+        dt = v_date_from AND
+        meal = p_meal_from
+    ON CONFLICT (dt, meal, foodkey)
+    DO UPDATE SET foodweight = EXCLUDED.foodweight;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION get_journal(p_date_str TEXT)
 RETURNS TABLE (
     meal_block TEXT,
@@ -94,8 +139,8 @@ BEGIN
             j.meal,
             CASE 
                 WHEN trim(f.brand) <> '' 
-                THEN f.name || ' [' || f.brand || ']'
-                ELSE f.name
+                THEN  f.name || ' [' || f.key || '] - ' || f.brand
+                ELSE f.name || ' [' || f.key || ']'
             END::TEXT AS f_name,
             j.foodweight,
             ROUND(((f.cal100 * j.foodweight) / 100.0)::NUMERIC, 2) AS cal,

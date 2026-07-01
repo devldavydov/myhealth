@@ -82,7 +82,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE delete_food(p_key TEXT)
+CREATE OR REPLACE PROCEDURE del_food(p_key TEXT)
 AS $$
 BEGIN
     DELETE FROM food
