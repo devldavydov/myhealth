@@ -90,6 +90,22 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE del_journal_meal(
+    p_date_str TEXT,
+    p_meal meal_type
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_date DATE := get_date(p_date_str);
+BEGIN
+    DELETE FROM journal
+    WHERE
+        dt = v_date AND
+        meal = p_meal;
+END;
+$$;
+
 CREATE OR REPLACE PROCEDURE cp_journal(
     p_date_from_str TEXT,
     p_meal_from meal_type,

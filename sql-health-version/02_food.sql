@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS food (
     prot100 REAL NOT NULL, 
     fat100  REAL NOT NULL,
     carb100 REAL NOT NULL,
-    comment TEXT NULL,
+    comment TEXT NOT NULL,
     PRIMARY KEY (key)
 );
 
