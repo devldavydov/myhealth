@@ -48,27 +48,31 @@ $$;
 CREATE OR REPLACE PROCEDURE set_journal_bundle(
     p_date_str TEXT,
     p_meal meal_type,
-    p_bundle_key TEXT
+    p_bundle_keys TEXT[]
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
     v_date DATE := get_date(p_date_str);
+    item TEXT;
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM bundle WHERE key = p_bundle_key) THEN
-        RAISE EXCEPTION 'Бандл с ключом "%" не найден в базе данных.', p_bundle_key;
-    END IF;
+    FOREACH item IN ARRAY p_bundle_keys
+    LOOP
+        IF NOT EXISTS (SELECT 1 FROM bundle WHERE key = item) THEN
+            RAISE EXCEPTION 'Бандл с ключом "%" не найден в базе данных.', item;
+        END IF;
 
-    INSERT INTO journal (dt, meal, foodkey, foodweight)
-    SELECT 
-        v_date,
-        p_meal,
-        b.foodkey,
-        b.weight
-    FROM bundle b
-    WHERE b.key = p_bundle_key
-    ON CONFLICT (dt, meal, foodkey) 
-    DO UPDATE SET foodweight = EXCLUDED.foodweight;
+        INSERT INTO journal (dt, meal, foodkey, foodweight)
+        SELECT 
+            v_date,
+            p_meal,
+            b.foodkey,
+            b.weight
+        FROM bundle b
+        WHERE b.key = item
+        ON CONFLICT (dt, meal, foodkey) 
+        DO UPDATE SET foodweight = EXCLUDED.foodweight;
+    END LOOP;
 END;
 $$;
 
@@ -225,7 +229,7 @@ BEGIN
         '*** ЛИМИТ ККАЛ: ' || cal_limit::TEXT || ', % БЖУ ***',
         '',
         CASE
-            WHEN diff_cal < 0 THEN '- ' || diff_cal::TEXT
+            WHEN diff_cal < 0 THEN '- ' || ABS(diff_cal)::TEXT
             WHEN diff_cal = 0 THEN diff_cal::TEXT
             ELSE '+ ' || diff_cal::TEXT
         END,

@@ -11,7 +11,7 @@ CALL set_journal(
 CALL set_journal_bundle(
     '', 
     'обед', 
-    'два_бут_кс'
+    ARRAY['два_бут_кс']
 );
 
 CALL cp_journal('-1', 'ужин', '', 'ужин');
