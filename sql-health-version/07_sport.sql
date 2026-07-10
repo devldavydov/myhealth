@@ -77,3 +77,48 @@ BEGIN
     WHERE dt = v_date AND sport_key = p_sport_key;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION get_sport_act(
+    p_date_from_str TEXT,
+    p_date_to_str TEXT,
+    is_total BOOLEAN
+)
+RETURNS TABLE (
+    dt TEXT,
+    sport_name TEXT,
+    unit TEXT,
+    total_volume NUMERIC
+) 
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_date_from DATE := get_date(p_date_from_str);
+    v_date_to DATE := get_date(p_date_to_str);
+BEGIN
+    IF is_total THEN
+        RETURN QUERY
+        SELECT 
+            v_date_from::TEXT || ' - ' || v_date_to::TEXT AS dt,
+            s.name AS sport_name,
+            s.unit AS unit,
+            ROUND(SUM(COALESCE((SELECT SUM(val) FROM unnest(sa.sets) AS val), 0))::NUMERIC, 2) AS total_volume
+        FROM sport_activity sa
+        JOIN sport s ON sa.sport_key = s.key
+        WHERE sa.dt BETWEEN v_date_from AND v_date_to
+        GROUP BY s.name, s.unit
+        ORDER BY s.name ASC;
+    ELSE
+        RETURN QUERY
+        SELECT 
+            sa.dt::TEXT AS dt,
+            s.name AS sport_name,
+            s.unit AS unit,
+            ROUND(SUM(COALESCE((SELECT SUM(val) FROM unnest(sa.sets) AS val), 0))::NUMERIC, 2) AS total_volume
+        FROM sport_activity sa
+        JOIN sport s ON sa.sport_key = s.key
+        WHERE sa.dt BETWEEN v_date_from AND v_date_to
+        GROUP BY sa.dt, s.name, s.unit
+        ORDER BY sa.dt DESC, s.name ASC;
+    END IF;
+END;
+$$;

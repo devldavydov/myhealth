@@ -87,3 +87,6 @@ CALL del_sport('прыг');
 
 CALL set_sport_act('', 'ходьба', ARRAY[5.0]);
 CALL del_sport_act('', 'ходьба');
+
+select * from get_sport_act('-30', '', false);
+select * from get_sport_act('-90', '', true);
