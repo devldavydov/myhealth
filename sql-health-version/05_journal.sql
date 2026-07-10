@@ -22,56 +22,54 @@ CREATE TABLE IF NOT EXISTS journal (
 CREATE OR REPLACE PROCEDURE set_journal(
     p_date_str TEXT,
     p_meal meal_type,
-    p_food_array TEXT[][] -- Формат: ARRAY[['food_key_1', '150'], ['food_key_2', '50']]
+    p_food_array TEXT[] -- Формат: ARRAY['food_key:150', 'bundle_key']
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_date DATE := get_date(p_date_str);
+    v_date  DATE := get_date(p_date_str);
+    v_key   TEXT;
+    v_value TEXT;
+    item    TEXT;
 BEGIN
-    IF p_food_array IS NOT NULL AND array_length(p_food_array, 2) <> 2 THEN
-        RAISE EXCEPTION 'Массив должен быть двумерным и содержать ровно две колонки (ключ еды и вес).';
-    END IF;
-
-    INSERT INTO journal (dt, meal, foodkey, foodweight)
-    SELECT 
-        v_date,
-        p_meal,
-        p_food_array[i][1],
-        p_food_array[i][2]::REAL
-    FROM generate_subscripts(p_food_array, 1) AS i
-    ON CONFLICT (dt, meal, foodkey) 
-    DO UPDATE SET foodweight = EXCLUDED.foodweight;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE set_journal_bundle(
-    p_date_str TEXT,
-    p_meal meal_type,
-    p_bundle_keys TEXT[]
-)
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_date DATE := get_date(p_date_str);
-    item TEXT;
-BEGIN
-    FOREACH item IN ARRAY p_bundle_keys
+    FOREACH item IN ARRAY p_food_array
     LOOP
-        IF NOT EXISTS (SELECT 1 FROM bundle WHERE key = item) THEN
-            RAISE EXCEPTION 'Бандл с ключом "%" не найден в базе данных.', item;
-        END IF;
+        IF item LIKE '%:%' THEN
+            -- Добавление еды
+            v_key = split_part(item, ':', 1);
+            v_value = split_part(item, ':', 2);
 
-        INSERT INTO journal (dt, meal, foodkey, foodweight)
-        SELECT 
-            v_date,
-            p_meal,
-            b.foodkey,
-            b.weight
-        FROM bundle b
-        WHERE b.key = item
-        ON CONFLICT (dt, meal, foodkey) 
-        DO UPDATE SET foodweight = EXCLUDED.foodweight;
+            IF NOT EXISTS (SELECT 1 FROM food WHERE key = v_key) THEN
+                RAISE EXCEPTION 'Еда с ключом "%" не найдена в базе данных.', v_key;
+            END IF;
+
+            INSERT INTO journal (dt, meal, foodkey, foodweight)
+            SELECT 
+                v_date,
+                p_meal,
+                v_key,
+                v_value::REAL
+            ON CONFLICT (dt, meal, foodkey) 
+            DO UPDATE SET foodweight = EXCLUDED.foodweight;
+        ELSE
+            -- Добавление бандла
+            v_key = item;
+
+            IF NOT EXISTS (SELECT 1 FROM bundle WHERE key = v_key) THEN
+                RAISE EXCEPTION 'Бандл с ключом "%" не найден в базе данных.', v_key;
+            END IF;
+
+            INSERT INTO journal (dt, meal, foodkey, foodweight)
+            SELECT 
+                v_date,
+                p_meal,
+                b.foodkey,
+                b.weight
+            FROM bundle b
+            WHERE b.key = v_key
+            ON CONFLICT (dt, meal, foodkey) 
+            DO UPDATE SET foodweight = EXCLUDED.foodweight;
+        END IF;
     END LOOP;
 END;
 $$;

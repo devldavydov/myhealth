@@ -5,13 +5,7 @@
 CALL set_journal(
     '', 
     'завтрак', 
-    ARRAY[['apple', '150.0'], ['oatmeal', '60.5']]
-);
-
-CALL set_journal_bundle(
-    '', 
-    'обед', 
-    ARRAY['два_бут_кс']
+    ARRAY['хлеб:20', 'сыр_гауда:24', 'кофе_мс']
 );
 
 CALL cp_journal('-1', 'ужин', '', 'ужин');
