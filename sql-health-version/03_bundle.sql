@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS bundle (
     key     TEXT NOT NULL,
     foodkey TEXT NOT NULL,
     weight  REAL NOT NULL,
+    PRIMARY KEY (key, foodkey),
     FOREIGN KEY (foodkey) REFERENCES food(key) ON DELETE RESTRICT
 );
 
@@ -10,23 +11,54 @@ CREATE TABLE IF NOT EXISTS bundle (
 
 CREATE OR REPLACE PROCEDURE set_bundle(
     p_bundle_key TEXT,
-    p_food_array TEXT[][] -- Формат: ARRAY[['food_key_1', '150'], ['food_key_2', '50']]
+    p_food_array TEXT[] -- Формат: ARRAY['food_key:150', 'bundle_key']
 ) 
 LANGUAGE plpgsql AS $$
+DECLARE
+    v_key   TEXT;
+    v_value TEXT;
+    item    TEXT;
 BEGIN
-    IF p_food_array IS NOT NULL AND array_length(p_food_array, 2) <> 2 THEN
-        RAISE EXCEPTION 'Массив должен быть двумерным и содержать ровно две колонки (ключ еды и вес).';
-    END IF;
-
     DELETE FROM bundle 
     WHERE key = p_bundle_key;
 
-    INSERT INTO bundle (key, foodkey, weight)
-    SELECT 
-        p_bundle_key,
-        p_food_array[i][1] AS foodkey,
-        p_food_array[i][2]::REAL AS weight
-    FROM generate_subscripts(p_food_array, 1) AS i;
+    FOREACH item IN ARRAY p_food_array
+    LOOP
+        IF item LIKE '%:%' THEN
+            -- Добавление еды
+            v_key = split_part(item, ':', 1);
+            v_value = split_part(item, ':', 2);
+
+            IF NOT EXISTS (SELECT 1 FROM food WHERE key = v_key) THEN
+                RAISE EXCEPTION 'Еда с ключом "%" не найдена в базе данных.', v_key;
+            END IF;
+
+            INSERT INTO bundle (key, foodkey, weight)
+            SELECT
+                p_bundle_key,
+                v_key,
+                v_value::REAL
+            ON CONFLICT (key, foodkey)
+            DO UPDATE SET weight = EXCLUDED.weight;
+        ELSE
+            -- Добавление бандла
+            v_key = item;
+
+            IF NOT EXISTS (SELECT 1 FROM bundle WHERE key = v_key) THEN
+                RAISE EXCEPTION 'Бандл с ключом "%" не найден в базе данных.', v_key;
+            END IF;
+
+            INSERT INTO bundle (key, foodkey, weight)
+            SELECT 
+                p_bundle_key,
+                b.foodkey,
+                b.weight
+            FROM bundle b
+            WHERE b.key = v_key
+            ON CONFLICT (key, foodkey)
+            DO UPDATE SET weight = EXCLUDED.weight;
+        END IF;
+    END LOOP;
 END;
 $$;
 
